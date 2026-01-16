@@ -108,35 +108,35 @@
                         <th scope="col" wire:click="sortBy('title')"
                             class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                             Título
-                            @if ($sortBy === 'title')
+                            @if ($sortField === 'title')
                                 <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                             @endif
                         </th>
                         <th scope="col" wire:click="sortBy('amount')"
                             class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                             Valor
-                            @if ($sortBy === 'amount')
+                            @if ($sortField === 'amount')
                                 <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                             @endif
                         </th>
                         <th scope="col" wire:click="sortBy('type')"
                             class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                             Tipo
-                            @if ($sortBy === 'type')
+                            @if ($sortField === 'type')
                                 <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                             @endif
                         </th>
                         <th scope="col" wire:click="sortBy('status')"
                             class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                             Status
-                            @if ($sortBy === 'status')
+                            @if ($sortField === 'status')
                                 <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                             @endif
                         </th>
                         <th scope="col" wire:click="sortBy('due_date')"
                             class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                             Vencimento
-                            @if ($sortBy === 'due_date')
+                            @if ($sortField === 'due_date')
                                 <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                             @endif
                         </th>
@@ -170,14 +170,14 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span
                                     class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full
-                                                        {{ $transaction->type->value === 'debit' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }}">
+                                                            {{ $transaction->type->value === 'debit' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }}">
                                     {{ $transaction->type->value === 'debit' ? 'Débito' : 'Crédito' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span
                                     class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full
-                                                        {{ $transaction->status->value === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
+                                                            {{ $transaction->status->value === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
                                     {{ $transaction->status->value === 'paid' ? 'Pago' : 'Pendente' }}
                                 </span>
                             </td>

@@ -29,7 +29,7 @@ class TransactionList extends Component
     public ?string $filterType = null;
 
     // Ordenação
-    public string $sortBy = 'due_date';
+    public string $sortField = 'due_date';
 
     public string $sortDirection = 'asc';
 
@@ -48,7 +48,7 @@ class TransactionList extends Component
                 'tags' => $this->selectedTags,
                 'status' => $this->filterStatus,
                 'type' => $this->filterType,
-                'sort_by' => $this->sortBy,
+                'sort_by' => $this->sortField,
                 'sort_direction' => $this->sortDirection,
             ]
         );
@@ -84,10 +84,10 @@ class TransactionList extends Component
 
     public function sortBy(string $field): void
     {
-        if ($this->sortBy === $field) {
+        if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
-            $this->sortBy = $field;
+            $this->sortField = $field;
             $this->sortDirection = 'asc';
         }
 
