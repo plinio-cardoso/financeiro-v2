@@ -1,0 +1,46 @@
+// ========================================
+// Container
+// ========================================
+@use '../abstracts' as *;
+
+.container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: $spacing-4;
+    padding-right: $spacing-4;
+
+    @include sm {
+        max-width: $breakpoint-sm;
+    }
+
+    @include md {
+        max-width: $breakpoint-md;
+        padding-left: $spacing-6;
+        padding-right: $spacing-6;
+    }
+
+    @include lg {
+        max-width: $breakpoint-lg;
+        padding-left: $spacing-8;
+        padding-right: $spacing-8;
+    }
+
+    @include xl {
+        max-width: $breakpoint-xl;
+    }
+
+    @include xxl {
+        max-width: $breakpoint-2xl;
+    }
+
+    &-fluid {
+        max-width: 100%;
+    }
+
+    &-narrow {
+        @include md {
+            max-width: 720px;
+        }
+    }
+}

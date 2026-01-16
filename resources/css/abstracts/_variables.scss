@@ -1,0 +1,145 @@
+// ========================================
+// Variables
+// ========================================
+
+// Colors - Primary Palette (based on rgb(48 85 191) and rgb(210 222 255))
+$color-primary: rgb(48, 85, 191);           // #3055bf - Primary blue (text color)
+$color-primary-dark: rgb(38, 68, 153);      // Darker version
+$color-primary-light: rgb(210, 222, 255);   // #d2deff - Light blue (button background)
+$color-primary-hover: rgb(195, 210, 255);   // Hover state
+$color-primary-active: rgb(180, 198, 255);  // Active/pressed state
+
+// Colors - Secondary Palette
+$color-secondary: rgb(99, 102, 241);        // Indigo accent
+$color-secondary-dark: rgb(79, 70, 229);
+$color-secondary-light: rgb(199, 210, 254);
+
+// Colors - Neutral Palette (Updated for better dark mode)
+$color-white: #ffffff;
+$color-black: #000000;
+
+// Light mode grays
+$color-gray-50: #f9fafb;
+$color-gray-100: #f3f4f6;
+$color-gray-200: #e5e7eb;
+$color-gray-300: #d1d5db;
+$color-gray-400: #9ca3af;
+$color-gray-500: #6b7280;
+$color-gray-600: #4b5563;
+$color-gray-700: #374151;
+$color-gray-800: #1f2937;
+$color-gray-900: #111827;
+$color-gray-950: #030712;
+
+// Dark mode specific colors (neutral dark grays)
+$color-dark-bg: rgb(23, 23, 23);           // #171717 - Main dark background
+$color-dark-surface: rgb(35, 35, 35);      // #232323 - Elevated surfaces
+$color-dark-elevated: rgb(57, 57, 57);     // #393939 - More elevated elements
+$color-dark-card: rgba(255, 255, 255, 0.03); // Very subtle card backgrounds
+$color-dark-border: rgba(255, 255, 255, 0.08); // Subtle borders in dark mode
+$color-dark-text: rgb(249, 250, 251);      // Almost white text (gray-50)
+$color-dark-text-muted: rgb(156, 163, 175); // Muted text in dark mode (gray-400)
+
+// Light mode specific colors (clean and friendly)
+$color-light-bg: rgb(249, 250, 251);       // Very light gray background (gray-50)
+$color-light-surface: rgb(255, 255, 255);  // Pure white surfaces
+$color-light-card: rgb(255, 255, 255);     // White cards
+$color-light-border: rgb(229, 231, 235);   // Light borders (gray-200)
+$color-light-text: rgb(17, 24, 39);        // Dark text (gray-900)
+$color-light-text-muted: rgb(107, 114, 128); // Muted text (gray-500)
+
+// Colors - Semantic
+$color-success: #10b981;
+$color-success-dark: #059669;
+$color-success-light: #34d399;
+
+$color-warning: #f59e0b;
+$color-warning-dark: #d97706;
+$color-warning-light: #fbbf24;
+
+$color-danger: #ef4444;
+$color-danger-dark: #dc2626;
+$color-danger-light: #f87171;
+
+$color-info: #3b82f6;
+$color-info-dark: #2563eb;
+$color-info-light: #60a5fa;
+
+// Typography
+$font-family-base: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$font-family-heading: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+$font-size-xs: 0.75rem;    // 12px
+$font-size-sm: 0.875rem;   // 14px
+$font-size-base: 1rem;     // 16px
+$font-size-lg: 1.125rem;   // 18px
+$font-size-xl: 1.25rem;    // 20px
+$font-size-2xl: 1.5rem;    // 24px
+$font-size-3xl: 1.875rem;  // 30px
+$font-size-4xl: 2.25rem;   // 36px
+$font-size-5xl: 3rem;      // 48px
+
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+$line-height-tight: 1.25;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// Spacing
+$spacing-0: 0;
+$spacing-1: 0.25rem;   // 4px
+$spacing-2: 0.5rem;    // 8px
+$spacing-3: 0.75rem;   // 12px
+$spacing-4: 1rem;      // 16px
+$spacing-5: 1.25rem;   // 20px
+$spacing-6: 1.5rem;    // 24px
+$spacing-8: 2rem;      // 32px
+$spacing-10: 2.5rem;   // 40px
+$spacing-12: 3rem;     // 48px
+$spacing-16: 4rem;     // 64px
+$spacing-20: 5rem;     // 80px
+$spacing-24: 6rem;     // 96px
+
+// Border Radius
+$radius-none: 0;
+$radius-sm: 0.125rem;  // 2px
+$radius-base: 0.25rem; // 4px
+$radius-md: 0.375rem;  // 6px
+$radius-lg: 0.5rem;    // 8px
+$radius-xl: 0.75rem;   // 12px
+$radius-2xl: 1rem;     // 16px
+$radius-full: 9999px;
+
+// Shadows
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+$shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+// Transitions
+$transition-base: all 0.2s ease-in-out;
+$transition-fast: all 0.15s ease-in-out;
+$transition-slow: all 0.3s ease-in-out;
+
+// Breakpoints
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
+
+// Z-Index Scale
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;

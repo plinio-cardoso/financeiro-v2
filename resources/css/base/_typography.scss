@@ -1,0 +1,137 @@
+// ========================================
+// Typography
+// ========================================
+@use '../abstracts' as *;
+
+body {
+    font-family: $font-family-base;
+    font-size: $font-size-base;
+    font-weight: $font-weight-normal;
+    line-height: $line-height-normal;
+    color: $color-gray-900;
+
+    @include dark {
+        color: $color-gray-100;
+    }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: $font-family-heading;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-tight;
+    margin-bottom: $spacing-4;
+}
+
+h1 {
+    font-size: $font-size-5xl;
+
+    @include md {
+        font-size: $font-size-5xl * 1.2;
+    }
+}
+
+h2 {
+    font-size: $font-size-4xl;
+}
+
+h3 {
+    font-size: $font-size-3xl;
+}
+
+h4 {
+    font-size: $font-size-2xl;
+}
+
+h5 {
+    font-size: $font-size-xl;
+}
+
+h6 {
+    font-size: $font-size-lg;
+}
+
+p {
+    margin-bottom: $spacing-4;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+a {
+    color: $color-primary;
+    transition: $transition-fast;
+
+    &:hover {
+        color: $color-primary-dark;
+    }
+
+    @include dark {
+        color: $color-primary-light;
+
+        &:hover {
+            color: $color-primary;
+        }
+    }
+}
+
+strong,
+b {
+    font-weight: $font-weight-bold;
+}
+
+em,
+i {
+    font-style: italic;
+}
+
+small {
+    font-size: $font-size-sm;
+}
+
+code {
+    font-family: $font-family-mono;
+    font-size: 0.875em;
+    padding: $spacing-1 $spacing-2;
+    background-color: $color-gray-100;
+    border-radius: $radius-sm;
+
+    @include dark {
+        background-color: $color-gray-800;
+    }
+}
+
+pre {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    padding: $spacing-4;
+    background-color: $color-gray-100;
+    border-radius: $radius-md;
+    overflow-x: auto;
+    margin-bottom: $spacing-4;
+
+    @include dark {
+        background-color: $color-gray-800;
+    }
+
+    code {
+        padding: 0;
+        background: transparent;
+    }
+}
+
+blockquote {
+    padding-left: $spacing-4;
+    border-left: 4px solid $color-gray-300;
+    font-style: italic;
+    margin: $spacing-6 0;
+
+    @include dark {
+        border-left-color: $color-gray-700;
+    }
+}

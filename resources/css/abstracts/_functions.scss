@@ -1,0 +1,55 @@
+// ========================================
+// Functions
+// ========================================
+@use 'sass:color';
+@use 'sass:math';
+@use 'sass:map';
+
+// Convert pixels to rem
+@function rem($pixels, $base: 16) {
+    @return math.div($pixels, $base) * 1rem;
+}
+
+// Convert pixels to em
+@function em($pixels, $base: 16) {
+    @return math.div($pixels, $base) * 1em;
+}
+
+// Get color with opacity
+@function color-alpha($color, $alpha) {
+    @return color.change($color, $alpha: $alpha);
+}
+
+// Tint (mix color with white)
+@function tint($color, $percentage) {
+    @return color.mix(white, $color, $percentage);
+}
+
+// Shade (mix color with black)
+@function shade($color, $percentage) {
+    @return color.mix(black, $color, $percentage);
+}
+
+// Get spacing value
+@function spacing($multiplier) {
+    @return $spacing-4 * $multiplier;
+}
+
+// Strip units from a value
+@function strip-unit($value) {
+    @return math.div($value, ($value * 0 + 1));
+}
+
+// Power function
+@function pow($number, $exponent) {
+    @return math.pow($number, $exponent);
+}
+
+// Map deep get
+@function map-deep-get($map, $keys...) {
+    @each $key in $keys {
+        $map: map.get($map, $key);
+    }
+
+    @return $map;
+}

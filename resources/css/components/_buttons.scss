@@ -1,0 +1,70 @@
+// ========================================
+// Buttons
+// ========================================
+@use '../abstracts' as *;
+
+// Base button styles (extending Tailwind/Jetstream buttons if needed)
+.btn {
+    @include button-base;
+    padding: $spacing-2 $spacing-4;
+    font-size: $font-size-base;
+
+    &-sm {
+        padding: $spacing-1 $spacing-3;
+        font-size: $font-size-sm;
+    }
+
+    &-lg {
+        padding: $spacing-3 $spacing-6;
+        font-size: $font-size-lg;
+    }
+
+    // Variants
+    &-primary {
+        @include button-variant($color-primary);
+    }
+
+    &-secondary {
+        @include button-variant($color-secondary);
+    }
+
+    &-success {
+        @include button-variant($color-success);
+    }
+
+    &-danger {
+        @include button-variant($color-danger);
+    }
+
+    &-warning {
+        @include button-variant($color-warning);
+    }
+
+    &-outline {
+        background-color: transparent;
+        border: 2px solid $color-primary;
+        color: $color-primary;
+
+        &:hover:not(:disabled) {
+            background-color: $color-primary;
+            color: $color-white;
+        }
+    }
+
+    &-ghost {
+        background-color: transparent;
+        color: $color-gray-700;
+
+        &:hover:not(:disabled) {
+            background-color: $color-gray-100;
+        }
+
+        @include dark {
+            color: $color-gray-300;
+
+            &:hover:not(:disabled) {
+                background-color: $color-gray-800;
+            }
+        }
+    }
+}

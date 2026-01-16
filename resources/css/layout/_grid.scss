@@ -1,0 +1,32 @@
+// ========================================
+// Grid System Extensions
+// ========================================
+// Custom grid utilities that extend Tailwind
+// NOTE: Use BEM-style naming to avoid conflicts with Tailwind classes
+@use '../abstracts' as *;
+
+// Custom responsive grid (use .grid-responsive instead of .grid)
+.grid-responsive {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: $spacing-4;
+}
+
+// Custom grid modifiers (use with Tailwind's .grid class)
+.grid {
+    &--gap-sm {
+        gap: $spacing-2;
+    }
+
+    &--gap-md {
+        gap: $spacing-4;
+    }
+
+    &--gap-lg {
+        gap: $spacing-6;
+    }
+
+    &--gap-xl {
+        gap: $spacing-8;
+    }
+}

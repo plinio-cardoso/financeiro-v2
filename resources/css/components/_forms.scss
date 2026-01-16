@@ -1,0 +1,149 @@
+// ========================================
+// Forms
+// ========================================
+@use '../abstracts' as *;
+
+.form-group {
+    margin-bottom: $spacing-4;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.form-label {
+    display: block;
+    margin-bottom: $spacing-2;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-gray-700;
+
+    @include dark {
+        color: $color-gray-300;
+    }
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    display: block;
+    width: 100%;
+    padding: $spacing-2 $spacing-3;
+    font-size: $font-size-base;
+    line-height: $line-height-normal;
+    color: $color-gray-900;
+    background-color: $color-white;
+    border: 1px solid $color-gray-300;
+    border-radius: $radius-md;
+    transition: $transition-fast;
+
+    @include placeholder {
+        color: $color-gray-400;
+    }
+
+    &:focus {
+        outline: none;
+        border-color: $color-primary;
+        box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    }
+
+    &:disabled {
+        background-color: $color-gray-100;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    &.is-invalid {
+        border-color: $color-danger;
+
+        &:focus {
+            border-color: $color-danger;
+            box-shadow: 0 0 0 3px rgba($color-danger, 0.1);
+        }
+    }
+
+    &.is-valid {
+        border-color: $color-success;
+
+        &:focus {
+            border-color: $color-success;
+            box-shadow: 0 0 0 3px rgba($color-success, 0.1);
+        }
+    }
+
+    @include dark {
+        color: $color-dark-text;
+        background-color: $color-dark-surface;
+        border-color: $color-dark-border;
+
+        @include placeholder {
+            color: $color-dark-text-muted;
+        }
+
+        &:disabled {
+            background-color: $color-dark-bg;
+        }
+    }
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-checkbox,
+.form-radio {
+    width: $spacing-4;
+    height: $spacing-4;
+    border: 1px solid $color-gray-300;
+    transition: $transition-fast;
+    cursor: pointer;
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    }
+
+    &:checked {
+        background-color: $color-primary;
+        border-color: $color-primary;
+    }
+
+    @include dark {
+        border-color: $color-dark-border;
+        background-color: $color-dark-surface;
+    }
+}
+
+.form-checkbox {
+    border-radius: $radius-sm;
+}
+
+.form-radio {
+    border-radius: $radius-full;
+}
+
+.form-help {
+    display: block;
+    margin-top: $spacing-1;
+    font-size: $font-size-sm;
+    color: $color-gray-500;
+
+    @include dark {
+        color: $color-gray-400;
+    }
+}
+
+.form-error {
+    display: block;
+    margin-top: $spacing-1;
+    font-size: $font-size-sm;
+    color: $color-danger;
+}
+
+.form-success {
+    display: block;
+    margin-top: $spacing-1;
+    font-size: $font-size-sm;
+    color: $color-success;
+}

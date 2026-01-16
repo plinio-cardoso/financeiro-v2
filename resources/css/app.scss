@@ -1,0 +1,175 @@
+// ========================================
+// Main Application Stylesheet
+// ========================================
+// Architecture: 7-1 Pattern
+// https://sass-guidelin.es/#the-7-1-pattern
+
+// 1. Abstracts
+// Configuration and helpers - no CSS output
+@use 'abstracts' as *;
+
+// 2. Base (only typography, reset is commented to avoid Tailwind conflicts)
+@use 'base/typography';
+
+// 3. Layout
+// Layout-related styles (grid, container, etc.)
+@use 'layout';
+
+// 4. Components
+// Reusable UI components
+@use 'components';
+
+// 5. Utilities
+// Helper classes and utilities
+@use 'utilities';
+
+// Tailwind CSS (must come after @use rules)
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// 6. Theme overrides (after Tailwind to override defaults)
+@layer base {
+    :root {
+        // Primary color tokens
+        --color-primary: 48 85 191;
+        --color-primary-light: 210 222 255;
+        --color-primary-dark: 38 68 153;
+
+        // Secondary color tokens
+        --color-secondary: 99 102 241;
+
+        // Success, Warning, Danger
+        --color-success: 16 185 129;
+        --color-warning: 245 158 11;
+        --color-danger: 239 68 68;
+
+        // Light mode colors
+        --color-light-bg: 249 250 251;
+        --color-light-surface: 255 255 255;
+        --color-light-border: 229 231 235;
+    }
+
+    .dark {
+        // Dark mode background and surfaces (neutral dark grays)
+        --tw-bg-opacity: 1;
+        --color-dark-bg: 23 23 23;           // #171717 - Main background
+        --color-dark-surface: 35 35 35;      // #232323 - Elevated
+        --color-dark-elevated: 57 57 57;     // #393939 - More elevated
+        --color-dark-card: 255 255 255;
+        --color-dark-card-opacity: 0.03;
+        --color-dark-border-opacity: 0.08;
+    }
+
+    // Apply light mode background
+    body {
+        background-color: rgb(var(--color-light-bg) / var(--tw-bg-opacity, 1));
+    }
+
+    .dark body {
+        background-color: rgb(var(--color-dark-bg) / var(--tw-bg-opacity, 1));
+    }
+}
+
+// Override Tailwind button classes to use new primary color
+@layer components {
+    // Primary button background (light blue)
+    .bg-primary-50 {
+        background-color: rgb(210 222 255 / var(--tw-bg-opacity, 1)) !important;
+    }
+
+    .bg-primary-100 {
+        background-color: rgb(195 210 255 / var(--tw-bg-opacity, 1)) !important;
+    }
+
+    .bg-primary-200 {
+        background-color: rgb(180 198 255 / var(--tw-bg-opacity, 1)) !important;
+    }
+
+    // Primary text color (dark blue)
+    .text-primary {
+        color: rgb(48 85 191 / var(--tw-text-opacity, 1)) !important;
+    }
+
+    // Legacy classes mapped to new colors
+    .bg-indigo-600 {
+        background-color: rgb(210 222 255 / var(--tw-bg-opacity, 1)) !important;
+    }
+
+    .text-indigo-600,
+    .text-blue-600 {
+        color: rgb(48 85 191 / var(--tw-text-opacity, 1)) !important;
+    }
+
+    .bg-indigo-50,
+    .bg-blue-50 {
+        background-color: rgb(210 222 255 / var(--tw-bg-opacity, 1)) !important;
+    }
+
+    // Light mode overrides
+    .bg-gray-50 {
+        background-color: rgb(var(--color-light-bg) / var(--tw-bg-opacity, 1)) !important;
+    }
+
+    .bg-white {
+        background-color: rgb(var(--color-light-surface) / var(--tw-bg-opacity, 1)) !important;
+    }
+
+    .border-gray-200 {
+        border-color: rgb(var(--color-light-border) / var(--tw-border-opacity, 1)) !important;
+    }
+
+    // Dark mode overrides
+    .dark {
+        // Dark backgrounds - neutral gray theme
+        .dark\:bg-gray-900,
+        &.bg-gray-900 {
+            background-color: rgb(23 23 23 / var(--tw-bg-opacity, 1)) !important; // #171717
+        }
+
+        .dark\:bg-gray-800,
+        &.bg-gray-800 {
+            background-color: rgb(35 35 35 / var(--tw-bg-opacity, 1)) !important; // #232323
+        }
+
+        .dark\:bg-gray-700,
+        &.bg-gray-700 {
+            background-color: rgb(57 57 57 / var(--tw-bg-opacity, 1)) !important; // #393939
+        }
+
+        // Dark borders - very subtle
+        .dark\:border-gray-700,
+        .dark\:border-gray-600,
+        &.border-gray-700,
+        &.border-gray-600 {
+            border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        .dark\:border-gray-800,
+        &.border-gray-800 {
+            border-color: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        // Dark text colors
+        .dark\:text-gray-100,
+        &.text-gray-100 {
+            color: rgb(249 250 251 / var(--tw-text-opacity, 1)) !important;
+        }
+
+        .dark\:text-gray-300,
+        &.text-gray-300 {
+            color: rgb(209 213 219 / var(--tw-text-opacity, 1)) !important;
+        }
+
+        // Primary button in dark mode keeps same color
+        .bg-indigo-600,
+        .dark\:bg-indigo-600 {
+            background-color: rgb(210 222 255 / var(--tw-bg-opacity, 1)) !important;
+        }
+    }
+}
+
+// Alpine.js cloak
+[x-cloak] {
+    display: none !important;
+}

@@ -1,0 +1,58 @@
+// ========================================
+// Cards
+// ========================================
+@use '../abstracts' as *;
+
+.card {
+    @include card;
+    transition: $transition-base;
+
+    @include dark {
+        background-color: $color-dark-card;
+        border: 1px solid $color-dark-border;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    &-header {
+        padding-bottom: $spacing-4;
+        border-bottom: 1px solid $color-gray-200;
+        margin-bottom: $spacing-4;
+
+        @include dark {
+            border-bottom-color: $color-dark-border;
+        }
+    }
+
+    &-title {
+        font-size: $font-size-xl;
+        font-weight: $font-weight-semibold;
+        margin: 0;
+    }
+
+    &-body {
+        // Default padding is inherited from .card
+    }
+
+    &-footer {
+        padding-top: $spacing-4;
+        border-top: 1px solid $color-gray-200;
+        margin-top: $spacing-4;
+
+        @include dark {
+            border-top-color: $color-dark-border;
+        }
+    }
+
+    &-hoverable {
+        @include hover-lift;
+        cursor: pointer;
+    }
+
+    &-compact {
+        padding: $spacing-4;
+    }
+
+    &-spacious {
+        padding: $spacing-8;
+    }
+}

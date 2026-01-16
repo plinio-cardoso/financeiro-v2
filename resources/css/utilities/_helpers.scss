@@ -1,0 +1,16 @@
+// ========================================
+// Helper Utilities
+// ========================================
+// Custom utilities that extend Tailwind
+// NOTE: Avoid duplicating Tailwind classes to prevent conflicts
+@use '../abstracts' as *;
+
+// Custom text utility (not in Tailwind by default)
+.text-truncate {
+    @include truncate;
+}
+
+// Screen reader only utility (Tailwind has sr-only, but keeping as alias)
+.visually-hidden {
+    @include visually-hidden;
+}
