@@ -20,7 +20,7 @@ class TransactionForm extends Component
 
     public string $description = '';
 
-    public float $amount = 0;
+    public $amount = 0;
 
     public string $type = 'debit';
 
@@ -54,6 +54,8 @@ class TransactionForm extends Component
             $this->dueDate = $transaction->due_date->format('Y-m-d');
             $this->paidAt = $transaction->paid_at?->format('Y-m-d\TH:i');
             $this->selectedTags = $transaction->tags->pluck('id')->toArray();
+        } else {
+            $this->dueDate = now()->format('Y-m-d');
         }
     }
 
@@ -74,11 +76,9 @@ class TransactionForm extends Component
 
         if ($this->editing) {
             $transactionService->updateTransaction($this->transaction->id, $data);
-            $this->banner('Transação atualizada com sucesso!');
         } else {
             $data['user_id'] = auth()->id();
             $transactionService->createTransaction($data);
-            $this->banner('Transação criada com sucesso!');
         }
 
         $this->dispatch('transaction-saved');

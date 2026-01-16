@@ -7,10 +7,13 @@ use App\Services\TransactionService;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\On;
 
 class TransactionList extends Component
 {
     use WithPagination;
+
+    public bool $showCreateModal = false;
 
     // Filtros
     public string $search = '';
@@ -87,6 +90,8 @@ class TransactionList extends Component
             $this->sortBy = $field;
             $this->sortDirection = 'asc';
         }
+
+        $this->resetPage();
     }
 
     public function clearFilters(): void
@@ -99,6 +104,15 @@ class TransactionList extends Component
             'filterStatus',
             'filterType',
         ]);
+    }
+
+    #[On('transaction-saved')]
+    public function refreshList(): void
+    {
+        $this->showCreateModal = false;
+        $this->resetPage();
+
+        $this->dispatch('notify', message: 'Transação salva com sucesso!', type: 'success');
     }
 
     public function render()

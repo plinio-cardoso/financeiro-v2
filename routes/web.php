@@ -19,7 +19,7 @@ Route::middleware([
         ->name('dashboard');
 
     // Transactions
-    Route::resource('transactions', TransactionController::class);
+    Route::resource('transactions', TransactionController::class)->except(['create']);
 
     // Notification Settings
     Route::get('/settings/notifications', [NotificationSettingController::class, 'edit'])

@@ -1,8 +1,31 @@
 <div>
+
+
     {{-- Filtros --}}
     <div class="mb-6 bg-white shadow sm:rounded-lg dark:bg-gray-800">
         <div class="px-4 py-5 sm:p-6">
-            <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-gray-100">Filtros</h3>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Filtros</h3>
+                <x-button wire:click="$set('showCreateModal', true)" class="bg-indigo-600 hover:bg-indigo-700">
+                    {{ __('Nova Transação') }}
+                </x-button>
+            </div>
+
+            <x-dialog-modal wire:model.live="showCreateModal">
+                <x-slot name="title">
+                    {{ __('Nova Transação') }}
+                </x-slot>
+
+                <x-slot name="content">
+                    <livewire:transaction-form />
+                </x-slot>
+
+                <x-slot name="footer">
+                    <x-secondary-button wire:click="$set('showCreateModal', false)" wire:loading.attr="disabled">
+                        {{ __('Cancelar') }}
+                    </x-secondary-button>
+                </x-slot>
+            </x-dialog-modal>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {{-- Search --}}
@@ -11,8 +34,8 @@
                         Buscar
                     </label>
                     <input type="text" id="search" wire:model.live="search"
-                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
-                           placeholder="Título ou descrição">
+                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                        placeholder="Título ou descrição">
                 </div>
 
                 {{-- Data Início --}}
@@ -21,7 +44,7 @@
                         Data Início
                     </label>
                     <input type="date" id="startDate" wire:model.live="startDate"
-                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                 </div>
 
                 {{-- Data Fim --}}
@@ -30,7 +53,7 @@
                         Data Fim
                     </label>
                     <input type="date" id="endDate" wire:model.live="endDate"
-                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                 </div>
 
                 {{-- Status --}}
@@ -38,12 +61,11 @@
                     <label for="filterStatus" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Status
                     </label>
-                    <select id="filterStatus" wire:model.live="filterStatus"
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
-                        <option value="">Todos</option>
-                        <option value="pending">Pendente</option>
-                        <option value="paid">Pago</option>
-                    </select>
+                    <x-custom-select wire:model.live="filterStatus" :options="[
+        ['value' => '', 'label' => 'Todos'],
+        ['value' => 'pending', 'label' => 'Pendente'],
+        ['value' => 'paid', 'label' => 'Pago']
+    ]" placeholder="Todos" />
                 </div>
 
                 {{-- Tipo --}}
@@ -51,12 +73,11 @@
                     <label for="filterType" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Tipo
                     </label>
-                    <select id="filterType" wire:model.live="filterType"
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
-                        <option value="">Todos</option>
-                        <option value="debit">Débito</option>
-                        <option value="credit">Crédito</option>
-                    </select>
+                    <x-custom-select wire:model.live="filterType" :options="[
+        ['value' => '', 'label' => 'Todos'],
+        ['value' => 'debit', 'label' => 'Débito'],
+        ['value' => 'credit', 'label' => 'Crédito']
+    ]" placeholder="Todos" />
                 </div>
 
                 {{-- Tags --}}
@@ -64,18 +85,14 @@
                     <label for="selectedTags" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Tags
                     </label>
-                    <select id="selectedTags" wire:model.live="selectedTags" multiple
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
-                        @foreach ($this->tags as $tag)
-                            <option value="{{ $tag->id }}">{{ $tag->name }}</option>
-                        @endforeach
-                    </select>
+                    <x-multi-select wire:model.live="selectedTags" :options="$this->tags"
+                        placeholder="Selecione as Tags" />
                 </div>
             </div>
 
             <div class="mt-4">
                 <button type="button" wire:click="clearFilters"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600">
+                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600">
                     Limpar Filtros
                 </button>
             </div>
@@ -123,7 +140,8 @@
                                 <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                             @endif
                         </th>
-                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                        <th scope="col"
+                            class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
                             Tags
                         </th>
                         <th scope="col" class="relative px-6 py-3">
@@ -150,14 +168,16 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full
-                                    {{ $transaction->type->value === 'debit' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }}">
+                                <span
+                                    class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full
+                                                        {{ $transaction->type->value === 'debit' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }}">
                                     {{ $transaction->type->value === 'debit' ? 'Débito' : 'Crédito' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full
-                                    {{ $transaction->status->value === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
+                                <span
+                                    class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full
+                                                        {{ $transaction->status->value === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
                                     {{ $transaction->status->value === 'paid' ? 'Pago' : 'Pendente' }}
                                 </span>
                             </td>
@@ -168,14 +188,15 @@
                                 <div class="flex flex-wrap gap-1">
                                     @foreach ($transaction->tags as $tag)
                                         <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                                              style="background-color: {{ $tag->color }}20; color: {{ $tag->color }}">
+                                            style="background-color: {{ $tag->color }}20; color: {{ $tag->color }}">
                                             {{ $tag->name }}
                                         </span>
                                     @endforeach
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                <a href="#" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                <a href="#"
+                                    class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
                                     Editar
                                 </a>
                             </td>
@@ -197,11 +218,5 @@
         </div>
     </div>
 
-    <!-- Loading overlay -->
-    <div wire:loading class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-6">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-            <p class="mt-4 text-gray-900 dark:text-gray-100">Carregando...</p>
-        </div>
-    </div>
+
 </div>

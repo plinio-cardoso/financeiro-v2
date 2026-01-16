@@ -15,19 +15,15 @@ class TransactionController extends Controller
 {
     public function __construct(
         private TransactionService $transactionService
-    ) {}
+    ) {
+    }
 
     /**
      * Display a listing of the transactions
      */
     public function index(Request $request): View
     {
-        $transactions = $this->transactionService->getFilteredTransactions(
-            auth()->id(),
-            $request->all()
-        );
-
-        return view('transactions.index', compact('transactions'));
+        return view('transactions.index');
     }
 
     /**

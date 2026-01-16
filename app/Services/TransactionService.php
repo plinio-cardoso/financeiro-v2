@@ -115,8 +115,8 @@ class TransactionService
 
         return [
             'total_due' => $transactions->sum('amount'),
-            'total_paid' => $transactions->filter(fn ($t) => $t->isPaid())->sum('amount'),
-            'total_pending' => $transactions->filter(fn ($t) => $t->isPending())->sum('amount'),
+            'total_paid' => $transactions->filter(fn($t) => $t->isPaid())->sum('amount'),
+            'total_pending' => $transactions->filter(fn($t) => $t->isPending())->sum('amount'),
         ];
     }
 
@@ -128,7 +128,7 @@ class TransactionService
         $nextMonth = \Carbon\Carbon::create($year, $month, 1)->addMonth();
 
         $transactions = $this->getMonthlyDebits($userId, $nextMonth->year, $nextMonth->month)
-            ->filter(fn ($t) => $t->isPending());
+            ->filter(fn($t) => $t->isPending());
 
         return $transactions->sum('amount');
     }
@@ -141,40 +141,41 @@ class TransactionService
         $query = Transaction::where('user_id', $userId)->with('tags');
 
         // Search filter
-        if (! empty($filters['search'])) {
-            $query->where('title', 'like', '%'.$filters['search'].'%');
+        if (!empty($filters['search'])) {
+            $query->where('title', 'like', '%' . $filters['search'] . '%');
         }
 
         // Date range filters
-        if (! empty($filters['start_date'])) {
+        if (!empty($filters['start_date'])) {
             $query->whereDate('due_date', '>=', $filters['start_date']);
         }
 
-        if (! empty($filters['end_date'])) {
+        if (!empty($filters['end_date'])) {
             $query->whereDate('due_date', '<=', $filters['end_date']);
         }
 
         // Tags filter
-        if (! empty($filters['tags']) && is_array($filters['tags'])) {
+        if (!empty($filters['tags']) && is_array($filters['tags'])) {
             $query->whereHas('tags', function ($q) use ($filters) {
                 $q->whereIn('tags.id', $filters['tags']);
             });
         }
 
         // Status filter
-        if (! empty($filters['status'])) {
+        if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
         // Type filter
-        if (! empty($filters['type'])) {
+        if (!empty($filters['type'])) {
             $query->where('type', $filters['type']);
         }
 
         // Sorting
         $sortBy = $filters['sort_by'] ?? 'due_date';
         $sortDirection = $filters['sort_direction'] ?? 'asc';
-        $query->orderBy($sortBy, $sortDirection);
+        $query->orderBy($sortBy, $sortDirection)
+            ->orderBy('id', 'desc');
 
         return $query;
     }

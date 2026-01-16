@@ -25,14 +25,16 @@
                             @foreach(old('emails', $settings->emails ?? []) as $index => $email)
                                 <div class="flex gap-2">
                                     <x-input type="email" name="emails[]" value="{{ $email }}" class="flex-1" />
-                                    <button type="button" onclick="removeEmail(this)" class="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                                    <button type="button" onclick="removeEmail(this)"
+                                        class="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600">
                                         Remover
                                     </button>
                                 </div>
                             @endforeach
                         </div>
 
-                        <button type="button" onclick="addEmail()" class="mt-2 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                        <button type="button" onclick="addEmail()"
+                            class="mt-2 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
                             + Adicionar E-mail
                         </button>
 
@@ -42,7 +44,8 @@
                     <!-- Notify Due Today -->
                     <div class="col-span-6">
                         <label class="flex items-center">
-                            <input type="checkbox" name="notify_due_today" value="1" {{ old('notify_due_today', $settings->notify_due_today ?? true) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:focus:ring-indigo-600" />
+                            <input type="checkbox" name="notify_due_today" value="1" {{ old('notify_due_today', $settings->notify_due_today ?? true) ? 'checked' : '' }}
+                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:focus:ring-indigo-600" />
                             <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">
                                 {{ __('Notificar sobre contas que vencem hoje') }}
                             </span>
@@ -52,7 +55,8 @@
                     <!-- Notify Overdue -->
                     <div class="col-span-6">
                         <label class="flex items-center">
-                            <input type="checkbox" name="notify_overdue" value="1" {{ old('notify_overdue', $settings->notify_overdue ?? true) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:focus:ring-indigo-600" />
+                            <input type="checkbox" name="notify_overdue" value="1" {{ old('notify_overdue', $settings->notify_overdue ?? true) ? 'checked' : '' }}
+                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:focus:ring-indigo-600" />
                             <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">
                                 {{ __('Notificar sobre contas vencidas') }}
                             </span>
@@ -61,9 +65,11 @@
                 </x-slot>
 
                 <x-slot name="actions">
-                    <x-action-message class="me-3" on="saved">
-                        {{ __('Salvo.') }}
-                    </x-action-message>
+                    @if (session('success'))
+                        <div class="mr-3 text-sm font-medium text-green-600 dark:text-green-400">
+                            {{ session('success') }}
+                        </div>
+                    @endif
 
                     <x-button>
                         {{ __('Salvar') }}
@@ -74,23 +80,23 @@
     </div>
 
     @push('scripts')
-    <script>
-        function addEmail() {
-            const container = document.getElementById('emails-container');
-            const div = document.createElement('div');
-            div.className = 'flex gap-2';
-            div.innerHTML = `
-                <input type="email" name="emails[]" class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
-                <button type="button" onclick="removeEmail(this)" class="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-                    Remover
-                </button>
-            `;
-            container.appendChild(div);
-        }
+        <script>
+            function addEmail() {
+                const container = document.getElementById('emails-container');
+                const div = document.createElement('div');
+                div.className = 'flex gap-2';
+                div.innerHTML = `
+                    <input type="email" name="emails[]" class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
+                    <button type="button" onclick="removeEmail(this)" class="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                        Remover
+                    </button>
+                `;
+                container.appendChild(div);
+            }
 
-        function removeEmail(button) {
-            button.parentElement.remove();
-        }
-    </script>
+            function removeEmail(button) {
+                button.parentElement.remove();
+            }
+        </script>
     @endpush
 </x-app-layout>
