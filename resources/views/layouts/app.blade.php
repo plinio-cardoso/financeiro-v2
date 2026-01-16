@@ -8,22 +8,26 @@
 <body class="font-sans antialiased">
     <x-toast-container />
 
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-        @livewire('navigation-menu')
+    <div class="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+        <!-- Sidebar -->
+        <x-sidebar />
 
-        <!-- Page Heading -->
-        @if (isset($header))
-            <header class="bg-white dark:bg-gray-800 shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
-        @endif
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Page Heading -->
+            @if (isset($header))
+                <header class="bg-white dark:bg-gray-800 shadow z-10">
+                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endif
 
-        <!-- Page Content -->
-        <main>
-            {{ $slot }}
-        </main>
+            <!-- Page Content -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto">
+                {{ $slot }}
+            </main>
+        </div>
     </div>
 
     @stack('modals')
