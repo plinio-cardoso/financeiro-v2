@@ -28,7 +28,7 @@
 }" class="relative">
     <div class="relative">
         <button type="button" @click="show = !show" @click.away="show = false"
-            class="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-md shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
+            class="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-md shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
             <span class="block truncate">
                 <span
                     x-text="selected.length === 0 ? '{{ $placeholder }}' : selected.length + ' selecionado(s)'"></span>

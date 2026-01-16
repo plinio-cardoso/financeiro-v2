@@ -14,6 +14,7 @@ class TransactionForm extends Component
     use InteractsWithBanner;
 
     public ?Transaction $transaction = null;
+    public ?int $transactionId = null;
 
     // Form fields
     public string $title = '';
@@ -41,19 +42,23 @@ class TransactionForm extends Component
         return Tag::orderBy('name')->get();
     }
 
-    public function mount(?Transaction $transaction = null): void
+    public function mount(?int $transactionId = null): void
     {
-        if ($transaction && $transaction->exists) {
-            $this->editing = true;
-            $this->transaction = $transaction;
-            $this->title = $transaction->title;
-            $this->description = $transaction->description ?? '';
-            $this->amount = $transaction->amount;
-            $this->type = $transaction->type->value;
-            $this->status = $transaction->status->value;
-            $this->dueDate = $transaction->due_date->format('Y-m-d');
-            $this->paidAt = $transaction->paid_at?->format('Y-m-d\TH:i');
-            $this->selectedTags = $transaction->tags->pluck('id')->toArray();
+        if ($transactionId) {
+            $transaction = Transaction::with('tags')->find($transactionId);
+
+            if ($transaction) {
+                $this->editing = true;
+                $this->transaction = $transaction;
+                $this->title = $transaction->title;
+                $this->description = $transaction->description ?? '';
+                $this->amount = $transaction->amount;
+                $this->type = $transaction->type->value;
+                $this->status = $transaction->status->value;
+                $this->dueDate = $transaction->due_date->format('Y-m-d');
+                $this->paidAt = $transaction->paid_at?->format('Y-m-d\TH:i');
+                $this->selectedTags = $transaction->tags->pluck('id')->toArray();
+            }
         } else {
             $this->dueDate = now()->format('Y-m-d');
         }

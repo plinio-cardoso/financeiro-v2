@@ -81,18 +81,23 @@
             </nav>
 
             <div
-                class="flex items-center gap-3 px-2 py-3 bg-gray-50 dark:bg-gray-800/30 rounded-xl border border-gray-100 dark:border-gray-800">
-                <img class="object-cover w-9 h-9 rounded-lg" src="{{ Auth::user()->profile_photo_url }}"
-                    alt="{{ Auth::user()->name }}">
+                class="flex items-center gap-3 px-3 py-4 bg-gray-50/50 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800/50 transition-colors">
+                <div class="relative">
+                    <img class="object-cover w-10 h-10 rounded-xl shadow-sm border border-white dark:border-gray-700"
+                        src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}">
+                    <div
+                        class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full">
+                    </div>
+                </div>
                 <div class="flex-1 min-w-0">
-                    <h1 class="text-sm font-bold text-gray-900 dark:text-gray-200 truncate">{{ Auth::user()->name }}
-                    </h1>
-                    <p class="text-xs text-gray-500 dark:text-gray-500 truncate">{{ Auth::user()->email }}</p>
+                    <h1 class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}</h1>
+                    <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 truncate tracking-wide">
+                        {{ Auth::user()->email }}</p>
                 </div>
                 <form method="POST" action="{{ route('logout') }}" x-data>
                     @csrf
                     <button @click.prevent="$root.submit();"
-                        class="p-1.5 text-gray-400 hover:text-red-500 transition-colors duration-200">
+                        class="p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-200 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

@@ -6,71 +6,63 @@
         <div class="px-4 py-5 sm:p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Filtros</h3>
-                <x-button wire:click="$set('showCreateModal', true)" class="bg-indigo-600 hover:bg-indigo-700">
+                <x-button wire:click="createTransaction" class="bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/10">
                     {{ __('Nova Transação') }}
                 </x-button>
             </div>
 
-            <x-dialog-modal wire:model.live="showCreateModal">
+            <x-slide-over wire:model.live="showCreateModal" maxWidth="md">
                 <x-slot name="title">
-                    {{ __('Nova Transação') }}
+                    {{ $editingTransactionId ? __('Editar Transação') : __('Nova Transação') }}
                 </x-slot>
 
-                <x-slot name="content">
-                    <livewire:transaction-form />
-                </x-slot>
-
-                <x-slot name="footer">
-                    <x-secondary-button wire:click="$set('showCreateModal', false)" wire:loading.attr="disabled">
-                        {{ __('Cancelar') }}
-                    </x-secondary-button>
-                </x-slot>
-            </x-dialog-modal>
+                <livewire:transaction-form :transaction-id="$editingTransactionId" :key="'transaction-form-' . ($editingTransactionId ?? 'new')" />
+            </x-slide-over>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {{-- Search --}}
                 <div>
-                    <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label for="search" class="block text-sm font-bold text-gray-900 dark:text-gray-300">
                         Buscar
                     </label>
                     <input type="text" id="search" wire:model.live="search"
-                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                        class="block w-full mt-1 border-gray-300 text-gray-900 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                         placeholder="Título ou descrição">
                 </div>
 
                 {{-- Data Início --}}
                 <div>
-                    <label for="startDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label for="startDate" class="block text-sm font-bold text-gray-900 dark:text-gray-300">
                         Data Início
                     </label>
                     <input type="date" id="startDate" wire:model.live="startDate"
-                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                        class="block w-full mt-1 border-gray-300 text-gray-900 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                 </div>
 
                 {{-- Data Fim --}}
                 <div>
-                    <label for="endDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label for="endDate" class="block text-sm font-bold text-gray-900 dark:text-gray-300">
                         Data Fim
                     </label>
                     <input type="date" id="endDate" wire:model.live="endDate"
-                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                        class="block w-full mt-1 border-gray-300 text-gray-900 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                 </div>
 
                 {{-- Status --}}
                 <div>
-                    <label for="filterStatus" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label for="filterStatus" class="block text-sm font-bold text-gray-900 dark:text-gray-300">
                         Status
                     </label>
                     <x-custom-select wire:model.live="filterStatus" :options="[
         ['value' => '', 'label' => 'Todos'],
         ['value' => 'pending', 'label' => 'Pendente'],
         ['value' => 'paid', 'label' => 'Pago']
-    ]" placeholder="Todos" />
+    ]"     placeholder="Todos" />
                 </div>
 
                 {{-- Tipo --}}
                 <div>
-                    <label for="filterType" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label for="filterType" class="block text-sm font-bold text-gray-900 dark:text-gray-300">
                         Tipo
                     </label>
                     <x-custom-select wire:model.live="filterType" :options="[
@@ -82,7 +74,7 @@
 
                 {{-- Tags --}}
                 <div>
-                    <label for="selectedTags" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label for="selectedTags" class="block text-sm font-bold text-gray-900 dark:text-gray-300">
                         Tags
                     </label>
                     <x-multi-select wire:model.live="selectedTags" :options="$this->tags"
@@ -170,14 +162,14 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span
                                     class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full
-                                                            {{ $transaction->type->value === 'debit' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }}">
+                                                                    {{ $transaction->type->value === 'debit' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }}">
                                     {{ $transaction->type->value === 'debit' ? 'Débito' : 'Crédito' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span
                                     class="inline-flex px-2 text-xs font-semibold leading-5 rounded-full
-                                                            {{ $transaction->status->value === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
+                                                                    {{ $transaction->status->value === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
                                     {{ $transaction->status->value === 'paid' ? 'Pago' : 'Pendente' }}
                                 </span>
                             </td>
@@ -195,10 +187,14 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                <a href="#"
-                                    class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
-                                    Editar
-                                </a>
+                                <button wire:click="editTransaction({{ $transaction->id }})"
+                                    class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors p-1 rounded-full hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                                    title="Editar">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
                             </td>
                         </tr>
                     @empty

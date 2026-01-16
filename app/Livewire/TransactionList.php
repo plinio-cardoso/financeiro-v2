@@ -14,6 +14,7 @@ class TransactionList extends Component
     use WithPagination;
 
     public bool $showCreateModal = false;
+    public ?int $editingTransactionId = null;
 
     // Filtros
     public string $search = '';
@@ -94,6 +95,18 @@ class TransactionList extends Component
         $this->resetPage();
     }
 
+    public function createTransaction(): void
+    {
+        $this->editingTransactionId = null;
+        $this->showCreateModal = true;
+    }
+
+    public function editTransaction(int $id): void
+    {
+        $this->editingTransactionId = $id;
+        $this->showCreateModal = true;
+    }
+
     public function clearFilters(): void
     {
         $this->reset([
@@ -110,6 +123,7 @@ class TransactionList extends Component
     public function refreshList(): void
     {
         $this->showCreateModal = false;
+        $this->editingTransactionId = null;
         $this->resetPage();
 
         $this->dispatch('notify', message: 'Transação salva com sucesso!', type: 'success');
