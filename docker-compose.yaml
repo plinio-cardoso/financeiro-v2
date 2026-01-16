@@ -1,8 +1,8 @@
-name: bot
+name: financeiro
 
 services:
   nginx:
-    container_name: nginx
+    container_name: nginx_financeiro
     image: nginx:1.25.0
     ports:
       - "8080:80"
@@ -12,38 +12,38 @@ services:
     depends_on:
       - php
     networks:
-      - bot-network
+      - financeiro-network
 
   php:
-    container_name: php
+    container_name: php_financeiro
     build:
       context: .docker
       dockerfile: Dockerfile
     volumes:
       - ./:/var/www/html:cached
     networks:
-      - bot-network
+      - financeiro-network
 
   mysql:
-    container_name: mysql
+    container_name: mysql_financeiro
     image: mysql:8.3.0
     env_file:
       - .env
     ports:
       - "3306:3306"
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE:-bot}
+      MYSQL_DATABASE: ${DB_DATABASE:-financeiro}
       MYSQL_PASSWORD: ${DB_PASSWORD:-password}
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
     volumes:
       - db_data:/var/lib/mysql/
     networks:
-      - bot-network
+      - financeiro-network
 
 volumes:
   db_data:
     driver: local
 
 networks:
-  bot-network:
+  financeiro-network:
     driver: bridge

@@ -14,26 +14,30 @@ build:
 	docker compose up --build -d
 
 test:
-	docker exec -it php php artisan test --testsuite=Feature --stop-on-failure
+	docker exec -it php_financeiro php artisan test --testsuite=Feature --stop-on-failure
 
 test-update:
-	docker exec -it php php artisan test -d --update-snapshots --testsuite=Feature --stop-on-failure
+	docker exec -it php_financeiro php artisan test -d --update-snapshots --testsuite=Feature --stop-on-failure
 
 restart: stop up
 
 bash:
-	docker exec -it php bash
+	docker exec -it php_financeiro bash
 
 db-bash:
-	docker exec -it mysql bash
+	docker exec -it mysql_financeiro bash
+
+refresh:
+	docker exec -it php_financeiro php artisan migrate:fresh
+	docker exec -it php_financeiro php artisan db:seed
 
 install:
-	docker exec -it php composer install --ignore-platform-req=ext-http
-	docker exec -it php php artisan migrate
-	docker exec -it php php artisan db:seed
+	docker exec -it php_financeiro composer install --ignore-platform-req=ext-http
+	docker exec -it php_financeiro php artisan migrate
+	docker exec -it php_financeiro php artisan db:seed
 
 composer-install:
-	docker exec -it php composer install --ignore-platform-req=ext-http
+	docker exec -it php_financeiro composer install --ignore-platform-req=ext-http
 
 logs:
 	tail -f storage/logs/*.log

@@ -7,12 +7,19 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
-                <div class="text-center">
-                    <h1 class="text-4xl font-bold text-gray-900 dark:text-white">
-                        Projeto BOT IA
-                    </h1>
-                </div>
+            <!-- Stats Cards (Livewire Component) -->
+            <livewire:dashboard-stats />
+
+            <!-- Divisor -->
+            <x-section-border />
+
+            <!-- Transações do Mês -->
+            <div class="mt-8">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                    Transações do Mês Atual
+                </h3>
+
+                <livewire:transaction-list />
             </div>
         </div>
     </div>
