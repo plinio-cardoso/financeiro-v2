@@ -19,6 +19,27 @@ test:
 test-update:
 	docker exec -it php_financeiro php artisan test -d --update-snapshots --testsuite=Feature --stop-on-failure
 
+test-coverage:
+	@echo "Running tests with code coverage (minimum 80%)..."
+	@docker exec -e XDEBUG_MODE=coverage php_financeiro php artisan test \
+		tests/Feature/Models \
+		tests/Feature/Services \
+		tests/Feature/Controllers \
+		tests/Feature/Commands \
+		--coverage \
+		--min=80
+
+test-coverage-html:
+	@echo "Generating HTML coverage report..."
+	@docker exec -e XDEBUG_MODE=coverage php_financeiro php artisan test \
+		tests/Feature/Models \
+		tests/Feature/Services \
+		tests/Feature/Controllers \
+		tests/Feature/Commands \
+		--coverage-html coverage-report \
+		--min=80
+	@echo "Coverage report generated at coverage-report/index.html"
+
 restart: stop up
 
 bash:

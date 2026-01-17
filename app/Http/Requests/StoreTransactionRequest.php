@@ -34,6 +34,7 @@ class StoreTransactionRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'amount' => 'required|numeric|min:0.01|max:999999999.99',
