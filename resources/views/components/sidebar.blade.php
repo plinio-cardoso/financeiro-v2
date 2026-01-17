@@ -11,7 +11,7 @@
         }
     }
 }"
-    class="flex flex-col w-64 h-screen px-4 py-8 overflow-y-auto bg-white border-r rtl:border-r-0 rtl:border-l dark:bg-gray-900 dark:border-gray-800">
+    class="flex flex-col w-64 h-screen px-4 py-8 overflow-y-auto bg-white border-r rtl:border-r-0 rtl:border-l dark:bg-gray-800 dark:border-gray-700/50">
     <div class="flex items-center px-2 mb-8">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
             <x-application-mark class="w-10 h-10 text-gray-900 dark:text-white" />
@@ -62,9 +62,9 @@
                 </x-sidebar-link>
 
                 <button @click="toggleTheme()" type="button"
-                    class="flex items-center w-full px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg group transition-all duration-200">
+                    class="flex items-center w-full px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-[#4ECDC4] dark:hover:text-[#4ECDC4] hover:bg-[#4ECDC410] dark:hover:bg-[#4ECDC410] rounded-lg group transition-all duration-200">
                     <div
-                        class="text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
+                        class="text-gray-400 group-hover:text-[#4ECDC4] dark:group-hover:text-[#4ECDC4] transition-colors duration-200">
                         <svg x-show="darkMode" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -79,20 +79,25 @@
             </nav>
 
             <div
-                class="flex items-center gap-3 px-3 py-4 bg-gray-50/50 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800/50 transition-colors">
-                <div class="relative">
-                    <img class="object-cover w-10 h-10 rounded-xl shadow-sm border border-white dark:border-gray-700"
-                        src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}">
-                    <div
-                        class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full">
+                class="flex items-center gap-3 px-3 py-4 bg-gray-50/50 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800/50 group/user transition-all">
+                <a href="{{ route('profile.show') }}" class="flex-1 flex items-center gap-3 min-w-0">
+                    <div class="relative flex-shrink-0">
+                        <img class="object-cover w-10 h-10 rounded-xl shadow-sm border border-white dark:border-gray-700 group-hover/user:border-[#4ECDC4] transition-colors"
+                            src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}">
+                        <div
+                            class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full">
+                        </div>
                     </div>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <h1 class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}</h1>
-                    <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 truncate tracking-wide">
-                        {{ Auth::user()->email }}</p>
-                </div>
-                <form method="POST" action="{{ route('logout') }}" x-data>
+                    <div class="flex-1 min-w-0">
+                        <h1
+                            class="text-sm font-bold text-gray-900 dark:text-white truncate group-hover/user:text-[#4ECDC4] transition-colors">
+                            {{ Auth::user()->name }}</h1>
+                        <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 truncate tracking-wide">
+                            {{ Auth::user()->email }}
+                        </p>
+                    </div>
+                </a>
+                <form method="POST" action="{{ route('logout') }}" x-data class="flex-shrink-0">
                     @csrf
                     <button @click.prevent="$root.submit();"
                         class="p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-200 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">

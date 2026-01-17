@@ -18,7 +18,7 @@ class TagSeeder extends Seeder
             ['name' => 'Moradia', 'color' => '#45B7D1'],
             ['name' => 'Saúde', 'color' => '#96CEB4'],
             ['name' => 'Educação', 'color' => '#FFEAA7'],
-            ['name' => 'Lazer', 'color' => '#3CB5EAc'],
+            ['name' => 'Lazer', 'color' => '#3CB5EA'],
             ['name' => 'Salário', 'color' => '#55E6C1'],
             ['name' => 'Freelance', 'color' => '#A29BFE'],
             ['name' => 'Investimento', 'color' => '#FD79A8'],

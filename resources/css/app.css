@@ -5,3 +5,11 @@
 [x-cloak] {
     display: none;
 }
+
+@layer base {
+    .dark input[type="date"],
+    .dark input[type="datetime-local"],
+    .dark input[type="time"] {
+        color-scheme: dark;
+    }
+}

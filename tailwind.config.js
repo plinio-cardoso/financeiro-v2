@@ -20,17 +20,17 @@ export default {
             },
             colors: {
                 primary: {
-                    DEFAULT: 'rgb(48 85 191)',      // #3055bf - Texto
-                    50: 'rgb(210 222 255)',         // #d2deff - Fundo do botão
-                    100: 'rgb(195 210 255)',        // Hover
-                    200: 'rgb(180 198 255)',        // Active
-                    300: 'rgb(135, 166, 255)',
-                    400: 'rgb(92, 128, 235)',
-                    500: 'rgb(48 85 191)',          // Same as DEFAULT
-                    600: 'rgb(38, 68, 153)',
-                    700: 'rgb(30, 54, 122)',
-                    800: 'rgb(22, 40, 92)',
-                    900: 'rgb(15, 27, 61)',
+                    DEFAULT: '#4ECDC4',
+                    50: '#f0fbf9',
+                    100: '#d7f4ef',
+                    200: '#afede2',
+                    300: '#7be1d1',
+                    400: '#4ECDC4',
+                    500: '#34b2a8',
+                    600: '#289088',
+                    700: '#23736f',
+                    800: '#1e5c5a',
+                    900: '#1d4d4b',
                 },
                 dark: {
                     bg: 'rgb(23, 23, 23)',           // #171717 - Main background

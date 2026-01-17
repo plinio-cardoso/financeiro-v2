@@ -8,7 +8,7 @@
 <body class="font-sans antialiased">
     <x-toast-container />
 
-    <div class="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div class="flex h-screen overflow-hidden bg-gray-100 dark:bg-gray-900">
         <!-- Sidebar -->
         <x-sidebar />
 

@@ -3,13 +3,13 @@
         {{-- Amount Block --}}
         <div
             class="p-8 text-center rounded-3xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
-            <label class="block text-xs font-bold tracking-widest text-gray-400 uppercase dark:text-gray-500">
+            <label class="block text-xs font-bold tracking-widest text-gray-400 uppercase dark:text-gray-300">
                 Valor da Transação
             </label>
             <div class="mt-4 flex justify-center">
                 <div class="relative w-full max-w-xs">
                     <x-currency-input wire:model="amount"
-                        class="text-4xl font-black text-center border-none bg-transparent focus:ring-0 text-indigo-600 dark:text-indigo-400 placeholder-indigo-300 dark:placeholder-indigo-900/50" />
+                        class="text-4xl font-black text-center border-none bg-transparent focus:ring-0 text-[#4ECDC4] dark:text-[#4ECDC4] placeholder-[#4ECDC4]/30 dark:placeholder-[#4ECDC4]/20" />
                 </div>
             </div>
             <x-input-error for="amount" class="mt-2" />
@@ -18,8 +18,8 @@
         {{-- Basic Information --}}
         <div class="space-y-4">
             <div class="flex items-center gap-2 px-1">
-                <div class="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
-                <h3 class="text-xs font-black tracking-widest text-gray-400 uppercase dark:text-gray-500">
+                <div class="w-1.5 h-4 bg-[#4ECDC4] rounded-full"></div>
+                <h3 class="text-xs font-black tracking-widest text-gray-400 uppercase dark:text-gray-300">
                     Informações Básicas
                 </h3>
             </div>
@@ -28,9 +28,9 @@
                 class="p-6 space-y-6 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
                 {{-- Título --}}
                 <div class="space-y-1.5">
-                    <x-label for="title" value="Título" class="text-xs font-bold text-gray-700 dark:text-gray-400" />
+                    <x-label for="title" value="Título" class="text-xs font-bold text-gray-700 dark:text-gray-300" />
                     <x-input id="title" type="text"
-                        class="block w-full border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 focus:ring-indigo-500/20 rounded-xl"
+                        class="block w-full border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 focus:border-[#4ECDC4]/50 focus:ring-[#4ECDC4]/20 rounded-xl"
                         placeholder="Ex: Aluguel, Salário, Supermercado..." wire:model="title" />
                     <x-input-error for="title" />
                 </div>
@@ -38,9 +38,9 @@
                 {{-- Descrição --}}
                 <div class="space-y-1.5">
                     <x-label for="description" value="Descrição (Opcional)"
-                        class="text-xs font-bold text-gray-700 dark:text-gray-400" />
+                        class="text-xs font-bold text-gray-700 dark:text-gray-300" />
                     <textarea id="description" wire:model="description" rows="3"
-                        class="block w-full border-gray-200 text-gray-900 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 focus:border-indigo-500/50 focus:ring-indigo-500/20 rounded-xl shadow-sm dark:text-gray-300"
+                        class="block w-full border-gray-200 text-gray-900 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 focus:border-[#4ECDC4]/50 focus:ring-[#4ECDC4]/20 rounded-xl shadow-sm dark:text-gray-200"
                         placeholder="Adicione detalhes importantes..."></textarea>
                     <x-input-error for="description" />
                 </div>
@@ -50,8 +50,8 @@
         {{-- Classification --}}
         <div class="space-y-4">
             <div class="flex items-center gap-2 px-1">
-                <div class="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
-                <h3 class="text-xs font-black tracking-widest text-gray-400 uppercase dark:text-gray-500">
+                <div class="w-1.5 h-4 bg-[#4ECDC4] rounded-full"></div>
+                <h3 class="text-xs font-black tracking-widest text-gray-400 uppercase dark:text-gray-300">
                     Classificação
                 </h3>
             </div>
@@ -94,8 +94,8 @@
         {{-- Schedule --}}
         <div class="space-y-4">
             <div class="flex items-center gap-2 px-1">
-                <div class="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
-                <h3 class="text-xs font-black tracking-widest text-gray-400 uppercase dark:text-gray-500">
+                <div class="w-1.5 h-4 bg-[#4ECDC4] rounded-full"></div>
+                <h3 class="text-xs font-black tracking-widest text-gray-400 uppercase dark:text-gray-300">
                     Agendamento
                 </h3>
             </div>
@@ -106,9 +106,9 @@
                     {{-- Data de Vencimento --}}
                     <div class="space-y-1.5">
                         <x-label for="dueDate" value="Vencimento"
-                            class="text-xs font-bold text-gray-500 dark:text-gray-400" />
+                            class="text-xs font-bold text-gray-500 dark:text-gray-300" />
                         <x-input id="dueDate" type="date"
-                            class="block w-full border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 focus:ring-indigo-500/20 rounded-xl"
+                            class="block w-full border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 focus:border-[#4ECDC4]/50 focus:ring-[#4ECDC4]/20 rounded-xl"
                             wire:model="dueDate" />
                         <x-input-error for="dueDate" />
                     </div>
@@ -117,9 +117,9 @@
                     @if ($status === 'paid')
                         <div class="space-y-1.5">
                             <x-label for="paidAt" value="Pagamento"
-                                class="text-xs font-bold text-gray-500 dark:text-gray-400" />
+                                class="text-xs font-bold text-gray-500 dark:text-gray-300" />
                             <x-input id="paidAt" type="datetime-local"
-                                class="block w-full border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 focus:ring-indigo-500/20 rounded-xl"
+                                class="block w-full border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 focus:border-[#4ECDC4]/50 focus:ring-[#4ECDC4]/20 rounded-xl"
                                 wire:model="paidAt" />
                             <x-input-error for="paidAt" />
                         </div>
@@ -131,7 +131,7 @@
         {{-- Actions --}}
         <div class="pt-6">
             <x-button
-                class="w-full justify-center py-4 text-base font-black uppercase tracking-widest shadow-md shadow-indigo-500/10 active:scale-95 transition-transform">
+                class="w-full justify-center py-4 text-base font-black uppercase tracking-widest !bg-[#4ECDC4] hover:!bg-[#3dbdb5] !text-gray-900 shadow-md shadow-[#4ECDC4]/10 active:scale-95 transition-transform">
                 {{ $editing ? 'Salvar Alterações' : 'Criar Transação' }}
             </x-button>
         </div>

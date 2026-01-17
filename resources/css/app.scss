@@ -32,9 +32,9 @@
 @layer base {
     :root {
         // Primary color tokens
-        --color-primary: 48 85 191;
-        --color-primary-light: 210 222 255;
-        --color-primary-dark: 38 68 153;
+        --color-primary: 78 205 196;
+        --color-primary-light: 78 205 196;
+        --color-primary-dark: 61 189 181;
 
         // Secondary color tokens
         --color-secondary: 99 102 241;
@@ -51,11 +51,12 @@
     }
 
     .dark {
+        color-scheme: dark;
         // Dark mode background and surfaces (neutral dark grays)
         --tw-bg-opacity: 1;
-        --color-dark-bg: 23 23 23;           // #171717 - Main background
-        --color-dark-surface: 35 35 35;      // #232323 - Elevated
-        --color-dark-elevated: 57 57 57;     // #393939 - More elevated
+        --color-dark-bg: 23 23 23; // #171717 - Main background
+        --color-dark-surface: 35 35 35; // #232323 - Elevated
+        --color-dark-elevated: 57 57 57; // #393939 - More elevated
         --color-dark-card: 255 255 255;
         --color-dark-card-opacity: 0.03;
         --color-dark-border-opacity: 0.08;
@@ -73,37 +74,51 @@
 
 // Override Tailwind button classes to use new primary color
 @layer components {
-    // Primary button background (light blue)
+
+    // Primary button background (light teal)
     .bg-primary-50 {
-        background-color: rgb(210 222 255 / var(--tw-bg-opacity, 1)) !important;
+        background-color: rgb(78 205 196 / 0.1) !important;
     }
 
     .bg-primary-100 {
-        background-color: rgb(195 210 255 / var(--tw-bg-opacity, 1)) !important;
+        background-color: rgb(78 205 196 / 0.2) !important;
     }
 
     .bg-primary-200 {
-        background-color: rgb(180 198 255 / var(--tw-bg-opacity, 1)) !important;
+        background-color: rgb(78 205 196 / 0.3) !important;
     }
 
-    // Primary text color (dark blue)
+    // Primary text color (teal)
     .text-primary {
-        color: rgb(48 85 191 / var(--tw-text-opacity, 1)) !important;
+        color: rgb(78 205 196 / var(--tw-text-opacity, 1)) !important;
     }
 
     // Legacy classes mapped to new colors
     .bg-indigo-600 {
-        background-color: rgb(210 222 255 / var(--tw-bg-opacity, 1)) !important;
+        background-color: rgb(78 205 196 / var(--tw-bg-opacity, 1)) !important;
+        color: #111827 !important; // text-gray-900
     }
 
     .text-indigo-600,
     .text-blue-600 {
-        color: rgb(48 85 191 / var(--tw-text-opacity, 1)) !important;
+        color: rgb(78 205 196 / var(--tw-text-opacity, 1)) !important;
     }
 
     .bg-indigo-50,
     .bg-blue-50 {
-        background-color: rgb(210 222 255 / var(--tw-bg-opacity, 1)) !important;
+        background-color: rgb(78 205 196 / 0.1) !important;
+    }
+
+    // Handle hover states specifically for sidebar
+    .hover\:text-\[\#4ECDC4\]:hover,
+    .dark\:hover\:text-\[\#4ECDC4\]:hover {
+        color: #4ECDC4 !important;
+    }
+
+    .hover\:bg-\[\#4ECDC410\]:hover,
+    .dark\:hover\:bg-\[\#4ECDC410\]:hover,
+    .dark\:hover\:bg-\[\#4ECDC420\]:hover {
+        background-color: rgba(78, 205, 196, 0.1) !important;
     }
 
     // Light mode overrides
@@ -121,6 +136,7 @@
 
     // Dark mode overrides
     .dark {
+
         // Dark backgrounds - neutral gray theme
         .dark\:bg-gray-900,
         &.bg-gray-900 {
@@ -164,7 +180,7 @@
         // Primary button in dark mode keeps same color
         .bg-indigo-600,
         .dark\:bg-indigo-600 {
-            background-color: rgb(210 222 255 / var(--tw-bg-opacity, 1)) !important;
+            background-color: rgb(78 205 196 / var(--tw-bg-opacity, 1)) !important;
         }
     }
 }

@@ -17,13 +17,11 @@
     }
 }" class="relative">
     <div class="relative">
-        <button type="button" @click="show = !show" @click.away="show = false"
-            class="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-md shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300">
+        <button type="button" @click="show = !show" @click.away="show = false" {{ $attributes->merge(['class' => 'relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-100 dark:border-gray-700/50 rounded-xl shadow-none cursor-default focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 sm:text-sm text-gray-900 dark:bg-gray-900 dark:text-gray-300 transition-all']) }}>
             <span class="block truncate" x-text="selectedLabel"></span>
-            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                <svg class="w-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="none" stroke="currentColor">
-                    <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" stroke-width="1.5" stroke-linecap="round"
-                        stroke-linejoin="round" />
+            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
             </span>
         </button>
@@ -42,7 +40,7 @@
                         x-text="option.label"></span>
 
                     <span x-show="selected == option.value"
-                        class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 dark:text-indigo-400">
+                        class="absolute inset-y-0 right-0 flex items-center pr-4 text-[#4ECDC4]">
                         <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
                                 d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"

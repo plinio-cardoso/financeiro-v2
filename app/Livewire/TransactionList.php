@@ -41,7 +41,30 @@ class TransactionList extends Component
     #[Computed]
     public function transactions()
     {
-        $query = app(TransactionService::class)->getFilteredTransactions(
+        return $this->getFilteredQuery()->paginate($this->perPage);
+    }
+
+    #[Computed]
+    public function totalCount(): int
+    {
+        return $this->getFilteredQuery()->count();
+    }
+
+    #[Computed]
+    public function totalAmount(): float
+    {
+        $query = $this->getFilteredQuery();
+
+        // Sum credits and debits separately to calculate net amount
+        $credits = (clone $query)->where('type', 'credit')->sum('amount');
+        $debits = (clone $query)->where('type', 'debit')->sum('amount');
+
+        return $credits - $debits;
+    }
+
+    private function getFilteredQuery()
+    {
+        return app(TransactionService::class)->getFilteredTransactions(
             auth()->id(),
             [
                 'search' => $this->search,
@@ -54,8 +77,6 @@ class TransactionList extends Component
                 'sort_direction' => $this->sortDirection,
             ]
         );
-
-        return $query->paginate($this->perPage);
     }
 
     #[Computed]
@@ -136,7 +157,7 @@ class TransactionList extends Component
             $transaction = app(TransactionService::class)
                 ->findTransactionById($transactionId, auth()->id());
 
-            if (! $transaction) {
+            if (!$transaction) {
                 $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
 
                 return;
@@ -159,7 +180,7 @@ class TransactionList extends Component
             $this->resetPage();
             $this->dispatch('notify', message: 'Transação marcada como paga com sucesso!', type: 'success');
         } catch (\Exception $e) {
-            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: '.$e->getMessage(), type: 'error');
+            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: ' . $e->getMessage(), type: 'error');
         }
     }
 
