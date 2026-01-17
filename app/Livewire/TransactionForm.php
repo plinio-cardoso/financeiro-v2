@@ -14,6 +14,7 @@ class TransactionForm extends Component
     use InteractsWithBanner;
 
     public ?Transaction $transaction = null;
+
     public ?int $transactionId = null;
 
     // Form fields

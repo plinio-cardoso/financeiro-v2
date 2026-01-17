@@ -157,7 +157,7 @@ class TransactionList extends Component
             $transaction = app(TransactionService::class)
                 ->findTransactionById($transactionId, auth()->id());
 
-            if (!$transaction) {
+            if (! $transaction) {
                 $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
 
                 return;
@@ -180,7 +180,7 @@ class TransactionList extends Component
             $this->resetPage();
             $this->dispatch('notify', message: 'Transação marcada como paga com sucesso!', type: 'success');
         } catch (\Exception $e) {
-            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: ' . $e->getMessage(), type: 'error');
+            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: '.$e->getMessage(), type: 'error');
         }
     }
 

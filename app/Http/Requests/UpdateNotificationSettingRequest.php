@@ -25,10 +25,21 @@ class UpdateNotificationSettingRequest extends FormRequest
     {
         return [
             'emails' => 'required|array|min:1|max:10',
-            'emails.*' => 'required|email:rfc,dns',
-            'notify_due_today' => 'required|boolean',
-            'notify_overdue' => 'required|boolean',
+            'emails.*' => 'required|email:rfc',
+            'notify_due_today' => 'nullable|boolean',
+            'notify_overdue' => 'nullable|boolean',
         ];
+    }
+
+    /**
+     * Prepare the data for validation
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'notify_due_today' => filter_var($this->input('notify_due_today'), FILTER_VALIDATE_BOOLEAN),
+            'notify_overdue' => filter_var($this->input('notify_overdue'), FILTER_VALIDATE_BOOLEAN),
+        ]);
     }
 
     /**
@@ -44,9 +55,7 @@ class UpdateNotificationSettingRequest extends FormRequest
             'emails.max' => 'Você pode cadastrar no máximo 10 emails.',
             'emails.*.required' => 'Todos os emails devem ser preenchidos.',
             'emails.*.email' => 'Um ou mais emails são inválidos.',
-            'notify_due_today.required' => 'A configuração de notificação para "vence hoje" é obrigatória.',
             'notify_due_today.boolean' => 'A configuração de notificação deve ser verdadeiro ou falso.',
-            'notify_overdue.required' => 'A configuração de notificação para "vencidas" é obrigatória.',
             'notify_overdue.boolean' => 'A configuração de notificação deve ser verdadeiro ou falso.',
         ];
     }

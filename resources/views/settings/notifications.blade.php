@@ -7,17 +7,25 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <x-form-section submit="updateSettings">
-                <x-slot name="title">
-                    <span class="text-gray-900 dark:text-gray-100 font-black">{{ __('Notificações por E-mail') }}</span>
-                </x-slot>
+            <div class="md:grid md:grid-cols-3 md:gap-6">
+                <div class="md:col-span-1 flex justify-between">
+                    <div class="px-4 sm:px-0">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                            {{ __('Notificações por E-mail') }}
+                        </h3>
+                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                            {{ __('Configure os e-mails que receberão notificações sobre contas a vencer e vencidas.') }}
+                        </p>
+                    </div>
+                </div>
 
-                <x-slot name="description">
-                    <span
-                        class="text-gray-500 dark:text-gray-400 font-medium">{{ __('Configure os e-mails que receberão notificações sobre contas a vencer e vencidas.') }}</span>
-                </x-slot>
+                <div class="mt-5 md:mt-0 md:col-span-2">
+                    <form action="{{ route('settings.notifications.update') }}" method="POST">
+                        @csrf
+                        @method('PUT')
 
-                <x-slot name="form">
+                        <div class="px-4 py-5 bg-white dark:bg-gray-800 sm:p-6 shadow sm:rounded-tl-md sm:rounded-tr-md">
+                            <div class="grid grid-cols-6 gap-6">
                     <!-- Emails -->
                     <div class="col-span-6">
                         <x-label for="emails" value="{{ __('E-mails para Notificação') }}" />
@@ -72,21 +80,24 @@
                             </span>
                         </label>
                     </div>
-                </x-slot>
-
-                <x-slot name="actions">
-                    @if (session('success'))
-                        <div class="mr-3 text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                            {{ session('success') }}
+                            </div>
                         </div>
-                    @endif
 
-                    <x-button
-                        class="!bg-[#4ECDC4] hover:!bg-[#3dbdb5] !text-gray-900 !rounded-xl px-8 py-3 text-sm font-black uppercase tracking-widest shadow-md shadow-[#4ECDC4]/10 active:scale-95 transition-all">
-                        {{ __('Salvar Configurações') }}
-                    </x-button>
-                </x-slot>
-            </x-form-section>
+                        <div class="flex items-center justify-end px-4 py-3 bg-gray-50 dark:bg-gray-800 text-end sm:px-6 shadow sm:rounded-bl-md sm:rounded-br-md">
+                            @if (session('success'))
+                                <div class="mr-3 text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                    {{ session('success') }}
+                                </div>
+                            @endif
+
+                            <x-button type="submit"
+                                class="!bg-[#4ECDC4] hover:!bg-[#3dbdb5] !text-gray-900 !rounded-xl px-8 py-3 text-sm font-black uppercase tracking-widest shadow-md shadow-[#4ECDC4]/10 active:scale-95 transition-all">
+                                {{ __('Salvar Configurações') }}
+                            </x-button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -15,8 +15,7 @@ class TransactionController extends Controller
 {
     public function __construct(
         private TransactionService $transactionService
-    ) {
-    }
+    ) {}
 
     /**
      * Display a listing of the transactions
