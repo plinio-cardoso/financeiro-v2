@@ -86,14 +86,19 @@
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
                     Saldo Período
                 </span>
-                <span @class([
-                    'text-sm font-black px-2 py-0.5 rounded-lg',
-                    'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10' => $this->totalAmount > 0,
-                    'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10' => $this->totalAmount < 0,
-                    'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50' => $this->totalAmount == 0,
-                ])>
-                    R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
-                </span>
+                @if($this->totalAmount > 0)
+                    <span class="text-sm font-black px-2 py-0.5 rounded-lg !text-emerald-600 dark:!text-emerald-400 !bg-emerald-50 dark:!bg-emerald-500/10">
+                        R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
+                    </span>
+                @elseif($this->totalAmount < 0)
+                    <span class="text-sm font-black px-2 py-0.5 rounded-lg !text-rose-600 dark:!text-rose-400 !bg-rose-50 dark:!bg-rose-500/10">
+                        R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
+                    </span>
+                @else
+                    <span class="text-sm font-black px-2 py-0.5 rounded-lg !text-gray-600 dark:!text-gray-400 !bg-gray-50 dark:!bg-gray-700/50">
+                        R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
+                    </span>
+                @endif
             </div>
         </div>
 

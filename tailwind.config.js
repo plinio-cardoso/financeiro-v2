@@ -13,6 +13,21 @@ export default {
 
     darkMode: 'class',
 
+    safelist: [
+        'text-emerald-600',
+        'text-emerald-400',
+        'bg-emerald-50',
+        'bg-emerald-500/10',
+        'text-rose-600',
+        'text-rose-400',
+        'bg-rose-50',
+        'bg-rose-500/10',
+        'dark:text-emerald-400',
+        'dark:text-rose-400',
+        'dark:bg-emerald-500/10',
+        'dark:bg-rose-500/10',
+    ],
+
     theme: {
         extend: {
             fontFamily: {
