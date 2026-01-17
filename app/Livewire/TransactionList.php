@@ -5,15 +5,16 @@ namespace App\Livewire;
 use App\Models\Tag;
 use App\Services\TransactionService;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\On;
 
 class TransactionList extends Component
 {
     use WithPagination;
 
     public bool $showCreateModal = false;
+
     public ?int $editingTransactionId = null;
 
     // Filtros
@@ -127,6 +128,39 @@ class TransactionList extends Component
         $this->resetPage();
 
         $this->dispatch('notify', message: 'Transação salva com sucesso!', type: 'success');
+    }
+
+    public function markAsPaid(int $transactionId): void
+    {
+        try {
+            $transaction = app(TransactionService::class)
+                ->findTransactionById($transactionId, auth()->id());
+
+            if (! $transaction) {
+                $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
+
+                return;
+            }
+
+            if ($transaction->type->value !== 'debit') {
+                $this->dispatch('notify', message: 'Apenas transações de débito podem ser marcadas como pagas.', type: 'error');
+
+                return;
+            }
+
+            if ($transaction->status->value === 'paid') {
+                $this->dispatch('notify', message: 'Esta transação já está marcada como paga.', type: 'info');
+
+                return;
+            }
+
+            $transaction->markAsPaid();
+
+            $this->resetPage();
+            $this->dispatch('notify', message: 'Transação marcada como paga com sucesso!', type: 'success');
+        } catch (\Exception $e) {
+            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: '.$e->getMessage(), type: 'error');
+        }
     }
 
     public function render()

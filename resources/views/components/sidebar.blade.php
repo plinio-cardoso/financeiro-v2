@@ -14,9 +14,7 @@
     class="flex flex-col w-64 h-screen px-4 py-8 overflow-y-auto bg-white border-r rtl:border-r-0 rtl:border-l dark:bg-gray-900 dark:border-gray-800">
     <div class="flex items-center px-2 mb-8">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
-            <div class="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-500/20">
-                <x-application-mark class="w-6 h-6 text-white" />
-            </div>
+            <x-application-mark class="w-10 h-10 text-gray-900 dark:text-white" />
             <span class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Financeiro</span>
         </a>
     </div>
