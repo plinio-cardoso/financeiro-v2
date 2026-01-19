@@ -6,21 +6,12 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
             <!-- Stats Cards (Livewire Component) -->
             <livewire:dashboard-stats />
 
-            <!-- Divisor -->
-            <x-section-border />
-
-            <!-- Transações do Mês -->
-            <div class="mt-8">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                    Transações do Mês Atual
-                </h3>
-
-                <livewire:transaction-list />
-            </div>
+            <!-- New Dashboard Widgets -->
+            <livewire:dashboard-widgets />
         </div>
     </div>
 </x-app-layout>

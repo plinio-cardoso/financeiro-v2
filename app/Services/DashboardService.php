@@ -10,7 +10,8 @@ class DashboardService
 {
     public function __construct(
         private TransactionService $transactionService
-    ) {}
+    ) {
+    }
 
     /**
      * Get current month statistics
@@ -74,6 +75,66 @@ class DashboardService
             ->whereBetween('due_date', [$startDate, $endDate])
             ->orderBy('due_date')
             ->with('tags')
+            ->get();
+    }
+
+    /**
+     * Get recent transaction activity (by updated_at)
+     */
+    public function getRecentActivity(int $userId, int $limit = 5): Collection
+    {
+        return Transaction::where('user_id', $userId)
+            ->with('tags')
+            ->orderByDesc('updated_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Get upcoming and overdue pending expenses
+     */
+    public function getUpcomingExpenses(int $userId): Collection
+    {
+        return Transaction::where('user_id', $userId)
+            ->where('type', TransactionTypeEnum::Debit)
+            ->where('status', 'pending')
+            ->where('due_date', '<=', now()->addDays(7))
+            ->orderBy('due_date')
+            ->with('tags')
+            ->get();
+    }
+
+    /**
+     * Get expenses grouped by tag for the current month
+     */
+    public function getExpensesByTag(int $userId): Collection
+    {
+        $now = now();
+
+        return Transaction::where('user_id', $userId)
+            ->where('type', TransactionTypeEnum::Debit)
+            ->whereYear('due_date', $now->year)
+            ->whereMonth('due_date', $now->month)
+            ->join('transaction_tag', 'transactions.id', '=', 'transaction_tag.transaction_id')
+            ->join('tags', 'transaction_tag.tag_id', '=', 'tags.id')
+            ->selectRaw('tags.name as tag_name, tags.color as tag_color, SUM(transactions.amount) as total')
+            ->groupBy('tags.name', 'tags.color')
+            ->orderByDesc('total')
+            ->get();
+    }
+
+    /**
+     * Get monthly expenses for the last 6 months for comparison
+     */
+    public function getMonthlyComparison(int $userId): Collection
+    {
+        return Transaction::where('user_id', $userId)
+            ->where('type', TransactionTypeEnum::Debit)
+            ->where('due_date', '>=', now()->subMonths(6)->startOfMonth())
+            ->selectRaw('YEAR(due_date) as year, MONTH(due_date) as month, SUM(amount) as total')
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
             ->get();
     }
 }

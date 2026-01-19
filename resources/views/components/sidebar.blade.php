@@ -9,6 +9,8 @@
         } else {
             document.documentElement.classList.remove('dark');
         }
+        // Dispatch event to notify charts to update
+        window.dispatchEvent(new CustomEvent('theme-changed', { detail: { darkMode: this.darkMode } }));
     }
 }"
     class="flex flex-col w-64 h-screen px-4 py-8 overflow-y-auto bg-white border-r rtl:border-r-0 rtl:border-l dark:bg-gray-800 dark:border-gray-700/50">
