@@ -90,9 +90,10 @@ deploy-install:
 
 deploy-build:
 	@echo "🔨 Building frontend assets..."
-	rm -rf public/build
+	docker compose -f docker-compose.staging.yml exec -T app rm -rf public/build
 	npm ci --prefer-offline --no-audit
 	npm run build
+	docker compose -f docker-compose.staging.yml exec -T app chown -R www-data:www-data public/build
 
 deploy-migrate:
 	@echo "🗄️  Running migrations..."
