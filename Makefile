@@ -90,6 +90,7 @@ deploy-install:
 
 deploy-build:
 	@echo "🔨 Building frontend assets..."
+	rm -rf public/build
 	npm ci --prefer-offline --no-audit
 	npm run build
 

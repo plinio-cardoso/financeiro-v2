@@ -64,7 +64,7 @@ jobs:
             echo "🏥 Verifying deployment health..."
 
             # Check container status
-            if ! docker compose -f docker-compose.prod.yml ps | grep -q "Up"; then
+            if ! docker compose -f docker-compose.staging.yml ps | grep -q "Up"; then
               echo "❌ Containers are not running!"
               exit 1
             fi
@@ -73,7 +73,7 @@ jobs:
             sleep 5
 
             # Check health endpoint (if accessible locally)
-            if docker compose -f docker-compose.prod.yml exec -T app php artisan inspire > /dev/null 2>&1; then
+            if docker compose -f docker-compose.staging.yml exec -T app php artisan inspire > /dev/null 2>&1; then
               echo "✅ Application is healthy"
             else
               echo "⚠️  Health check returned non-200 (but continuing)"
