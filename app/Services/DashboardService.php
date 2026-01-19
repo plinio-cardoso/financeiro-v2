@@ -39,7 +39,7 @@ class DashboardService
         $overdueCount = Transaction::where('user_id', $userId)
             ->where('type', TransactionTypeEnum::Debit)
             ->where('status', 'pending')
-            ->where('due_date', '<', now())
+            ->whereDate('due_date', '<', today())
             ->count();
 
         // Count total transactions for the month (only debits)
@@ -97,7 +97,7 @@ class DashboardService
         return Transaction::where('user_id', $userId)
             ->where('type', TransactionTypeEnum::Debit)
             ->where('status', 'pending')
-            ->where('due_date', '<=', now()->addDays(7))
+            ->whereDate('due_date', '<=', today()->addDays(7))
             ->orderBy('due_date')
             ->with('tags')
             ->get();

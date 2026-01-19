@@ -81,14 +81,14 @@ class DashboardServiceTest extends TestCase
         Transaction::factory()->for($user)->create([
             'type' => TransactionTypeEnum::Debit,
             'status' => TransactionStatusEnum::Pending,
-            'due_date' => now()->subDays(5),
+            'due_date' => today()->subDays(5),
         ]);
 
-        // Create current transaction
+        // Create future transaction (not overdue)
         Transaction::factory()->for($user)->create([
             'type' => TransactionTypeEnum::Debit,
             'status' => TransactionStatusEnum::Pending,
-            'due_date' => now(),
+            'due_date' => today()->addDay(),
         ]);
 
         $stats = $this->dashboardService->getCurrentMonthStats($user->id);
