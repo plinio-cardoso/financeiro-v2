@@ -25,9 +25,9 @@
         // Ensure selected are all integers if options ids are integers, or match types
         // Livewire might send selected as strings
     }
-}" class="relative">
+}" class="relative" @click.away="show = false">
     <div class="relative">
-        <button type="button" @click="show = !show" @click.away="show = false" {{ $attributes->merge(['class' => 'relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-100 dark:border-gray-700/50 rounded-xl shadow-none cursor-default focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 sm:text-sm text-gray-900 dark:bg-gray-900 dark:text-gray-300 transition-all']) }}>
+        <button type="button" @click="show = !show" {{ $attributes->merge(['class' => 'relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-100 dark:border-gray-700/50 rounded-xl shadow-none cursor-default focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 sm:text-sm text-gray-900 dark:bg-gray-900 dark:text-gray-300 transition-all']) }}>
             <span class="block truncate font-bold">
                 <span x-text="selected.length === 0 ? '{{ $placeholder }}' : selected.length + ' selecionados'"></span>
             </span>
