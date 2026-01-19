@@ -51,8 +51,8 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress --ignore-platform-req=ext-http
 
-      - name: Copy .env.testing to .env
-        run: cp .env.testing .env
+      - name: Copy .env.testing.example to .env
+        run: cp .env.testing.example .env
 
       - name: Generate application key
         run: php artisan key:generate
