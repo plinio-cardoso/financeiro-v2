@@ -157,7 +157,7 @@ class TransactionList extends Component
             $transaction = app(TransactionService::class)
                 ->findTransactionById($transactionId, auth()->id());
 
-            if (!$transaction) {
+            if (! $transaction) {
                 $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
 
                 return;
@@ -174,7 +174,7 @@ class TransactionList extends Component
             $this->resetPage();
             $this->dispatch('notify', message: 'Transação marcada como paga com sucesso!', type: 'success');
         } catch (\Exception $e) {
-            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: ' . $e->getMessage(), type: 'error');
+            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: '.$e->getMessage(), type: 'error');
         }
     }
 
@@ -183,8 +183,9 @@ class TransactionList extends Component
         try {
             $transaction = app(TransactionService::class)->findTransactionById($id, auth()->id());
 
-            if (!$transaction) {
+            if (! $transaction) {
                 $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
+
                 return;
             }
 
@@ -232,6 +233,7 @@ class TransactionList extends Component
 
             if ($validator->fails()) {
                 $this->dispatch('notify', message: $validator->errors()->first(), type: 'error');
+
                 return;
             }
 
@@ -240,13 +242,13 @@ class TransactionList extends Component
                 $field => $validationValue,
             ]);
 
-            $this->dispatch('notify', message: ucfirst($fieldNames[$field]) . ' atualizado com sucesso!', type: 'success');
+            $this->dispatch('notify', message: ucfirst($fieldNames[$field]).' atualizado com sucesso!', type: 'success');
 
             // Refresh the component to show updated data
-            // Since we are using Computed properties, we don't strictly need to redirect, 
+            // Since we are using Computed properties, we don't strictly need to redirect,
             // but we might need to reset items or just let Livewire do its thing.
         } catch (\Exception $e) {
-            $this->dispatch('notify', message: 'Erro ao atualizar: ' . $e->getMessage(), type: 'error');
+            $this->dispatch('notify', message: 'Erro ao atualizar: '.$e->getMessage(), type: 'error');
         }
     }
 
@@ -255,8 +257,9 @@ class TransactionList extends Component
         try {
             $transaction = app(TransactionService::class)->findTransactionById($id, auth()->id());
 
-            if (!$transaction) {
+            if (! $transaction) {
                 $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
+
                 return;
             }
 
@@ -266,7 +269,7 @@ class TransactionList extends Component
 
             $this->dispatch('notify', message: 'Tags atualizadas com sucesso!', type: 'success');
         } catch (\Exception $e) {
-            $this->dispatch('notify', message: 'Erro ao analisar tags: ' . $e->getMessage(), type: 'error');
+            $this->dispatch('notify', message: 'Erro ao analisar tags: '.$e->getMessage(), type: 'error');
         }
     }
 

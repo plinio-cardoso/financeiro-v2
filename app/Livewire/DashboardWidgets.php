@@ -9,8 +9,11 @@ use Livewire\Component;
 class DashboardWidgets extends Component
 {
     public $recentActivity = [];
+
     public $upcomingExpenses = [];
+
     public $expensesByTag = [];
+
     public $monthlyComparison = [];
 
     public function mount(DashboardService $dashboardService): void
@@ -37,7 +40,7 @@ class DashboardWidgets extends Component
                 $this->dispatch('transactionUpdated');
             }
         } catch (\Exception $e) {
-            $this->dispatch('notify', message: 'Erro: ' . $e->getMessage(), type: 'error');
+            $this->dispatch('notify', message: 'Erro: '.$e->getMessage(), type: 'error');
         }
     }
 

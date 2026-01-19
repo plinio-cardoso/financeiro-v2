@@ -10,8 +10,7 @@ class DashboardService
 {
     public function __construct(
         private TransactionService $transactionService
-    ) {
-    }
+    ) {}
 
     /**
      * Get current month statistics
