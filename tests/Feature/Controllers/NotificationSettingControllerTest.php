@@ -39,14 +39,21 @@ class NotificationSettingControllerTest extends TestCase
     {
         $user = User::factory()->create();
 
+        // Ensure no settings exist
+        $this->assertDatabaseCount('notification_settings', 0);
+
         $response = $this->actingAs($user)->get(route('settings.notifications.edit'));
 
         $response->assertStatus(200);
 
-        // Check that default settings were created
+        // Check that default settings were created with correct default values
         $this->assertDatabaseHas('notification_settings', [
-            'id' => 1,
+            'notify_due_today' => true,
+            'notify_overdue' => true,
         ]);
+
+        $settings = NotificationSetting::first();
+        $this->assertEquals([], $settings->emails);
     }
 
     public function test_update_requires_authentication(): void
