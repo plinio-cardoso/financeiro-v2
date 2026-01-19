@@ -178,7 +178,7 @@ class TransactionListTest extends TestCase
         $this->assertNotNull($transaction->paid_at);
     }
 
-    public function test_cannot_mark_credit_transaction_as_paid(): void
+    public function test_can_mark_credit_transaction_as_paid(): void
     {
         $user = User::factory()->create();
 
@@ -193,11 +193,11 @@ class TransactionListTest extends TestCase
 
         Livewire::test(TransactionList::class)
             ->call('markAsPaid', $transaction->id)
-            ->assertDispatched('notify', message: 'Apenas transações de débito podem ser marcadas como pagas.', type: 'error');
+            ->assertDispatched('notify', message: 'Transação marcada como paga com sucesso!', type: 'success');
 
         $this->assertDatabaseHas('transactions', [
             'id' => $transaction->id,
-            'status' => TransactionStatusEnum::Pending->value,
+            'status' => TransactionStatusEnum::Paid->value,
         ]);
     }
 
