@@ -61,7 +61,19 @@
         {{-- List Header with Search & Actions --}}
         <div
             class="px-6 py-3 border-b border-gray-50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/10 flex items-center justify-between">
-            <div class="relative w-64">
+            <div class="relative w-64" x-data="{
+                searchValue: @entangle('search').live,
+                localSearch: '',
+                timeout: null,
+                handleInput() {
+                    clearTimeout(this.timeout);
+                    this.timeout = setTimeout(() => {
+                        if (this.localSearch.length >= 3 || this.localSearch === '') {
+                            this.searchValue = this.localSearch;
+                        }
+                    }, 500);
+                }
+            }" x-init="localSearch = searchValue">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -69,7 +81,7 @@
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
-                <input type="text" wire:model.live.debounce.500ms="search" placeholder="Buscar (mín. 3 letras)..."
+                <input type="text" x-model="localSearch" @input="handleInput()" placeholder="Buscar (mín. 3 letras)..."
                     class="block w-full pl-9 pr-4 py-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-lg text-[11px] font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 transition-all shadow-sm">
             </div>
 

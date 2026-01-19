@@ -62,13 +62,10 @@ class TransactionList extends Component
 
     private function getFilteredQuery()
     {
-        // Only apply search filter if empty or has 3+ characters
-        $search = (strlen($this->search) >= 3 || $this->search === '') ? $this->search : '';
-
         return app(TransactionService::class)->getFilteredTransactions(
             auth()->id(),
             [
-                'search' => $search,
+                'search' => $this->search,
                 'start_date' => $this->startDate,
                 'end_date' => $this->endDate,
                 'tags' => $this->selectedTags,
