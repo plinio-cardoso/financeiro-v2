@@ -3,7 +3,7 @@
         @if(!$editing)
             {{-- Amount Block --}}
             <div
-                class="p-6 text-center rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
+                class="p-6 text-center rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
                 <label class="block text-xs font-bold tracking-widest text-gray-400 uppercase dark:text-gray-300">
                     Valor da Transação
                 </label>
