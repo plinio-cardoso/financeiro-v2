@@ -27,7 +27,7 @@
         </button>
     </div>
 
-    <div x-show="show" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
+    <div x-show="show" x-cloak x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
         class="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 max-h-60 overflow-hidden ring-1 ring-black ring-opacity-5 focus:outline-none">
 
@@ -39,7 +39,7 @@
                     <span class="block truncate font-normal" :class="{ 'font-semibold': selected == option.value }"
                         x-text="option.label"></span>
 
-                    <span x-show="selected == option.value"
+                    <span x-show="selected == option.value" x-cloak
                         class="absolute inset-y-0 right-0 flex items-center pr-4 text-[#4ECDC4]">
                         <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"

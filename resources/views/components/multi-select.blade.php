@@ -39,7 +39,7 @@
         </button>
     </div>
 
-    <div x-show="show" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
+    <div x-show="show" x-cloak x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
         class="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 max-h-60 overflow-hidden ring-1 ring-black ring-opacity-5 focus:outline-none">
 
@@ -56,11 +56,11 @@
                     <div class="flex items-center">
                         <span class="block truncate font-normal" :class="{ 'font-semibold': isSelected(option.id) }"
                             x-text="option.name"></span>
-                        <span x-show="option.color" class="w-2 h-2 ml-2 rounded-full"
+                        <span x-show="option.color" x-cloak class="w-2 h-2 ml-2 rounded-full"
                             :style="'background-color: ' + option.color"></span>
                     </div>
 
-                    <span x-show="isSelected(option.id)"
+                    <span x-show="isSelected(option.id)" x-cloak
                         class="absolute inset-y-0 right-0 flex items-center pr-4 text-[#4ECDC4]">
                         <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
@@ -70,7 +70,7 @@
                     </span>
                 </li>
             </template>
-            <div x-show="filteredOptions.length === 0" class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+            <div x-show="filteredOptions.length === 0" x-cloak class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
                 Nenhum resultado encontrado.
             </div>
         </ul>

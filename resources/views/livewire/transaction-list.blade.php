@@ -1,7 +1,10 @@
-<div x-data="{ 
-    isOpen: @entangle('showCreateModal'),
+<div x-data="{
+    isOpen: false,
     editingId: @entangle('editingTransactionId')
-}" @transaction-saved.window="isOpen = false">
+}"
+    @transaction-saved.window="isOpen = false"
+    @close-modal.window="isOpen = false"
+    @keydown.escape.window="isOpen = false">
     {{-- Compact Filters Row --}}
     <div class="flex flex-wrap items-center gap-4 mb-8">
         {{-- Data Range Group --}}
@@ -73,17 +76,17 @@
         </div>
 
         {{-- Totals Summary Bar --}}
-        <div class="flex items-center gap-6 px-6 py-3 mb-6 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
+        <div class="flex items-center gap-6 px-6 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
             <div class="flex items-center gap-2">
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
                     Total de Itens
                 </span>
-                <span class="text-sm font-black text-[#4ECDC4] bg-[#4ECDC420] px-2 py-0.5 rounded-lg">
+                <span class="inline-flex items-center text-sm font-black text-[#4ECDC4] bg-[#4ECDC420] px-2 py-1 rounded-lg">
                     {{ $this->totalCount }}
                 </span>
             </div>
 
-            <div class="w-px h-4 bg-gray-100 dark:bg-gray-700"></div>
+            <div class="w-px self-stretch bg-gray-100 dark:bg-gray-700"></div>
 
             <div class="flex items-center gap-2">
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
@@ -91,41 +94,84 @@
                 </span>
                 @if($this->totalAmount > 0)
                     <span
-                        class="text-sm font-black px-2 py-0.5 rounded-lg !text-emerald-600 dark:!text-emerald-400 !bg-emerald-50 dark:!bg-emerald-500/10">
+                        class="inline-flex items-center text-sm font-black px-2 py-1 rounded-lg !text-emerald-600 dark:!text-emerald-400 !bg-emerald-50 dark:!bg-emerald-500/10">
                         R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
                     </span>
                 @elseif($this->totalAmount < 0)
                     <span
-                        class="text-sm font-black px-2 py-0.5 rounded-lg !text-rose-600 dark:!text-rose-400 !bg-rose-50 dark:!bg-rose-500/10">
+                        class="inline-flex items-center text-sm font-black px-2 py-1 rounded-lg !text-rose-600 dark:!text-rose-400 !bg-rose-50 dark:!bg-rose-500/10">
                         R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
                     </span>
                 @else
                     <span
-                        class="text-sm font-black px-2 py-0.5 rounded-lg !text-gray-600 dark:!text-gray-400 !bg-gray-50 dark:!bg-gray-700/50">
+                        class="inline-flex items-center text-sm font-black px-2 py-1 rounded-lg !text-gray-600 dark:!text-gray-400 !bg-gray-50 dark:!bg-gray-700/50">
                         R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
                     </span>
                 @endif
             </div>
         </div>
 
-        <x-slide-over wire:model.live="showCreateModal" maxWidth="md">
-            <x-slot name="title">
-                {{ $editingTransactionId ? __('Editar Transação') : __('Nova Transação') }}
-            </x-slot>
+        {{-- Slide-over Modal (Pure Alpine for speed) --}}
+        <div x-show="isOpen"
+            class="fixed inset-0 z-50 overflow-hidden"
+            style="display: none;"
+            x-transition:enter="transition ease-in-out duration-500"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in-out duration-500"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0">
 
-            <div class="relative min-h-[200px]">
-                <div wire:loading wire:target="createTransaction, editTransaction" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-10 rounded-xl">
-                    <svg class="w-8 h-8 animate-spin text-[#4ECDC4]" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+            <div class="absolute inset-0 overflow-hidden">
+                {{-- Backdrop --}}
+                <div class="absolute inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity" @click="isOpen = false"></div>
+
+                <div class="fixed inset-y-0 right-0 flex max-w-full pl-10 pointer-events-none">
+                    <div x-show="isOpen"
+                        class="w-screen max-w-md pointer-events-auto shadow-2xl"
+                        x-transition:enter="transform transition ease-in-out duration-500"
+                        x-transition:enter-start="translate-x-full"
+                        x-transition:enter-end="translate-x-0"
+                        x-transition:leave="transform transition ease-in-out duration-500"
+                        x-transition:leave-start="translate-x-0"
+                        x-transition:leave-end="translate-x-full">
+
+                        <div class="flex flex-col h-full bg-white dark:bg-gray-900">
+                            {{-- Header --}}
+                            <div class="px-6 py-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between rounded-none">
+                                <h2 class="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
+                                    <span x-text="editingId ? 'Editar Transação' : 'Nova Transação'"></span>
+                                </h2>
+                                <button type="button" @click="isOpen = false" class="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {{-- Content Area --}}
+                            <div class="flex-1 flex items-center justify-center relative overflow-hidden">
+                                {{-- Centered Loader --}}
+                                <div wire:loading wire:target="createTransaction, editTransaction" class="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-900 z-50">
+                                    <div class="flex flex-col items-center gap-4  pt-5">
+                                        <div class="w-12 h-12 rounded-full border-4 border-[#4ECDC4]/20 border-t-[#4ECDC4] animate-spin"></div>
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-[#4ECDC4] animate-pulse">Buscando dados...</p>
+                                    </div>
+                                </div>
+
+                                {{-- Component Content --}}
+                                <div wire:loading.remove wire:target="createTransaction, editTransaction" class="w-full h-full px-6 py-8 overflow-y-auto custom-scrollbar">
+                                    <livewire:transaction-form :transaction-id="$editingTransactionId" :key="'transaction-form-' . ($editingTransactionId ?? 'new')" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <livewire:transaction-form :transaction-id="$editingTransactionId" :key="'transaction-form-' . ($editingTransactionId ?? 'new')" />
             </div>
-        </x-slide-over>
+        </div>
 
         {{-- Tabela de Transações --}}
-        <div class="overflow-hidden bg-white shadow sm:rounded-lg dark:bg-gray-800">
+        <div class="overflow-hidden bg-white shadow dark:bg-gray-800 rounded-none">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
@@ -188,8 +234,8 @@
                         @forelse ($this->transactions as $transaction)
                             <tr wire:key="transaction-{{ $transaction->id }}">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div x-data="{ 
-                                            editing: false, 
+                                    <div x-data="{
+                                            editing: false,
                                             value: '{{ addslashes($transaction->title) }}',
                                             original: '{{ addslashes($transaction->title) }}',
                                             save() {
@@ -209,13 +255,13 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                         </div>
-                                        <input x-show="editing" x-ref="input" x-model="value" @focusout="save()"
+                                        <input x-show="editing" x-cloak x-ref="input" x-model="value" @focusout="save()"
                                             @keydown.enter="save()" @keydown.escape="editing = false; value = original"
                                             x-effect="if(editing) { $nextTick(() => $refs.input.focus()); }" type="text"
                                             class="w-full px-2 py-1 text-sm font-bold bg-white dark:bg-gray-700 border-b-2 border-[#4ECDC4] border-t-0 border-x-0 focus:ring-0 focus:border-[#4ECDC4] text-gray-900 dark:text-gray-100 p-0">
                                     </div>
-                                    <div x-data="{ 
-                                            editing: false, 
+                                    <div x-data="{
+                                            editing: false,
                                             value: '{{ addslashes($transaction->description ?? '') }}',
                                             original: '{{ addslashes($transaction->description ?? '') }}',
                                             save() {
@@ -239,15 +285,15 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                         </div>
-                                        <input x-show="editing" x-ref="input" x-model="value" @focusout="save()"
+                                        <input x-show="editing" x-cloak x-ref="input" x-model="value" @focusout="save()"
                                             @keydown.enter="save()" @keydown.escape="editing = false; value = original"
                                             x-effect="if(editing) { $nextTick(() => $refs.input.focus()); }" type="text"
                                             class="w-full px-2 py-0 text-sm bg-white dark:bg-gray-700 border-b border-[#4ECDC4] border-t-0 border-x-0 focus:ring-0 focus:border-[#4ECDC4] text-gray-500 dark:text-gray-400 p-0">
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div x-data="{ 
-                                            editing: false, 
+                                    <div x-data="{
+                                            editing: false,
                                             value: '{{ number_format($transaction->amount, 2, '.', '') }}',
                                             original: '{{ number_format($transaction->amount, 2, '.', '') }}',
                                             save() {
@@ -267,7 +313,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                         </div>
-                                        <div x-show="editing" class="flex items-center">
+                                        <div x-show="editing" x-cloak class="flex items-center">
                                             <span class="text-sm mr-1 font-bold text-gray-900 dark:text-gray-100">R$</span>
                                             <input x-ref="input" x-model="value" @focusout="save()"
                                                 @keydown.enter="save()" @keydown.escape="editing = false; value = original"
@@ -277,8 +323,8 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div x-data="{ 
-                                            show: false, 
+                                    <div x-data="{
+                                            show: false,
                                             value: '{{ $transaction->type->value }}',
                                             original: '{{ $transaction->type->value }}',
                                             options: [
@@ -303,10 +349,10 @@
                                                 {{ $transaction->type->value === 'debit' ? 'Débito' : 'Crédito' }}
                                             </span>
                                         </div>
-                                        
-                                        <div x-show="show" @click.away="show = false" x-cloak 
+
+                                        <div x-show="show" @click.away="show = false" x-cloak
                                             class="absolute z-50 bottom-full mb-2 left-0 w-32 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 p-1 overflow-hidden">
-                                            <div @click="select('debit')" 
+                                            <div @click="select('debit')"
                                                 class="flex items-center gap-2 p-2 hover:bg-[#4ECDC4]/10 dark:hover:bg-[#4ECDC4]/20 rounded-lg cursor-pointer transition-colors">
                                                 <div class="w-3 h-3 rounded-full bg-red-600"></div>
                                                 <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Débito</span>
@@ -314,7 +360,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </div>
-                                            <div @click="select('credit')" 
+                                            <div @click="select('credit')"
                                                 class="flex items-center gap-2 p-2 hover:bg-[#4ECDC4]/10 dark:hover:bg-[#4ECDC4]/20 rounded-lg cursor-pointer transition-colors">
                                                 <div class="w-3 h-3 rounded-full bg-green-500"></div>
                                                 <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Crédito</span>
@@ -326,8 +372,8 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div x-data="{ 
-                                            show: false, 
+                                    <div x-data="{
+                                            show: false,
                                             value: '{{ $transaction->status->value }}',
                                             original: '{{ $transaction->status->value }}',
                                             select(val) {
@@ -349,9 +395,9 @@
                                             </span>
                                         </div>
 
-                                        <div x-show="show" @click.away="show = false" x-cloak 
+                                        <div x-show="show" @click.away="show = false" x-cloak
                                             class="absolute z-50 bottom-full mb-2 left-0 w-32 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 p-1 overflow-hidden">
-                                            <div @click="select('pending')" 
+                                            <div @click="select('pending')"
                                                 class="flex items-center gap-2 p-2 hover:bg-[#4ECDC4]/10 dark:hover:bg-[#4ECDC4]/20 rounded-lg cursor-pointer transition-colors">
                                                 <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
                                                 <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Pendente</span>
@@ -359,7 +405,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </div>
-                                            <div @click="select('paid')" 
+                                            <div @click="select('paid')"
                                                 class="flex items-center gap-2 p-2 hover:bg-[#4ECDC4]/10 dark:hover:bg-[#4ECDC4]/20 rounded-lg cursor-pointer transition-colors">
                                                 <div class="w-3 h-3 rounded-full bg-green-500"></div>
                                                 <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Pago</span>
@@ -371,8 +417,8 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div x-data="{ 
-                                            editing: false, 
+                                    <div x-data="{
+                                            editing: false,
                                             value: '{{ $transaction->due_date->format('Y-m-d') }}',
                                             original: '{{ $transaction->due_date->format('Y-m-d') }}',
                                             save() {
@@ -392,7 +438,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                         </div>
-                                        <input x-show="editing" x-ref="input" x-model="value" @focusout="save()"
+                                        <input x-show="editing" x-cloak x-ref="input" x-model="value" @focusout="save()"
                                             @change="save()" @keydown.enter="save()"
                                             @keydown.escape="editing = false; value = original"
                                             x-effect="if(editing) { $nextTick(() => $refs.input.focus()); }" type="date"
@@ -400,7 +446,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div x-data="{ 
+                                    <div x-data="{
                                         show: false,
                                         selected: @js($transaction->tags->pluck('id')),
                                         allTags: @js($this->tags),
@@ -416,9 +462,9 @@
                                             }
                                         }
                                     }" class="relative">
-                                        <div @click="show = !show" class="flex flex-wrap gap-1 cursor-pointer group p-1 rounded transition-all min-h-[32px]">
+                                        <div @click="show = !show" class="flex flex-wrap gap-1 cursor-pointer group p-1 rounded transition-all min-h-[32px] items-center">
                                             @forelse ($transaction->tags as $tag)
-                                                <span class="inline-flex px-2 py-0.5 text-[10px] font-black rounded-md uppercase tracking-wider"
+                                                <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-black rounded-md uppercase tracking-wider"
                                                     style="background-color: {{ $tag->color }}20; color: {{ $tag->color }}; border: 1px solid {{ $tag->color }}30">
                                                     {{ $tag->name }}
                                                 </span>
@@ -426,11 +472,11 @@
                                                 <span class="text-[10px] text-gray-600 dark:text-gray-400 group-hover:text-[#4ECDC4] transition-colors font-semibold">Gerenciar tags...</span>
                                             @endforelse
                                         </div>
-                                        
-                                        <div x-show="show" @click.away="save()" x-cloak 
+
+                                        <div x-show="show" @click.away="save()" x-cloak
                                             class="absolute z-50 bottom-full mb-2 left-0 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 p-2 max-h-60 overflow-y-auto">
                                             <template x-for="tag in allTags" :key="tag.id">
-                                                <div @click="toggle(tag.id)" 
+                                                <div @click="toggle(tag.id)"
                                                     class="flex items-center gap-2 p-2 hover:bg-[#4ECDC4]/10 dark:hover:bg-[#4ECDC4]/20 rounded-lg cursor-pointer transition-colors">
                                                     <div class="w-4 h-4 rounded border flex items-center justify-center transition-colors"
                                                         :class="selected.includes(tag.id) ? 'bg-[#4ECDC4] border-[#4ECDC4]' : 'border-gray-300 dark:border-gray-600'">
@@ -452,7 +498,7 @@
                                                 wire:target="markAsPaid({{ $transaction->id }})"
                                                 class="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all text-[10px] font-black uppercase tracking-widest group border border-emerald-500/10 dark:border-none shadow-sm"
                                                 title="Pagar">
-                                                
+
                                                 <div wire:loading.remove wire:target="markAsPaid({{ $transaction->id }})" class="flex items-center gap-1.5">
                                                     <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"
