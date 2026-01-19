@@ -199,13 +199,76 @@ SESSION_DRIVER=redis
 QUEUE_CONNECTION=redis
 ```
 
-### Deploy
+### Deploy com Docker (Staging)
 
-1. Configure as variáveis de ambiente
-2. Execute as migrations: `php artisan migrate --force`
-3. Compile os assets: `npm run build`
-4. Otimize a aplicação: `php artisan optimize`
-5. Configure o cron para os comandos de notificação
+Este projeto usa Docker para deployment em staging. O processo é automatizado via GitHub Actions.
+
+#### Estrutura de Deployment
+
+- **Docker Compose**: Gerencia PHP-FPM e MySQL (usando Dockerfile de dev)
+- **Nginx Proxy**: Configurado separadamente (ver repo `infra`)
+- **GitHub Actions**: CI/CD automatizado
+- **Makefile**: Comandos de deploy simplificados
+
+#### Deploy Automático
+
+Push para `main` branch → GitHub Actions executa:
+1. ✅ Testes (CI)
+2. ✅ Lint (Pint)
+3. 🚀 Deploy via SSH para servidor
+
+#### Deploy Manual
+
+```bash
+# No servidor (SSH)
+cd /opt/financeiro
+make deploy
+```
+
+O comando `make deploy` executa:
+- `git pull origin main`
+- `composer install --no-dev`
+- `npm run build`
+- `php artisan migrate --force`
+- Otimizações (cache de config, routes, views)
+- Restart dos containers
+- Health check
+
+#### Rollback
+
+```bash
+make deploy-rollback
+```
+
+#### Comandos Úteis
+
+```bash
+# Ver status dos containers
+make staging-status
+
+# Ver logs em tempo real
+make staging-logs
+
+# Acessar bash do container
+make staging-bash
+
+# Subir containers manualmente
+make staging-up
+
+# Parar containers
+make staging-down
+```
+
+#### Secrets Necessários (GitHub)
+
+Para o GitHub Actions funcionar, configure estes secrets no repositório:
+
+- `SSH_PRIVATE_KEY`: Chave SSH para acesso ao servidor
+- `SERVER_HOST`: IP ou domínio do servidor
+- `SERVER_USER`: Usuário SSH
+- `PROJECT_PATH`: Caminho do projeto no servidor (ex: `/opt/financeiro`)
+
+Ver documentação completa no repositório [infra](https://github.com/seu-usuario/infra).
 
 ## Contribuindo
 

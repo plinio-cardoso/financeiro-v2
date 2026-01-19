@@ -1,0 +1,76 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+.docker
+docker-compose.yaml
+.dockerignore
+
+# CI/CD
+.github
+
+# Documentation
+README.md
+docs/
+specs/
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Dependencies (will be installed in container)
+vendor/
+node_modules/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Testing
+tests/
+phpunit.xml
+.phpunit.cache
+coverage-report/
+
+# Storage (generated at runtime)
+storage/app/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/testing/*
+storage/framework/views/*
+storage/logs/*
+!storage/app/.gitignore
+!storage/framework/.gitignore
+!storage/framework/cache/.gitignore
+!storage/framework/sessions/.gitignore
+!storage/framework/testing/.gitignore
+!storage/framework/views/.gitignore
+!storage/logs/.gitignore
+
+# Public assets (will be built in container)
+public/hot
+public/storage
+public/build
+
+# Composer
+composer.phar
+composer.lock
+
+# NPM
+package-lock.json
+npm-debug.log
+yarn-error.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.log
+Makefile

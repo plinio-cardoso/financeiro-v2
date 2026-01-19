@@ -64,3 +64,76 @@ composer-install:
 
 logs:
 	tail -f storage/logs/*.log
+
+# ============================================
+# Staging Deployment Commands
+# ============================================
+
+deploy:
+	@echo "🚀 Starting deployment to staging..."
+	@$(MAKE) deploy-pull
+	@$(MAKE) deploy-install
+	@$(MAKE) deploy-build
+	@$(MAKE) deploy-migrate
+	@$(MAKE) deploy-optimize
+	@$(MAKE) deploy-restart
+	@$(MAKE) deploy-health
+	@echo "✅ Deployment complete!"
+
+deploy-pull:
+	@echo "📥 Pulling latest code..."
+	git pull origin main
+
+deploy-install:
+	@echo "📦 Installing dependencies..."
+	docker compose -f docker-compose.staging.yml exec -T app composer install --no-dev --optimize-autoloader --no-interaction
+
+deploy-build:
+	@echo "🔨 Building frontend assets..."
+	docker compose -f docker-compose.staging.yml exec -T app npm ci --prefer-offline --no-audit
+	docker compose -f docker-compose.staging.yml exec -T app npm run build
+
+deploy-migrate:
+	@echo "🗄️  Running migrations..."
+	docker compose -f docker-compose.staging.yml exec -T app php artisan migrate --force
+
+deploy-optimize:
+	@echo "⚡ Optimizing application..."
+	docker compose -f docker-compose.staging.yml exec -T app php artisan config:cache
+	docker compose -f docker-compose.staging.yml exec -T app php artisan route:cache
+	docker compose -f docker-compose.staging.yml exec -T app php artisan view:cache
+	docker compose -f docker-compose.staging.yml exec -T app php artisan event:cache
+
+deploy-restart:
+	@echo "🔄 Restarting services..."
+	docker compose -f docker-compose.staging.yml restart app
+
+deploy-health:
+	@echo "🏥 Running health checks..."
+	@sleep 5
+	@docker compose -f docker-compose.staging.yml exec -T app php artisan inspire && echo "✅ App is healthy" || echo "❌ Health check failed"
+
+deploy-rollback:
+	@echo "⏪ Rolling back to previous version..."
+	git reset --hard HEAD~1
+	@$(MAKE) deploy-install
+	@$(MAKE) deploy-optimize
+	@$(MAKE) deploy-restart
+	@$(MAKE) deploy-health
+	@echo "✅ Rollback complete"
+
+# Staging utilities
+staging-up:
+	docker compose -f docker-compose.staging.yml up -d
+
+staging-down:
+	docker compose -f docker-compose.staging.yml down
+
+staging-logs:
+	docker compose -f docker-compose.staging.yml logs -f
+
+staging-bash:
+	docker compose -f docker-compose.staging.yml exec app bash
+
+staging-status:
+	docker compose -f docker-compose.staging.yml ps

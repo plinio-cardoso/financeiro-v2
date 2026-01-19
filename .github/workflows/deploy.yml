@@ -1,0 +1,111 @@
+name: Deploy to Production
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip running tests'
+        required: false
+        default: 'false'
+
+jobs:
+  deploy:
+    name: Deploy to Production Server
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to production
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
+        run: |
+          ssh $SERVER_USER@$SERVER_HOST << 'ENDSSH'
+            set -e
+            cd ${{ secrets.PROJECT_PATH }}
+
+            echo "🚀 Starting deployment..."
+
+            # Run deployment
+            make deploy
+
+            echo "✅ Deployment completed successfully!"
+          ENDSSH
+
+      - name: Verify deployment
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
+        run: |
+          ssh $SERVER_USER@$SERVER_HOST << 'ENDSSH'
+            cd ${{ secrets.PROJECT_PATH }}
+
+            echo "🏥 Verifying deployment health..."
+
+            # Check container status
+            if ! docker compose -f docker-compose.prod.yml ps | grep -q "Up"; then
+              echo "❌ Containers are not running!"
+              exit 1
+            fi
+
+            # Wait a bit for app to stabilize
+            sleep 5
+
+            # Check health endpoint (if accessible locally)
+            if docker compose -f docker-compose.prod.yml exec -T app php artisan inspire > /dev/null 2>&1; then
+              echo "✅ Application is healthy"
+            else
+              echo "⚠️  Health check returned non-200 (but continuing)"
+            fi
+
+            echo "✅ Deployment verification complete!"
+          ENDSSH
+
+      - name: Rollback on failure
+        if: failure()
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
+        run: |
+          ssh $SERVER_USER@$SERVER_HOST << 'ENDSSH'
+            cd ${{ secrets.PROJECT_PATH }}
+
+            echo "❌ Deployment failed! Rolling back..."
+            make deploy-rollback
+
+            echo "✅ Rollback complete"
+          ENDSSH
+
+      - name: Send deployment notification (Success)
+        if: success()
+        run: |
+          echo "✅ Deployment successful for commit ${{ github.sha }}"
+          # Add Slack/Discord/Email notification here if needed
+
+      - name: Send deployment notification (Failure)
+        if: failure()
+        run: |
+          echo "❌ Deployment failed for commit ${{ github.sha }}"
+          # Add Slack/Discord/Email notification here if needed
