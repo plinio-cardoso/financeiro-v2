@@ -1,4 +1,7 @@
-<div>
+<div x-data="{ 
+    isOpen: @entangle('showCreateModal'),
+    editingId: @entangle('editingTransactionId')
+}" @transaction-saved.window="isOpen = false">
     {{-- Compact Filters Row --}}
     <div class="flex flex-wrap items-center gap-4 mb-8">
         {{-- Data Range Group --}}
@@ -63,7 +66,7 @@
                     class="block w-full pl-9 pr-4 py-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-lg text-[11px] font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 transition-all shadow-sm">
             </div>
 
-            <x-button wire:click="createTransaction"
+            <x-button @click="isOpen = true; if(editingId !== null) $wire.createTransaction()"
                 class="!bg-[#4ECDC4] hover:!bg-[#3dbdb5] !text-gray-900 shadow-sm py-1.5 px-4 rounded-lg active:scale-95 transition-all text-[11px] font-bold uppercase tracking-wider">
                 Nova Transação
             </x-button>
@@ -110,7 +113,15 @@
                 {{ $editingTransactionId ? __('Editar Transação') : __('Nova Transação') }}
             </x-slot>
 
-            <livewire:transaction-form :transaction-id="$editingTransactionId" :key="'transaction-form-' . ($editingTransactionId ?? 'new')" />
+            <div class="relative min-h-[200px]">
+                <div wire:loading wire:target="createTransaction, editTransaction" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-10 rounded-xl">
+                    <svg class="w-8 h-8 animate-spin text-[#4ECDC4]" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+                <livewire:transaction-form :transaction-id="$editingTransactionId" :key="'transaction-form-' . ($editingTransactionId ?? 'new')" />
+            </div>
         </x-slide-over>
 
         {{-- Tabela de Transações --}}
@@ -460,7 +471,7 @@
                                                 </svg>
                                             </button>
                                         @endif
-                                        <button wire:click="editTransaction({{ $transaction->id }})"
+                                        <button @click="isOpen = true; $wire.editTransaction({{ $transaction->id }})"
                                             class="text-[#4ECDC4] hover:text-[#3dbdb5] dark:text-[#4ECDC4] dark:hover:text-[#3dbdb5] transition-colors p-1 rounded-full hover:bg-[#4ECDC410] dark:hover:bg-[#4ECDC420]"
                                             title="Editar">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

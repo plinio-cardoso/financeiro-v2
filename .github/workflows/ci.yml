@@ -109,31 +109,10 @@ jobs:
       - name: Run Laravel Pint
         run: vendor/bin/pint --test
 
-  build:
-    name: Build Production Image
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build production Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: .docker/Dockerfile.production
-          push: false
-          tags: financeiro:test
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
   # TODO: Add this job after infra repository is created
   # trigger-deploy:
   #   name: Trigger Deployment
-  #   needs: [test, lint, build]
+  #   needs: [test, lint]
   #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
   #   runs-on: ubuntu-latest
   #
