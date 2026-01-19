@@ -12,6 +12,7 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
+    <coverage/>
     <source>
         <include>
             <directory>app</directory>

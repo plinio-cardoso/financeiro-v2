@@ -157,7 +157,7 @@ class TransactionList extends Component
             $transaction = app(TransactionService::class)
                 ->findTransactionById($transactionId, auth()->id());
 
-            if (! $transaction) {
+            if (!$transaction) {
                 $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
 
                 return;
@@ -180,7 +180,99 @@ class TransactionList extends Component
             $this->resetPage();
             $this->dispatch('notify', message: 'Transação marcada como paga com sucesso!', type: 'success');
         } catch (\Exception $e) {
-            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: '.$e->getMessage(), type: 'error');
+            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: ' . $e->getMessage(), type: 'error');
+        }
+    }
+
+    public function updateField(int $id, string $field, $value): void
+    {
+        try {
+            $transaction = app(TransactionService::class)->findTransactionById($id, auth()->id());
+
+            if (!$transaction) {
+                $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
+                return;
+            }
+
+            // Map field names to human-readable names for error messages
+            $fieldNames = [
+                'title' => 'título',
+                'description' => 'descrição',
+                'amount' => 'valor',
+                'type' => 'tipo',
+                'due_date' => 'data de vencimento',
+                'status' => 'status',
+            ];
+
+            // Validation logic
+            $rules = [
+                'field' => 'required|in:title,description,amount,type,due_date,status',
+            ];
+
+            $validationValue = $value;
+
+            switch ($field) {
+                case 'title':
+                    $rules['value'] = 'required|string|max:255';
+                    break;
+                case 'description':
+                    $rules['value'] = 'nullable|string';
+                    break;
+                case 'amount':
+                    // Convert potential comma decimal separator
+                    $validationValue = str_replace(',', '.', $value);
+                    $rules['value'] = 'required|numeric|min:0.01';
+                    break;
+                case 'type':
+                    $rules['value'] = 'required|in:debit,credit';
+                    break;
+                case 'due_date':
+                    $rules['value'] = 'required|date';
+                    break;
+                case 'status':
+                    $rules['value'] = 'required|in:pending,paid';
+                    break;
+            }
+
+            $validator = validator(['field' => $field, 'value' => $validationValue], $rules);
+
+            if ($validator->fails()) {
+                $this->dispatch('notify', message: $validator->errors()->first(), type: 'error');
+                return;
+            }
+
+            // Update the model
+            app(TransactionService::class)->updateTransaction($transaction, [
+                $field => $validationValue,
+            ]);
+
+            $this->dispatch('notify', message: ucfirst($fieldNames[$field]) . ' atualizado com sucesso!', type: 'success');
+
+            // Refresh the component to show updated data
+            // Since we are using Computed properties, we don't strictly need to redirect, 
+            // but we might need to reset items or just let Livewire do its thing.
+        } catch (\Exception $e) {
+            $this->dispatch('notify', message: 'Erro ao atualizar: ' . $e->getMessage(), type: 'error');
+        }
+    }
+
+    public function updateTags(int $id, array $tagIds): void
+    {
+        try {
+            $transaction = app(TransactionService::class)->findTransactionById($id, auth()->id());
+
+            if (!$transaction) {
+                $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
+                return;
+            }
+
+            app(TransactionService::class)->updateTransaction($transaction, [
+                'tags' => $tagIds,
+            ]);
+
+            $this->dispatch('notify', message: 'Tags atualizadas com sucesso!', type: 'success');
+        } catch (\Exception $e) {
+            $this->dispatch('notify', message: 'Erro ao analisar tags: ' . $e->getMessage(), type: 'error');
         }
     }
 

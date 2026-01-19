@@ -23,7 +23,7 @@ class TransactionListTest extends TestCase
 
         Livewire::test(TransactionList::class)
             ->assertStatus(200)
-            ->assertSee('Filtros');
+            ->assertSee('Limpar filtros');
     }
 
     public function test_component_displays_transactions(): void

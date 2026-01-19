@@ -111,7 +111,9 @@
 
     // Handle hover states specifically for sidebar
     .hover\:text-\[\#4ECDC4\]:hover,
-    .dark\:hover\:text-\[\#4ECDC4\]:hover {
+    .dark\:hover\:text-\[\#4ECDC4\]:hover,
+    [class*="sidebar"] a:hover,
+    aside a:hover {
         color: #4ECDC4 !important;
     }
 

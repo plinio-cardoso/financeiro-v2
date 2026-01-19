@@ -67,12 +67,20 @@ a {
     color: $color-primary;
     transition: $transition-fast;
 
+    &:visited {
+        color: $color-primary;
+    }
+
     &:hover {
         color: $color-primary-dark;
     }
 
     @include dark {
         color: $color-primary-light;
+
+        &:visited {
+            color: $color-primary-light;
+        }
 
         &:hover {
             color: $color-primary;
