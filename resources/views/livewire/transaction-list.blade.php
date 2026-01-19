@@ -1,9 +1,7 @@
 <div x-data="{
     isOpen: false,
     editingId: @entangle('editingTransactionId')
-}"
-    @transaction-saved.window="isOpen = false"
-    @close-modal.window="isOpen = false"
+}" @transaction-saved.window="isOpen = false" @close-modal.window="isOpen = false"
     @keydown.escape.window="isOpen = false">
     {{-- Compact Filters Row --}}
     <div class="flex flex-wrap items-center gap-4 mb-8">
@@ -41,12 +39,11 @@
                 class="!py-2 !text-xs !font-bold" />
         </div>
 
-        <button wire:click="clearFilters" @disabled(!$this->hasActiveFilters)
-            @class([
-                'text-xs font-bold uppercase tracking-widest ml-2 transition-colors',
-                'text-gray-400 hover:text-[#4ECDC4] cursor-pointer' => $this->hasActiveFilters,
-                'text-gray-300 dark:text-gray-600 cursor-not-allowed opacity-50' => !$this->hasActiveFilters,
-            ])>
+        <button wire:click="clearFilters" @disabled(!$this->hasActiveFilters) @class([
+            'text-xs font-bold uppercase tracking-widest ml-2 transition-colors',
+            'text-gray-400 hover:text-[#4ECDC4] cursor-pointer' => $this->hasActiveFilters,
+            'text-gray-300 dark:text-gray-600 cursor-not-allowed opacity-50' => !$this->hasActiveFilters,
+        ])>
             Limpar filtros
         </button>
 
@@ -97,7 +94,8 @@
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
                     Total de Itens
                 </span>
-                <span class="inline-flex items-center text-sm font-black text-[#4ECDC4] bg-[#4ECDC420] px-2 py-1 rounded-lg">
+                <span
+                    class="inline-flex items-center text-sm font-black text-[#4ECDC4] bg-[#4ECDC420] px-2 py-1 rounded-lg">
                     {{ $this->totalCount }}
                 </span>
             </div>
@@ -128,39 +126,35 @@
         </div>
 
         {{-- Slide-over Modal (Pure Alpine for speed) --}}
-        <div x-show="isOpen"
-            class="fixed inset-0 z-50 overflow-hidden"
-            style="display: none;"
-            x-transition:enter="transition ease-in-out duration-500"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in-out duration-500"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0">
+        <div x-show="isOpen" class="fixed inset-0 z-50 overflow-hidden" style="display: none;"
+            x-transition:enter="transition ease-in-out duration-500" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in-out duration-500"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
 
             <div class="absolute inset-0 overflow-hidden">
                 {{-- Backdrop --}}
-                <div class="absolute inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity" @click="isOpen = false"></div>
+                <div class="absolute inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity"
+                    @click="isOpen = false"></div>
 
                 <div class="fixed inset-y-0 right-0 flex max-w-full pl-10 pointer-events-none">
-                    <div x-show="isOpen"
-                        class="w-screen max-w-md pointer-events-auto shadow-2xl"
+                    <div x-show="isOpen" class="w-screen max-w-md pointer-events-auto shadow-2xl"
                         x-transition:enter="transform transition ease-in-out duration-500"
-                        x-transition:enter-start="translate-x-full"
-                        x-transition:enter-end="translate-x-0"
+                        x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
                         x-transition:leave="transform transition ease-in-out duration-500"
-                        x-transition:leave-start="translate-x-0"
-                        x-transition:leave-end="translate-x-full">
+                        x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
 
                         <div class="flex flex-col h-full bg-white dark:bg-gray-900">
                             {{-- Header --}}
-                            <div class="px-6 py-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between rounded-none">
+                            <div
+                                class="px-6 py-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between rounded-none">
                                 <h2 class="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
                                     <span x-text="editingId ? 'Editar Transação' : 'Nova Transação'"></span>
                                 </h2>
-                                <button type="button" @click="isOpen = false" class="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                                <button type="button" @click="isOpen = false"
+                                    class="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
                                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
                             </div>
@@ -168,16 +162,23 @@
                             {{-- Content Area --}}
                             <div class="flex-1 flex items-center justify-center relative overflow-hidden">
                                 {{-- Centered Loader --}}
-                                <div wire:loading wire:target="createTransaction, editTransaction" class="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-900 z-50">
+                                <div wire:loading wire:target="createTransaction, editTransaction"
+                                    class="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-900 z-50">
                                     <div class="flex flex-col items-center gap-4  pt-5">
-                                        <div class="w-12 h-12 rounded-full border-4 border-[#4ECDC4]/20 border-t-[#4ECDC4] animate-spin"></div>
-                                        <p class="text-[10px] font-black uppercase tracking-widest text-[#4ECDC4] animate-pulse">Buscando dados...</p>
+                                        <div
+                                            class="w-12 h-12 rounded-full border-4 border-[#4ECDC4]/20 border-t-[#4ECDC4] animate-spin">
+                                        </div>
+                                        <p
+                                            class="text-[10px] font-black uppercase tracking-widest text-[#4ECDC4] animate-pulse">
+                                            Buscando dados...</p>
                                     </div>
                                 </div>
 
                                 {{-- Component Content --}}
-                                <div wire:loading.remove wire:target="createTransaction, editTransaction" class="w-full h-full px-6 py-8 overflow-y-auto custom-scrollbar">
-                                    <livewire:transaction-form :transaction-id="$editingTransactionId" :key="'transaction-form-' . ($editingTransactionId ?? 'new')" />
+                                <div wire:loading.remove wire:target="createTransaction, editTransaction"
+                                    class="w-full h-full px-6 py-8 overflow-y-auto custom-scrollbar">
+                                    <livewire:transaction-form :transaction-id="$editingTransactionId"
+                                        :key="'transaction-form-' . ($editingTransactionId ?? 'new')" />
                                 </div>
                             </div>
                         </div>
@@ -251,24 +252,27 @@
                             <tr wire:key="transaction-{{ $transaction->id }}">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div x-data="{
-                                            editing: false,
-                                            value: '{{ addslashes($transaction->title) }}',
-                                            original: '{{ addslashes($transaction->title) }}',
-                                            save() {
-                                                if (this.value === this.original) { this.editing = false; return; }
-                                                $wire.updateField({{ $transaction->id }}, 'title', this.value).then(() => {
-                                                    this.original = this.value;
-                                                    this.editing = false;
-                                                });
-                                            }
-                                        }" class="min-w-[200px]">
+                                                editing: false,
+                                                value: '{{ addslashes($transaction->title) }}',
+                                                original: '{{ addslashes($transaction->title) }}',
+                                                save() {
+                                                    if (this.value === this.original) { this.editing = false; return; }
+                                                    $wire.updateField({{ $transaction->id }}, 'title', this.value).then(() => {
+                                                        this.original = this.value;
+                                                        this.editing = false;
+                                                    });
+                                                }
+                                            }" class="min-w-[200px]">
                                         <div x-show="!editing" @click="editing = true"
                                             class="flex items-center gap-2 group cursor-pointer">
-                                            <span class="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#4ECDC4] transition-colors">
+                                            <span
+                                                class="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#4ECDC4] transition-colors">
                                                 {{ $transaction->title }}
                                             </span>
-                                            <svg class="w-3 h-3 text-[#4ECDC4] opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            <svg class="w-3 h-3 text-[#4ECDC4] opacity-0 group-hover:opacity-100 transition-opacity"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                         </div>
                                         <input x-show="editing" x-cloak x-ref="input" x-model="value" @focusout="save()"
@@ -277,28 +281,32 @@
                                             class="w-full px-2 py-1 text-sm font-bold bg-white dark:bg-gray-700 border-b-2 border-[#4ECDC4] border-t-0 border-x-0 focus:ring-0 focus:border-[#4ECDC4] text-gray-900 dark:text-gray-100 p-0">
                                     </div>
                                     <div x-data="{
-                                            editing: false,
-                                            value: '{{ addslashes($transaction->description ?? '') }}',
-                                            original: '{{ addslashes($transaction->description ?? '') }}',
-                                            save() {
-                                                if (this.value === this.original) { this.editing = false; return; }
-                                                $wire.updateField({{ $transaction->id }}, 'description', this.value).then(() => {
-                                                    this.original = this.value;
-                                                    this.editing = false;
-                                                });
-                                            }
-                                        }" class="mt-1">
+                                                editing: false,
+                                                value: '{{ addslashes($transaction->description ?? '') }}',
+                                                original: '{{ addslashes($transaction->description ?? '') }}',
+                                                save() {
+                                                    if (this.value === this.original) { this.editing = false; return; }
+                                                    $wire.updateField({{ $transaction->id }}, 'description', this.value).then(() => {
+                                                        this.original = this.value;
+                                                        this.editing = false;
+                                                    });
+                                                }
+                                            }" class="mt-1">
                                         <div x-show="!editing" @click="editing = true"
                                             class="flex items-center gap-2 group cursor-pointer min-h-[1.25rem]">
-                                            <span class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-[#4ECDC4] transition-colors">
+                                            <span
+                                                class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-[#4ECDC4] transition-colors">
                                                 @if($transaction->description)
                                                     {{ Str::limit($transaction->description, 50) }}
                                                 @else
-                                                    <span class="text-xs italic opacity-30">{{ __('Adicionar descrição...') }}</span>
+                                                    <span
+                                                        class="text-xs italic opacity-30">{{ __('Adicionar descrição...') }}</span>
                                                 @endif
                                             </span>
-                                            <svg class="w-3 h-3 text-[#4ECDC4] opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            <svg class="w-3 h-3 text-[#4ECDC4] opacity-0 group-hover:opacity-100 transition-opacity"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                         </div>
                                         <input x-show="editing" x-cloak x-ref="input" x-model="value" @focusout="save()"
@@ -309,30 +317,33 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div x-data="{
-                                            editing: false,
-                                            value: '{{ number_format($transaction->amount, 2, '.', '') }}',
-                                            original: '{{ number_format($transaction->amount, 2, '.', '') }}',
-                                            save() {
-                                                if (this.value === this.original) { this.editing = false; return; }
-                                                $wire.updateField({{ $transaction->id }}, 'amount', this.value).then(() => {
-                                                    this.original = this.value;
-                                                    this.editing = false;
-                                                });
-                                            }
-                                        }" class="flex flex-col items-start">
+                                                editing: false,
+                                                value: '{{ number_format($transaction->amount, 2, '.', '') }}',
+                                                original: '{{ number_format($transaction->amount, 2, '.', '') }}',
+                                                save() {
+                                                    if (this.value === this.original) { this.editing = false; return; }
+                                                    $wire.updateField({{ $transaction->id }}, 'amount', this.value).then(() => {
+                                                        this.original = this.value;
+                                                        this.editing = false;
+                                                    });
+                                                }
+                                            }" class="flex flex-col items-start">
                                         <div x-show="!editing" @click="editing = true"
                                             class="flex items-center gap-2 group cursor-pointer">
-                                            <span class="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#4ECDC4] transition-colors">
+                                            <span
+                                                class="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#4ECDC4] transition-colors">
                                                 R$ {{ number_format($transaction->amount, 2, ',', '.') }}
                                             </span>
-                                            <svg class="w-3 h-3 text-[#4ECDC4] opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            <svg class="w-3 h-3 text-[#4ECDC4] opacity-0 group-hover:opacity-100 transition-opacity"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                         </div>
                                         <div x-show="editing" x-cloak class="flex items-center">
                                             <span class="text-sm mr-1 font-bold text-gray-900 dark:text-gray-100">R$</span>
-                                            <input x-ref="input" x-model="value" @focusout="save()"
-                                                @keydown.enter="save()" @keydown.escape="editing = false; value = original"
+                                            <input x-ref="input" x-model="value" @focusout="save()" @keydown.enter="save()"
+                                                @keydown.escape="editing = false; value = original"
                                                 x-effect="if(editing) { $nextTick(() => $refs.input.focus()); }" type="text"
                                                 class="w-24 px-1 py-0 text-sm font-bold bg-white dark:bg-gray-700 border-b border-[#4ECDC4] border-t-0 border-x-0 focus:ring-0 focus:border-[#4ECDC4] text-gray-900 dark:text-gray-100 p-0">
                                         </div>
@@ -340,22 +351,22 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div x-data="{
-                                            show: false,
-                                            value: '{{ $transaction->type->value }}',
-                                            original: '{{ $transaction->type->value }}',
-                                            options: [
-                                                { label: 'Débito', value: 'debit', color: '#EF4444' },
-                                                { label: 'Crédito', value: 'credit', color: '#10B981' }
-                                            ],
-                                            select(val) {
-                                                if (val === this.original) { this.show = false; return; }
-                                                this.value = val;
-                                                $wire.updateField({{ $transaction->id }}, 'type', this.value).then(() => {
-                                                    this.original = this.value;
-                                                    this.show = false;
-                                                });
-                                            }
-                                        }" class="relative">
+                                                show: false,
+                                                value: '{{ $transaction->type->value }}',
+                                                original: '{{ $transaction->type->value }}',
+                                                options: [
+                                                    { label: 'Débito', value: 'debit', color: '#EF4444' },
+                                                    { label: 'Crédito', value: 'credit', color: '#10B981' }
+                                                ],
+                                                select(val) {
+                                                    if (val === this.original) { this.show = false; return; }
+                                                    this.value = val;
+                                                    $wire.updateField({{ $transaction->id }}, 'type', this.value).then(() => {
+                                                        this.original = this.value;
+                                                        this.show = false;
+                                                    });
+                                                }
+                                            }" class="relative">
                                         <div @click="show = !show" class="cursor-pointer group flex items-center gap-1">
                                             <span @class([
                                                 'inline-flex px-2 text-xs font-semibold leading-5 rounded-full transition-all group-hover:ring-2 group-hover:ring-[#4ECDC4]/30',
@@ -371,17 +382,23 @@
                                             <div @click="select('debit')"
                                                 class="flex items-center gap-2 p-2 hover:bg-[#4ECDC4]/10 dark:hover:bg-[#4ECDC4]/20 rounded-lg cursor-pointer transition-colors">
                                                 <div class="w-3 h-3 rounded-full bg-red-600"></div>
-                                                <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Débito</span>
-                                                <svg x-show="value === 'debit'" class="w-3 h-3 text-[#4ECDC4] ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                                <span
+                                                    class="text-xs font-bold text-gray-700 dark:text-gray-300">Débito</span>
+                                                <svg x-show="value === 'debit'" class="w-3 h-3 text-[#4ECDC4] ml-auto"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                                        d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </div>
                                             <div @click="select('credit')"
                                                 class="flex items-center gap-2 p-2 hover:bg-[#4ECDC4]/10 dark:hover:bg-[#4ECDC4]/20 rounded-lg cursor-pointer transition-colors">
                                                 <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                                                <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Crédito</span>
-                                                <svg x-show="value === 'credit'" class="w-3 h-3 text-[#4ECDC4] ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                                <span
+                                                    class="text-xs font-bold text-gray-700 dark:text-gray-300">Crédito</span>
+                                                <svg x-show="value === 'credit'" class="w-3 h-3 text-[#4ECDC4] ml-auto"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                                        d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </div>
                                         </div>
@@ -389,18 +406,18 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div x-data="{
-                                            show: false,
-                                            value: '{{ $transaction->status->value }}',
-                                            original: '{{ $transaction->status->value }}',
-                                            select(val) {
-                                                if (val === this.original) { this.show = false; return; }
-                                                this.value = val;
-                                                $wire.updateField({{ $transaction->id }}, 'status', this.value).then(() => {
-                                                    this.original = this.value;
-                                                    this.show = false;
-                                                });
-                                            }
-                                        }" class="relative">
+                                                show: false,
+                                                value: '{{ $transaction->status->value }}',
+                                                original: '{{ $transaction->status->value }}',
+                                                select(val) {
+                                                    if (val === this.original) { this.show = false; return; }
+                                                    this.value = val;
+                                                    $wire.updateField({{ $transaction->id }}, 'status', this.value).then(() => {
+                                                        this.original = this.value;
+                                                        this.show = false;
+                                                    });
+                                                }
+                                            }" class="relative">
                                         <div @click="show = !show" class="cursor-pointer group flex items-center gap-1">
                                             <span @class([
                                                 'inline-flex px-2 text-xs font-semibold leading-5 rounded-full transition-all group-hover:ring-2 group-hover:ring-[#4ECDC4]/30',
@@ -416,17 +433,22 @@
                                             <div @click="select('pending')"
                                                 class="flex items-center gap-2 p-2 hover:bg-[#4ECDC4]/10 dark:hover:bg-[#4ECDC4]/20 rounded-lg cursor-pointer transition-colors">
                                                 <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                                                <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Pendente</span>
-                                                <svg x-show="value === 'pending'" class="w-3 h-3 text-[#4ECDC4] ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                                <span
+                                                    class="text-xs font-bold text-gray-700 dark:text-gray-300">Pendente</span>
+                                                <svg x-show="value === 'pending'" class="w-3 h-3 text-[#4ECDC4] ml-auto"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                                        d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </div>
                                             <div @click="select('paid')"
                                                 class="flex items-center gap-2 p-2 hover:bg-[#4ECDC4]/10 dark:hover:bg-[#4ECDC4]/20 rounded-lg cursor-pointer transition-colors">
                                                 <div class="w-3 h-3 rounded-full bg-green-500"></div>
                                                 <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Pago</span>
-                                                <svg x-show="value === 'paid'" class="w-3 h-3 text-[#4ECDC4] ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                                <svg x-show="value === 'paid'" class="w-3 h-3 text-[#4ECDC4] ml-auto"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                                        d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </div>
                                         </div>
@@ -434,24 +456,27 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div x-data="{
-                                            editing: false,
-                                            value: '{{ $transaction->due_date->format('Y-m-d') }}',
-                                            original: '{{ $transaction->due_date->format('Y-m-d') }}',
-                                            save() {
-                                                if (this.value === this.original) { this.editing = false; return; }
-                                                $wire.updateField({{ $transaction->id }}, 'due_date', this.value).then(() => {
-                                                    this.original = this.value;
-                                                    this.editing = false;
-                                                });
-                                            }
-                                        }">
+                                                editing: false,
+                                                value: '{{ $transaction->due_date->format('Y-m-d') }}',
+                                                original: '{{ $transaction->due_date->format('Y-m-d') }}',
+                                                save() {
+                                                    if (this.value === this.original) { this.editing = false; return; }
+                                                    $wire.updateField({{ $transaction->id }}, 'due_date', this.value).then(() => {
+                                                        this.original = this.value;
+                                                        this.editing = false;
+                                                    });
+                                                }
+                                            }">
                                         <div x-show="!editing" @click="editing = true"
                                             class="flex items-center gap-2 group cursor-pointer">
-                                            <span class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-[#4ECDC4] transition-colors">
+                                            <span
+                                                class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-[#4ECDC4] transition-colors">
                                                 {{ $transaction->due_date->format('d/m/Y') }}
                                             </span>
-                                            <svg class="w-3 h-3 text-[#4ECDC4] opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            <svg class="w-3 h-3 text-[#4ECDC4] opacity-0 group-hover:opacity-100 transition-opacity"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                         </div>
                                         <input x-show="editing" x-cloak x-ref="input" x-model="value" @focusout="save()"
@@ -463,44 +488,72 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div x-data="{
-                                        show: false,
-                                        selected: @js($transaction->tags->pluck('id')),
-                                        allTags: @js($this->tags),
-                                        save() {
-                                            $wire.updateTags({{ $transaction->id }}, this.selected);
-                                            this.show = false;
-                                        },
-                                        toggle(id) {
-                                            if (this.selected.includes(id)) {
-                                                this.selected = this.selected.filter(i => i != id);
-                                            } else {
-                                                this.selected.push(id);
+                                            show: false,
+                                            selected: @js($transaction->tags->pluck('id')),
+                                            original: @js($transaction->tags->pluck('id')),
+                                            allTags: @js($this->tags),
+                                            position: { top: 0, left: 0 },
+                                            updatePosition() {
+                                                let rect = $refs.trigger.getBoundingClientRect();
+                                                this.position = {
+                                                    top: rect.bottom + 'px',
+                                                    left: rect.left + 'px'
+                                                };
+                                            },
+                                            save() {
+                                                let s = JSON.stringify(this.selected.sort());
+                                                let o = JSON.stringify(this.original.sort());
+                                                
+                                                if (s === o) {
+                                                    this.show = false;
+                                                    return;
+                                                }
+
+                                                $wire.updateTags({{ $transaction->id }}, this.selected).then(() => {
+                                                    this.original = [...this.selected];
+                                                    this.show = false;
+                                                });
+                                            },
+                                            toggle(id) {
+                                                if (this.selected.includes(id)) {
+                                                    this.selected = this.selected.filter(i => i != id);
+                                                } else {
+                                                    this.selected.push(id);
+                                                }
                                             }
-                                        }
-                                    }" class="relative">
-                                        <div @click="show = !show" class="flex flex-wrap gap-1 cursor-pointer group p-1 rounded transition-all min-h-[32px] items-center">
+                                        }" class="relative">
+                                        <div x-ref="trigger" @click="updatePosition(); show = !show"
+                                            @scroll.window="show = false" @resize.window="show = false"
+                                            class="flex flex-wrap gap-1 cursor-pointer group p-1 rounded transition-all min-h-[32px] items-center">
                                             @forelse ($transaction->tags as $tag)
-                                                <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-black rounded-md uppercase tracking-wider"
+                                                <span
+                                                    class="inline-flex items-center px-2 py-0.5 text-[10px] font-black rounded-md uppercase tracking-wider"
                                                     style="background-color: {{ $tag->color }}20; color: {{ $tag->color }}; border: 1px solid {{ $tag->color }}30">
                                                     {{ $tag->name }}
                                                 </span>
                                             @empty
-                                                <span class="text-[10px] text-gray-600 dark:text-gray-400 group-hover:text-[#4ECDC4] transition-colors font-semibold">Gerenciar tags...</span>
+                                                <span
+                                                    class="text-[10px] text-gray-600 dark:text-gray-400 group-hover:text-[#4ECDC4] transition-colors font-semibold">Gerenciar
+                                                    tags...</span>
                                             @endforelse
                                         </div>
 
                                         <div x-show="show" @click.away="save()" x-cloak
-                                            class="absolute z-50 bottom-full mb-2 left-0 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 p-2 max-h-60 overflow-y-auto">
+                                            :style="`top: ${position.top}; left: ${position.left}`"
+                                            class="fixed z-[9999] mt-1 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 p-2 max-h-60 overflow-y-auto">
                                             <template x-for="tag in allTags" :key="tag.id">
                                                 <div @click="toggle(tag.id)"
                                                     class="flex items-center gap-2 p-2 hover:bg-[#4ECDC4]/10 dark:hover:bg-[#4ECDC4]/20 rounded-lg cursor-pointer transition-colors">
                                                     <div class="w-4 h-4 rounded border flex items-center justify-center transition-colors"
                                                         :class="selected.includes(tag.id) ? 'bg-[#4ECDC4] border-[#4ECDC4]' : 'border-gray-300 dark:border-gray-600'">
-                                                        <svg x-show="selected.includes(tag.id)" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                                        <svg x-show="selected.includes(tag.id)" class="w-3 h-3 text-white"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="3" d="M5 13l4 4L19 7" />
                                                         </svg>
                                                     </div>
-                                                    <span class="text-xs font-bold" :style="'color: ' + tag.color" x-text="tag.name"></span>
+                                                    <span class="text-xs font-bold" :style="'color: ' + tag.color"
+                                                        x-text="tag.name"></span>
                                                 </div>
                                             </template>
                                         </div>
@@ -515,8 +568,10 @@
                                                 class="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all text-[10px] font-black uppercase tracking-widest group border border-emerald-500/10 dark:border-none shadow-sm"
                                                 title="Pagar">
 
-                                                <div wire:loading.remove wire:target="markAsPaid({{ $transaction->id }})" class="flex items-center gap-1.5">
-                                                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <div wire:loading.remove wire:target="markAsPaid({{ $transaction->id }})"
+                                                    class="flex items-center gap-1.5">
+                                                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none"
+                                                        viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"
                                                             d="M5 13l4 4L19 7" />
                                                     </svg>
@@ -524,7 +579,8 @@
                                                 </div>
 
                                                 <svg wire:loading wire:target="markAsPaid({{ $transaction->id }})"
-                                                    class="w-4 h-4 animate-spin text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24">
+                                                    class="w-4 h-4 animate-spin text-emerald-600 dark:text-emerald-400"
+                                                    fill="none" viewBox="0 0 24 24">
                                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                                                         stroke-width="4"></circle>
                                                     <path class="opacity-75" fill="currentColor"
