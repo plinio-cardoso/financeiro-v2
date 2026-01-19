@@ -38,6 +38,8 @@ services:
       MYSQL_USER: ${DB_USERNAME:-financeiro}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "127.0.0.1:9000:9000"
     volumes:
       - financeiro-db-data:/var/lib/mysql
     networks:
