@@ -41,8 +41,12 @@
                 class="!py-2 !text-xs !font-bold" />
         </div>
 
-        <button wire:click="clearFilters"
-            class="text-xs font-bold text-gray-400 hover:text-[#4ECDC4] transition-colors uppercase tracking-widest ml-2">
+        <button wire:click="clearFilters" @disabled(!$this->hasActiveFilters)
+            @class([
+                'text-xs font-bold uppercase tracking-widest ml-2 transition-colors',
+                'text-gray-400 hover:text-[#4ECDC4] cursor-pointer' => $this->hasActiveFilters,
+                'text-gray-300 dark:text-gray-600 cursor-not-allowed opacity-50' => !$this->hasActiveFilters,
+            ])>
             Limpar filtros
         </button>
 
@@ -65,7 +69,7 @@
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
-                <input type="text" wire:model.live="search" placeholder="Buscar..."
+                <input type="text" wire:model.live.debounce.500ms="search" placeholder="Buscar (mín. 3 letras)..."
                     class="block w-full pl-9 pr-4 py-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-lg text-[11px] font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 transition-all shadow-sm">
             </div>
 

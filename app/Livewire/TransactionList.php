@@ -62,10 +62,13 @@ class TransactionList extends Component
 
     private function getFilteredQuery()
     {
+        // Only apply search filter if empty or has 3+ characters
+        $search = (strlen($this->search) >= 3 || $this->search === '') ? $this->search : '';
+
         return app(TransactionService::class)->getFilteredTransactions(
             auth()->id(),
             [
-                'search' => $this->search,
+                'search' => $search,
                 'start_date' => $this->startDate,
                 'end_date' => $this->endDate,
                 'tags' => $this->selectedTags,
@@ -81,6 +84,17 @@ class TransactionList extends Component
     public function tags()
     {
         return Tag::orderBy('name')->get();
+    }
+
+    #[Computed]
+    public function hasActiveFilters(): bool
+    {
+        return ! empty($this->search)
+            || ! empty($this->startDate)
+            || ! empty($this->endDate)
+            || ! empty($this->selectedTags)
+            || ! empty($this->filterStatus)
+            || ! empty($this->filterType);
     }
 
     public function updatedSearch(): void

@@ -3,7 +3,7 @@
         @if(!$editing)
             {{-- Amount Block --}}
             <div
-                class="p-8 text-center rounded-3xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
+                class="p-6 text-center rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
                 <label class="block text-xs font-bold tracking-widest text-gray-400 uppercase dark:text-gray-300">
                     Valor da Transação
                 </label>
@@ -27,7 +27,7 @@
             </div>
 
             <div
-                class="p-6 space-y-6 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
+                class="p-4 space-y-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
                 {{-- Título --}}
                 @if(!$editing)
                     <div class="space-y-1.5">
@@ -62,8 +62,8 @@
                 </div>
 
                 <div
-                    class="p-6 space-y-6 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <div class="grid grid-cols-2 gap-6">
+                    class="p-4 space-y-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <div class="grid grid-cols-2 gap-4">
                         {{-- Tipo --}}
                         <div class="space-y-1.5">
                             <x-label for="type" value="Tipo" class="text-xs font-bold text-gray-500 dark:text-gray-400" />
@@ -106,8 +106,8 @@
                 </div>
 
                 <div
-                    class="p-6 space-y-6 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <div class="grid grid-cols-1 gap-6 {{ $status === 'paid' ? 'sm:grid-cols-2' : '' }}">
+                    class="p-4 space-y-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <div class="grid grid-cols-1 gap-4 {{ $status === 'paid' ? 'sm:grid-cols-2' : '' }}">
                         {{-- Data de Vencimento --}}
                         <div class="space-y-1.5">
                             <x-label for="dueDate" value="Vencimento"
