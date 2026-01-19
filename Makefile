@@ -90,8 +90,8 @@ deploy-install:
 
 deploy-build:
 	@echo "🔨 Building frontend assets..."
-	docker compose -f docker-compose.staging.yml exec -T app npm ci --prefer-offline --no-audit
-	docker compose -f docker-compose.staging.yml exec -T app npm run build
+	npm ci --prefer-offline --no-audit
+	npm run build
 
 deploy-migrate:
 	@echo "🗄️  Running migrations..."
