@@ -163,12 +163,6 @@ class TransactionList extends Component
                 return;
             }
 
-            if ($transaction->type->value !== 'debit') {
-                $this->dispatch('notify', message: 'Apenas transações de débito podem ser marcadas como pagas.', type: 'error');
-
-                return;
-            }
-
             if ($transaction->status->value === 'paid') {
                 $this->dispatch('notify', message: 'Esta transação já está marcada como paga.', type: 'info');
 

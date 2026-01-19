@@ -105,13 +105,6 @@
             </div>
         </div>
 
-        {{-- 
-            DESABILITADO TEMPORARIAMENTE:
-            Todos os campos principais já possuem edição inline diretamente na grid. 
-            Caso no futuro surjam mais campos complexos ou metadados que não caibam na visualização de tabela, 
-            a edição via modal poderá ser reativada.
-        --}}
-        {{-- 
         <x-slide-over wire:model.live="showCreateModal" maxWidth="md">
             <x-slot name="title">
                 {{ $editingTransactionId ? __('Editar Transação') : __('Nova Transação') }}
@@ -119,7 +112,6 @@
 
             <livewire:transaction-form :transaction-id="$editingTransactionId" :key="'transaction-form-' . ($editingTransactionId ?? 'new')" />
         </x-slide-over>
-        --}}
 
         {{-- Tabela de Transações --}}
         <div class="overflow-hidden bg-white shadow sm:rounded-lg dark:bg-gray-800">
@@ -413,7 +405,7 @@
                                             }
                                         }
                                     }" class="relative">
-                                        <div @click="show = !show" class="flex flex-wrap gap-1 cursor-pointer group hover:ring-1 hover:ring-[#4ECDC4]/20 p-1 rounded transition-all min-h-[32px]">
+                                        <div @click="show = !show" class="flex flex-wrap gap-1 cursor-pointer group p-1 rounded transition-all min-h-[32px]">
                                             @forelse ($transaction->tags as $tag)
                                                 <span class="inline-flex px-2 py-0.5 text-[10px] font-black rounded-md uppercase tracking-wider"
                                                     style="background-color: {{ $tag->color }}20; color: {{ $tag->color }}; border: 1px solid {{ $tag->color }}30">
@@ -443,19 +435,19 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                                     <div class="flex justify-end gap-2">
-                                        @if ($transaction->status->value === 'pending')
+                                        @if ($transaction->status->value === 'pending' && $transaction->type->value === 'debit')
                                             <button wire:click="markAsPaid({{ $transaction->id }})" wire:loading.attr="disabled"
                                                 wire:loading.class="opacity-50 cursor-not-allowed"
                                                 wire:target="markAsPaid({{ $transaction->id }})"
                                                 class="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all text-[10px] font-black uppercase tracking-widest group border border-emerald-500/10 dark:border-none shadow-sm"
-                                                title="{{ $transaction->type->value === 'debit' ? 'Pagar' : 'Receber' }}">
+                                                title="Pagar">
                                                 
                                                 <div wire:loading.remove wire:target="markAsPaid({{ $transaction->id }})" class="flex items-center gap-1.5">
                                                     <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"
                                                             d="M5 13l4 4L19 7" />
                                                     </svg>
-                                                    <span class="text-emerald-800 dark:text-emerald-400">{{ $transaction->type->value === 'debit' ? 'Pagar' : 'Receber' }}</span>
+                                                    <span class="text-emerald-800 dark:text-emerald-400">Pagar</span>
                                                 </div>
 
                                                 <svg wire:loading wire:target="markAsPaid({{ $transaction->id }})"
@@ -468,11 +460,6 @@
                                                 </svg>
                                             </button>
                                         @endif
-                                        {{-- 
-                                            DESABILITADO TEMPORARIAMENTE:
-                                            Edição inline já disponível para todos os campos na grid.
-                                        --}}
-                                        {{-- 
                                         <button wire:click="editTransaction({{ $transaction->id }})"
                                             class="text-[#4ECDC4] hover:text-[#3dbdb5] dark:text-[#4ECDC4] dark:hover:text-[#3dbdb5] transition-colors p-1 rounded-full hover:bg-[#4ECDC410] dark:hover:bg-[#4ECDC420]"
                                             title="Editar">
@@ -481,7 +468,6 @@
                                                     d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                         </button>
-                                        --}}
                                     </div>
                                 </td>
                             </tr>
