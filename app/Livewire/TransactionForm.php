@@ -2,10 +2,9 @@
 
 namespace App\Livewire;
 
-use App\Models\Tag;
 use App\Models\Transaction;
+use App\Services\TagService;
 use App\Services\TransactionService;
-use Illuminate\Support\Facades\Cache;
 use Laravel\Jetstream\InteractsWithBanner;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -63,9 +62,7 @@ class TransactionForm extends Component
     #[Computed]
     public function tags()
     {
-        return Cache::remember('user_tags', 604800, function () {
-            return Tag::orderBy('name')->get();
-        });
+        return app(TagService::class)->getUserTags(auth()->id());
     }
 
     public function mount(?int $transactionId = null): void

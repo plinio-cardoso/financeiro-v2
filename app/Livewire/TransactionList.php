@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Tag;
+use App\Services\TagService;
 use App\Services\TransactionService;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
@@ -72,7 +72,19 @@ class TransactionList extends Component
     {
         if ($this->aggregatesCache === null) {
             // Single query to get ALL totals across ALL filtered transactions
-            $this->aggregatesCache = $this->getFilteredQuery()
+            $this->aggregatesCache = app(TransactionService::class)->getFilteredTransactions(
+                auth()->id(),
+                [
+                    'search' => $this->search,
+                    'start_date' => $this->startDate,
+                    'end_date' => $this->endDate,
+                    'tags' => $this->selectedTags,
+                    'status' => $this->filterStatus,
+                    'type' => $this->filterType,
+                    'recurring' => $this->filterRecurrence,
+                ],
+                false // Don't include select for aggregates
+            )
                 ->selectRaw('
                     COUNT(*) as total_count,
                     SUM(CASE WHEN type = "credit" THEN amount ELSE 0 END) as total_credits,
@@ -103,9 +115,7 @@ class TransactionList extends Component
     #[Computed]
     public function tags()
     {
-        return Cache::remember('user_tags', 604800, function () {
-            return Tag::orderBy('name')->get();
-        });
+        return app(TagService::class)->getUserTags(auth()->id());
     }
 
     #[Computed]
@@ -123,26 +133,43 @@ class TransactionList extends Component
     public function updatedSearch(): void
     {
         $this->resetPage();
+        $this->aggregatesCache = null;
     }
 
     public function updatedSelectedTags(): void
     {
         $this->resetPage();
+        $this->aggregatesCache = null;
     }
 
     public function updatedFilterStatus(): void
     {
         $this->resetPage();
+        $this->aggregatesCache = null;
     }
 
     public function updatedFilterType(): void
     {
         $this->resetPage();
+        $this->aggregatesCache = null;
     }
 
     public function updatedFilterRecurrence(): void
     {
         $this->resetPage();
+        $this->aggregatesCache = null;
+    }
+
+    public function updatedStartDate(): void
+    {
+        $this->resetPage();
+        $this->aggregatesCache = null;
+    }
+
+    public function updatedEndDate(): void
+    {
+        $this->resetPage();
+        $this->aggregatesCache = null;
     }
 
     public function sortBy(string $field): void

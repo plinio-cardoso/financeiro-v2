@@ -181,9 +181,28 @@ class TransactionService
     /**
      * Get filtered transactions query
      */
-    public function getFilteredTransactions(int $userId, array $filters)
+    public function getFilteredTransactions(int $userId, array $filters, bool $includeSelect = true)
     {
-        $query = Transaction::where('user_id', $userId)->with(['tags', 'recurringTransaction']);
+        $query = Transaction::where('user_id', $userId);
+
+        if ($includeSelect) {
+            $query->select([
+                'transactions.id',
+                'transactions.title',
+                'transactions.description',
+                'transactions.amount',
+                'transactions.due_date',
+                'transactions.paid_at',
+                'transactions.status',
+                'transactions.type',
+                'transactions.recurring_transaction_id',
+                'transactions.user_id',
+            ])
+                ->with([
+                    'tags:id,name,color',
+                    'recurringTransaction:id,title,frequency',
+                ]);
+        }
 
         // Search filter
         if (! empty($filters['search'])) {

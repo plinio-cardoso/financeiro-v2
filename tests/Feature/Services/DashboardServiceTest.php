@@ -204,4 +204,69 @@ class DashboardServiceTest extends TestCase
         $this->assertEquals($transaction2->id, $transactions->first()->id);
         $this->assertEquals($transaction1->id, $transactions->last()->id);
     }
+
+    public function test_get_upcoming_expenses_grouped_by_day_groups_correctly(): void
+    {
+        $user = User::factory()->create();
+
+        // Create transactions for today
+        Transaction::factory()->for($user)->create([
+            'due_date' => today(),
+            'type' => TransactionTypeEnum::Debit,
+            'status' => TransactionStatusEnum::Pending,
+        ]);
+
+        // Create transaction for tomorrow
+        Transaction::factory()->for($user)->create([
+            'due_date' => today()->addDay(),
+            'type' => TransactionTypeEnum::Debit,
+            'status' => TransactionStatusEnum::Pending,
+        ]);
+
+        $grouped = $this->dashboardService->getUpcomingExpensesGroupedByDay($user->id);
+
+        // Should have 2 groups (today and tomorrow)
+        $this->assertCount(2, $grouped);
+
+        // Each group should have 1 transaction
+        foreach ($grouped as $dayExpenses) {
+            $this->assertCount(1, $dayExpenses);
+        }
+    }
+
+    public function test_get_upcoming_expenses_grouped_by_day_returns_empty_when_no_expenses(): void
+    {
+        $user = User::factory()->create();
+
+        $grouped = $this->dashboardService->getUpcomingExpensesGroupedByDay($user->id);
+
+        $this->assertIsArray($grouped);
+        $this->assertEmpty($grouped);
+    }
+
+    public function test_get_current_month_expense_total_sums_correctly(): void
+    {
+        $user = User::factory()->create();
+        $tag = \App\Models\Tag::factory()->create();
+
+        // Create transactions for the current month
+        Transaction::factory()->count(3)->for($user)->create([
+            'type' => TransactionTypeEnum::Debit,
+            'amount' => 100,
+            'due_date' => now(),
+        ])->each(fn ($t) => $t->tags()->attach($tag));
+
+        $total = $this->dashboardService->getCurrentMonthExpenseTotal($user->id);
+
+        $this->assertEquals(300.0, $total);
+    }
+
+    public function test_get_current_month_expense_total_returns_zero_when_no_expenses(): void
+    {
+        $user = User::factory()->create();
+
+        $total = $this->dashboardService->getCurrentMonthExpenseTotal($user->id);
+
+        $this->assertEquals(0.0, $total);
+    }
 }

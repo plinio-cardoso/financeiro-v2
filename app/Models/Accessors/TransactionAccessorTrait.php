@@ -70,4 +70,32 @@ trait TransactionAccessorTrait
     {
         return $this->type === TransactionTypeEnum::Credit;
     }
+
+    /**
+     * Get CSS color class based on transaction type
+     */
+    public function getTypeColorClass(): string
+    {
+        return $this->isDebit()
+            ? 'text-rose-500'
+            : 'text-emerald-500';
+    }
+
+    /**
+     * Get text color class for amount display
+     */
+    public function getAmountColorClass(): string
+    {
+        return $this->isDebit()
+            ? 'text-gray-900 dark:text-gray-100'
+            : 'text-emerald-500';
+    }
+
+    /**
+     * Get sign prefix for amount display (+ or -)
+     */
+    public function getSignPrefix(): string
+    {
+        return $this->isDebit() ? '-' : '+';
+    }
 }

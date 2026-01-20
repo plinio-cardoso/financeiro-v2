@@ -41,8 +41,7 @@ class RecurringTransactionEdit extends Component
     public function mount(?int $recurringId = null): void
     {
         if ($recurringId) {
-            $this->recurring = RecurringTransaction::with('transactions')
-                ->where('user_id', auth()->id())
+            $this->recurring = RecurringTransaction::where('user_id', auth()->id())
                 ->findOrFail($recurringId);
 
             $this->recurringId = $recurringId;
@@ -78,7 +77,7 @@ class RecurringTransactionEdit extends Component
             return 0;
         }
 
-        return $this->recurring->transactions
+        return Transaction::where('recurring_transaction_id', $this->recurring->id)
             ->where('due_date', '>=', now())
             ->where('status', 'pending')
             ->count();
@@ -91,7 +90,8 @@ class RecurringTransactionEdit extends Component
             return 0;
         }
 
-        return $this->recurring->transactions->count();
+        return Transaction::where('recurring_transaction_id', $this->recurring->id)
+            ->count();
     }
 
     public function save(): void

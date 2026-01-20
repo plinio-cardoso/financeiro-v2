@@ -210,7 +210,7 @@
         </div>
 
         {{-- Tabela de Transações --}}
-        <div class="overflow-hidden bg-white shadow dark:bg-gray-800 rounded-none">
+        <div x-data="{ globalTags: @js($this->tags) }" class="overflow-hidden bg-white shadow dark:bg-gray-800 rounded-none">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
@@ -521,7 +521,6 @@
                                                                                             show: false,
                                                                                             selected: @js($transaction->tags->pluck('id')),
                                                                                             original: @js($transaction->tags->pluck('id')),
-                                                                                            allTags: @js($this->tags),
                                                                                             position: { top: 0, left: 0 },
                                                                                             updatePosition() {
                                                                                                 let rect = $refs.trigger.getBoundingClientRect();
@@ -571,7 +570,7 @@
                                         <div x-show="show" @click.away="save()" x-cloak
                                             :style="`top: ${position.top}; left: ${position.left}`"
                                             class="fixed z-[9999] mt-1 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 p-2 max-h-60 overflow-y-auto">
-                                            <template x-for="tag in allTags" :key="tag.id">
+                                            <template x-for="tag in globalTags" :key="tag.id">
                                                 <div @click="toggle(tag.id)"
                                                     class="flex items-center gap-2 p-2 hover:bg-[#4ECDC4]/10 dark:hover:bg-[#4ECDC4]/20 rounded-lg cursor-pointer transition-colors">
                                                     <div class="w-4 h-4 rounded border flex items-center justify-center transition-colors"

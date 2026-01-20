@@ -4,25 +4,95 @@ namespace App\Livewire;
 
 use App\Services\DashboardService;
 use App\Services\TransactionService;
+use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class DashboardWidgets extends Component
 {
-    public $recentActivity = [];
+    #[Locked]
+    public Collection $recentActivity;
 
-    public $upcomingExpenses = [];
+    #[Locked]
+    public Collection $upcomingExpenses;
 
-    public $expensesByTag = [];
+    #[Locked]
+    public Collection $expensesByTag;
 
-    public $monthlyComparison = [];
+    #[Locked]
+    public Collection $monthlyComparison;
 
-    public function mount(DashboardService $dashboardService): void
+    public bool $loadedRecent = false;
+
+    public bool $loadedUpcoming = false;
+
+    public bool $loadedByTag = false;
+
+    public bool $loadedComparison = false;
+
+    public function mount(): void
     {
-        $userId = auth()->id();
-        $this->recentActivity = $dashboardService->getRecentActivity($userId);
-        $this->upcomingExpenses = $dashboardService->getUpcomingExpenses($userId);
-        $this->expensesByTag = $dashboardService->getExpensesByTag($userId);
-        $this->monthlyComparison = $dashboardService->getMonthlyComparison($userId);
+        $this->recentActivity = collect();
+        $this->upcomingExpenses = collect();
+        $this->expensesByTag = collect();
+        $this->monthlyComparison = collect();
+    }
+
+    public function loadRecentActivity(): void
+    {
+        if (! $this->loadedRecent) {
+            $this->recentActivity = app(DashboardService::class)->getRecentActivity(auth()->id());
+            $this->loadedRecent = true;
+        }
+    }
+
+    public function loadUpcomingExpenses(): void
+    {
+        if (! $this->loadedUpcoming) {
+            $this->upcomingExpenses = app(DashboardService::class)->getUpcomingExpenses(auth()->id());
+            $this->loadedUpcoming = true;
+        }
+    }
+
+    #[Computed]
+    public function upcomingExpensesGrouped(): array
+    {
+        if (! $this->loadedUpcoming) {
+            return [];
+        }
+
+        return app(DashboardService::class)
+            ->getUpcomingExpensesGroupedByDay(auth()->id());
+    }
+
+    #[Computed]
+    public function monthlyExpenseTotal(): float
+    {
+        if (! $this->loadedByTag) {
+            return 0.0;
+        }
+
+        return app(DashboardService::class)
+            ->getCurrentMonthExpenseTotal(auth()->id());
+    }
+
+    public function loadExpensesByTag(): void
+    {
+        if (! $this->loadedByTag) {
+            $this->expensesByTag = app(DashboardService::class)->getExpensesByTag(auth()->id());
+            $this->loadedByTag = true;
+            $this->dispatch('expensesByTagLoaded', data: $this->expensesByTag->toArray());
+        }
+    }
+
+    public function loadMonthlyComparison(): void
+    {
+        if (! $this->loadedComparison) {
+            $this->monthlyComparison = app(DashboardService::class)->getMonthlyComparison(auth()->id());
+            $this->loadedComparison = true;
+            $this->dispatch('monthlyComparisonLoaded', data: $this->monthlyComparison->toArray());
+        }
     }
 
     public function markAsPaid(int $transactionId): void

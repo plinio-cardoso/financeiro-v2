@@ -1,7 +1,7 @@
 <div class="space-y-8 pb-12">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {{-- Próximas Despesas & Vencidas --}}
-        <div class="overflow-hidden bg-white shadow sm:rounded-lg dark:bg-gray-800 flex flex-col">
+        <div class="overflow-hidden bg-white shadow sm:rounded-lg dark:bg-gray-800 flex flex-col" x-intersect.once="$wire.loadUpcomingExpenses()">
             <div class="px-8 py-6 border-b border-gray-50 dark:border-gray-700/30 flex items-center justify-between">
                 <h3 class="text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Próximas Despesas</h3>
                 <a href="{{ route('transactions.index') }}" 
@@ -13,19 +13,16 @@
             
             <div class="p-6 flex-1">
                 <div class="space-y-8">
-                    @php 
-                        $grouped = $upcomingExpenses->groupBy(fn($e) => $e->due_date->startOfDay()->timestamp);
-                    @endphp
-                    
-                    @forelse($grouped as $timestamp => $dayExpenses)
-                        @php $date = \Carbon\Carbon::createFromTimestamp($timestamp); @endphp
+                    @forelse($this->upcomingExpensesGrouped as $timestamp => $dayExpenses)
+                        @php
+                            $date = \Carbon\Carbon::createFromTimestamp($timestamp);
+                        @endphp
                         <div class="space-y-4">
                             <h4 class="text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 px-1">
                                 @if($date->isToday()) HOJE @elseif($date->isTomorrow()) AMANHÃ @else {{ $date->translatedFormat('D, d M') }} @endif
                             </h4>
-                            
+
                             @foreach($dayExpenses as $expense)
-                                @php $isOverdue = $expense->due_date->isPast() && $expense->status->value === 'pending'; @endphp
                                 <div class="relative flex items-center justify-between p-4 rounded-xl hover:bg-gray-50/20 dark:hover:bg-gray-900/40 transition-all group border border-transparent hover:border-gray-100 dark:hover:border-gray-700/50">
                                     <div class="flex items-center gap-4">
                                         <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
@@ -36,7 +33,7 @@
                                         <div>
                                             <div class="flex items-center gap-2">
                                                 <p class="text-sm font-bold text-gray-900 dark:text-gray-100">{{ $expense->title }}</p>
-                                                @if($isOverdue)
+                                                @if($expense->isOverdue())
                                                     <span class="px-2 py-0.5 text-[8px] font-black uppercase tracking-tighter bg-rose-100 text-rose-600 dark:bg-rose-900 dark:text-rose-400 rounded-md shadow-sm">Vencido</span>
                                                 @endif
                                             </div>
@@ -51,9 +48,9 @@
                                     </div>
                                     <div class="flex items-center gap-6">
                                         <div class="text-right">
-                                            <span class="block text-sm font-black text-gray-900 dark:text-gray-100">R$ {{ number_format($expense->amount, 2, ',', '.') }}</span>
+                                            <span class="block text-sm font-black text-gray-900 dark:text-gray-100">{{ $expense->getFormattedAmount() }}</span>
                                         </div>
-                                        <button wire:click="markAsPaid({{ $expense->id }})" 
+                                        <button wire:click="markAsPaid({{ $expense->id }})"
                                             class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 dark:border-none shadow-sm">
                                             PAGAR
                                         </button>
@@ -71,7 +68,7 @@
         </div>
 
         {{-- Histórico Recente --}}
-        <div class="overflow-hidden bg-white shadow sm:rounded-lg dark:bg-gray-800 flex flex-col">
+        <div class="overflow-hidden bg-white shadow sm:rounded-lg dark:bg-gray-800 flex flex-col" x-intersect.once="$wire.loadRecentActivity()">
             <div class="px-8 py-6 border-b border-gray-50 dark:border-gray-700/30 flex items-center justify-between">
                 <h3 class="text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Atividades Recentes</h3>
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-gray-100">Últimas 5</span>
@@ -83,7 +80,7 @@
                         <div class="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50/50 dark:hover:bg-gray-900/10 transition-all border border-transparent hover:border-gray-100/50 dark:hover:border-gray-700/20">
                             <div class="flex items-center gap-4">
                                 <div class="w-10 h-10 rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 flex items-center justify-center">
-                                    <svg class="w-5 h-5 {{ $activity->type->value === 'debit' ? 'text-rose-500' : 'text-emerald-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-5 h-5 {{ $activity->getTypeColorClass() }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         @if($activity->type->value === 'debit')
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 17l-4 4m0 0l-4-4m4 4V3" />
                                         @else
@@ -99,8 +96,8 @@
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm font-black {{ $activity->type->value === 'debit' ? 'text-gray-900 dark:text-gray-100' : 'text-emerald-500' }}">
-                                    {{ $activity->type->value === 'debit' ? '-' : '+' }} R$ {{ number_format($activity->amount, 2, ',', '.') }}
+                                <p class="text-sm font-black {{ $activity->getAmountColorClass() }}">
+                                    {{ $activity->getSignPrefix() }} {{ $activity->getFormattedAmount() }}
                                 </p>
                                 @if($activity->status->value === 'paid')
                                     <span class="text-[8px] font-black uppercase tracking-widest text-emerald-600 px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-500/10 rounded-md">Pago</span>
@@ -118,17 +115,17 @@
     {{-- Gráficos --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {{-- Gastos por Categoria --}}
-        <div class="lg:col-span-1 bg-white dark:bg-gray-800 shadow sm:rounded-lg p-8">
+        <div class="lg:col-span-1 bg-white dark:bg-gray-800 shadow sm:rounded-lg p-8" x-intersect.once="$wire.loadExpensesByTag()">
             <h3 class="text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-8">Despesas por Categoria</h3>
             <div id="chart-tags" class="min-h-[300px]"></div>
         </div>
 
         {{-- Evolução de Gastos --}}
-        <div class="lg:col-span-2 bg-white dark:bg-gray-800 shadow sm:rounded-lg p-8 flex flex-col">
+        <div class="lg:col-span-2 bg-white dark:bg-gray-800 shadow sm:rounded-lg p-8 flex flex-col" x-intersect.once="$wire.loadMonthlyComparison()">
             <div class="flex items-center justify-between mb-8">
                 <div>
                     <h3 class="text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Fluxo de Despesas Mensal</h3>
-                    <p class="text-2xl font-black text-gray-900 dark:text-gray-100 mt-1">R$ {{ number_format($expensesByTag->sum('total'), 2, ',', '.') }}</p>
+                    <p class="text-2xl font-black text-gray-900 dark:text-gray-100 mt-1">R$ {{ number_format($this->monthlyExpenseTotal, 2, ',', '.') }}</p>
                     <p class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Total de saídas em {{ now()->translatedFormat('F') }}</p>
                 </div>
             </div>
@@ -142,21 +139,31 @@
         let tagChart = null;
         let monthlyChart = null;
 
-        function initializeCharts() {
+        function getChartStyles() {
             const isDark = document.documentElement.classList.contains('dark');
-            const textColor = isDark ? '#94a3b8' : '#475569';
-            const chartTheme = isDark ? 'dark' : 'light';
+            return {
+                textColor: isDark ? '#94a3b8' : '#475569',
+                chartTheme: isDark ? 'dark' : 'light',
+                isDark: isDark
+            };
+        }
 
-            // Destroy existing charts if they exist
+        function initializeTagChart(tagData) {
+            const { textColor, chartTheme } = getChartStyles();
+
+            // Destroy existing chart if it exists
             if (tagChart) {
                 tagChart.destroy();
             }
-            if (monthlyChart) {
-                monthlyChart.destroy();
+
+            // Don't render if no data
+            if (!tagData || tagData.length === 0) {
+                console.log('No tag data available');
+                return;
             }
 
-            // Chart Tags
-            const tagData = @js($expensesByTag);
+            console.log('Rendering tag chart with data:', tagData);
+
             const tagOptions = {
                 chart: {
                     type: 'donut',
@@ -179,11 +186,27 @@
                 tooltip: { theme: chartTheme },
                 plotOptions: { pie: { donut: { size: '75%' } } }
             };
+
             tagChart = new ApexCharts(document.querySelector("#chart-tags"), tagOptions);
             tagChart.render();
+        }
 
-            // Chart Monthly
-            const monthlyData = @js($monthlyComparison);
+        function initializeMonthlyChart(monthlyData) {
+            const { textColor, chartTheme, isDark } = getChartStyles();
+
+            // Destroy existing chart if it exists
+            if (monthlyChart) {
+                monthlyChart.destroy();
+            }
+
+            // Don't render if no data
+            if (!monthlyData || monthlyData.length === 0) {
+                console.log('No monthly data available');
+                return;
+            }
+
+            console.log('Rendering monthly chart with data:', monthlyData);
+
             const monthlyOptions = {
                 chart: {
                     type: 'area',
@@ -240,18 +263,31 @@
                     }
                 }
             };
+
             monthlyChart = new ApexCharts(document.querySelector("#chart-monthly"), monthlyOptions);
             monthlyChart.render();
         }
 
-        // Initialize charts on page load
+        // Listen for Livewire events when data is loaded
         document.addEventListener('livewire:initialized', () => {
-            initializeCharts();
+            Livewire.on('expensesByTagLoaded', (event) => {
+                console.log('expensesByTagLoaded event received:', event);
+                // Small delay to ensure DOM is updated
+                setTimeout(() => initializeTagChart(event.data), 100);
+            });
+
+            Livewire.on('monthlyComparisonLoaded', (event) => {
+                console.log('monthlyComparisonLoaded event received:', event);
+                // Small delay to ensure DOM is updated
+                setTimeout(() => initializeMonthlyChart(event.data), 100);
+            });
         });
 
-        // Reinitialize charts when theme changes
+        // Reinitialize charts when theme changes (only if data already loaded)
         window.addEventListener('theme-changed', () => {
-            initializeCharts();
+            // Charts will be re-rendered on next data load
+            if (tagChart) tagChart.destroy();
+            if (monthlyChart) monthlyChart.destroy();
         });
     </script>
     @endpush

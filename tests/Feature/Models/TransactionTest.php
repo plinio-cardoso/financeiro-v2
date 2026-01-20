@@ -240,4 +240,31 @@ class TransactionTest extends TestCase
         $this->assertTrue($credit->isCredit());
         $this->assertFalse($debit->isCredit());
     }
+
+    public function test_get_type_color_class_returns_correct_colors(): void
+    {
+        $debit = Transaction::factory()->debit()->create();
+        $credit = Transaction::factory()->credit()->create();
+
+        $this->assertEquals('text-rose-500', $debit->getTypeColorClass());
+        $this->assertEquals('text-emerald-500', $credit->getTypeColorClass());
+    }
+
+    public function test_get_sign_prefix_returns_correct_signs(): void
+    {
+        $debit = Transaction::factory()->debit()->create();
+        $credit = Transaction::factory()->credit()->create();
+
+        $this->assertEquals('-', $debit->getSignPrefix());
+        $this->assertEquals('+', $credit->getSignPrefix());
+    }
+
+    public function test_get_amount_color_class_returns_correct_classes(): void
+    {
+        $debit = Transaction::factory()->debit()->create();
+        $credit = Transaction::factory()->credit()->create();
+
+        $this->assertStringContainsString('text-gray-900', $debit->getAmountColorClass());
+        $this->assertEquals('text-emerald-500', $credit->getAmountColorClass());
+    }
 }

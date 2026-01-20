@@ -35,19 +35,17 @@ class DashboardService
             $currentMonth
         );
 
-        // Count overdue transactions (only debits)
-        $overdueCount = Transaction::where('user_id', $userId)
+        // Combined query for counts - single database hit instead of two (MySQL optimized)
+        $counts = Transaction::where('user_id', $userId)
             ->where('type', TransactionTypeEnum::Debit)
-            ->where('status', 'pending')
-            ->whereDate('due_date', '<', today())
-            ->count();
+            ->selectRaw('
+                COUNT(CASE WHEN status = "pending" AND DATE(due_date) < CURDATE() THEN 1 END) as overdue_count,
+                COUNT(CASE WHEN YEAR(due_date) = ? AND MONTH(due_date) = ? THEN 1 END) as transactions_count
+            ', [$currentYear, $currentMonth])
+            ->first();
 
-        // Count total transactions for the month (only debits)
-        $transactionsCount = Transaction::where('user_id', $userId)
-            ->where('type', TransactionTypeEnum::Debit)
-            ->whereYear('due_date', $currentYear)
-            ->whereMonth('due_date', $currentMonth)
-            ->count();
+        $overdueCount = $counts->overdue_count ?? 0;
+        $transactionsCount = $counts->transactions_count ?? 0;
 
         return [
             'total_due' => $monthlyTotals['total_due'],
@@ -71,9 +69,10 @@ class DashboardService
         $endDate = $startDate->copy()->endOfMonth();
 
         return Transaction::where('user_id', $userId)
+            ->select(['id', 'title', 'amount', 'due_date', 'paid_at', 'status', 'type', 'user_id'])
             ->whereBetween('due_date', [$startDate, $endDate])
             ->orderBy('due_date')
-            ->with('tags')
+            ->with('tags:id,name,color')
             ->get();
     }
 
@@ -83,7 +82,8 @@ class DashboardService
     public function getRecentActivity(int $userId, int $limit = 5): Collection
     {
         return Transaction::where('user_id', $userId)
-            ->with('tags')
+            ->select(['id', 'title', 'amount', 'due_date', 'status', 'type', 'updated_at', 'user_id'])
+            ->with('tags:id,name,color')
             ->orderByDesc('updated_at')
             ->limit($limit)
             ->get();
@@ -95,11 +95,12 @@ class DashboardService
     public function getUpcomingExpenses(int $userId): Collection
     {
         return Transaction::where('user_id', $userId)
+            ->select(['id', 'title', 'amount', 'due_date', 'status', 'type', 'user_id'])
             ->where('type', TransactionTypeEnum::Debit)
             ->where('status', 'pending')
             ->whereDate('due_date', '<=', today()->addDays(7))
             ->orderBy('due_date')
-            ->with('tags')
+            ->with('tags:id,name,color')
             ->get();
     }
 
@@ -135,5 +136,27 @@ class DashboardService
             ->orderBy('year')
             ->orderBy('month')
             ->get();
+    }
+
+    /**
+     * Get upcoming expenses grouped by day for dashboard display
+     *
+     * @return array [timestamp => Collection<Transaction>]
+     */
+    public function getUpcomingExpensesGroupedByDay(int $userId): array
+    {
+        $expenses = $this->getUpcomingExpenses($userId);
+
+        return $expenses
+            ->groupBy(fn ($expense) => $expense->due_date->startOfDay()->timestamp)
+            ->all();
+    }
+
+    /**
+     * Get total expenses for current month
+     */
+    public function getCurrentMonthExpenseTotal(int $userId): float
+    {
+        return $this->getExpensesByTag($userId)->sum('total');
     }
 }
