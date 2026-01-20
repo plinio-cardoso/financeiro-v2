@@ -2,6 +2,22 @@
     isOpen: false,
     editingId: @entangle('editingTransactionId'),
     editingRecurringId: @entangle('editingRecurringId'),
+    modalCounter: @entangle('modalCounter').live,
+
+    openCreate() {
+        this.editingId = null;
+        this.editingRecurringId = null;
+        this.modalCounter++;
+        this.isOpen = true;
+    },
+
+    openEditRecurring(recurringId) {
+        this.editingId = null;
+        this.editingRecurringId = recurringId;
+        this.modalCounter++;
+        this.isOpen = true;
+    },
+
     closeModalAndReset() {
         this.isOpen = false;
         $wire.closeModal();
@@ -96,7 +112,7 @@
                     class="block w-full pl-9 pr-4 py-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-lg text-[11px] font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 transition-all shadow-sm">
             </div>
 
-            <x-button @click="$wire.createTransaction().then(() => { isOpen = true; })"
+            <x-button @click="openCreate()"
                 class="!bg-[#4ECDC4] hover:!bg-[#3dbdb5] !text-gray-900 shadow-sm py-1.5 px-4 rounded-lg active:scale-95 transition-all text-[11px] font-bold uppercase tracking-wider">
                 Nova Transação
             </x-button>
@@ -176,22 +192,8 @@
 
                             {{-- Content Area --}}
                             <div class="flex-1 flex items-center justify-center relative overflow-hidden">
-                                {{-- Centered Loader --}}
-                                <div wire:loading wire:target="createTransaction, editTransaction, editRecurring"
-                                    class="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-900 z-50">
-                                    <div class="flex flex-col items-center gap-4  pt-5">
-                                        <div
-                                            class="w-12 h-12 rounded-full border-4 border-[#4ECDC4]/20 border-t-[#4ECDC4] animate-spin">
-                                        </div>
-                                        <p
-                                            class="text-[10px] font-black uppercase tracking-widest text-[#4ECDC4] animate-pulse">
-                                            Buscando dados...</p>
-                                    </div>
-                                </div>
-
-                                {{-- Component Content --}}
-                                <div wire:loading.remove wire:target="createTransaction, editTransaction, editRecurring"
-                                    class="w-full h-full px-6 py-8 overflow-y-auto custom-scrollbar">
+                                {{-- Component Content - No loader needed as modal opens instantly --}}
+                                <div class="w-full h-full px-6 py-8 overflow-y-auto custom-scrollbar">
                                     @if($editingRecurringId)
                                         <livewire:recurring-transaction-edit :recurring-id="$editingRecurringId"
                                             :key="'recurring-' . $modalCounter . '-' . $editingRecurringId" />
@@ -620,7 +622,7 @@
 
                                         @if($transaction->recurring_transaction_id)
                                             <button
-                                                @click="$wire.editRecurring({{ $transaction->recurring_transaction_id }}).then(() => { isOpen = true; })"
+                                                @click="openEditRecurring({{ $transaction->recurring_transaction_id }})"
                                                 class="text-[#4ECDC4] hover:text-[#3dbdb5] dark:text-[#4ECDC4] dark:hover:text-[#3dbdb5] transition-colors p-1 rounded-full hover:bg-[#4ECDC410] dark:hover:bg-[#4ECDC420]"
                                                 title="Editar recorrência">
                                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
