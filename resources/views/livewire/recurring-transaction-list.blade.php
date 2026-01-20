@@ -1,26 +1,11 @@
 <div x-data="{
     isOpen: false,
-    editingId: @entangle('editingTransactionId'),
-    editingRecurringId: @entangle('editingRecurringId'),
+    editingId: @entangle('editingRecurringId'),
     modalCounter: @entangle('modalCounter').live,
 
-    openCreate() {
-        this.editingId = null;
-        this.editingRecurringId = null;
+    openEdit(recurringId) {
+        this.editingId = recurringId;
         this.modalCounter++;
-        this.isOpen = true;
-    },
-
-    openEditRecurring(recurringId, transactionId) {
-        this.editingId = transactionId || null;
-        this.editingRecurringId = recurringId;
-        this.modalCounter++;
-        this.isOpen = true;
-    },
-
-    openEditTransaction(transactionId) {
-        this.editingId = transactionId;
-        this.editingRecurringId = null;
         this.isOpen = true;
     },
 
@@ -28,52 +13,36 @@
         this.isOpen = false;
         $wire.closeModal();
     }
-}" @transaction-saved.window="closeModalAndReset()" @recurring-saved.window="closeModalAndReset()"
-    @close-modal.window="closeModalAndReset()" @keydown.escape.window="closeModalAndReset()"
-    @open-edit-modal.window="openEditTransaction($event.detail.transactionId)">
+}" @recurring-saved.window="closeModalAndReset()" @close-modal.window="closeModalAndReset()"
+    @keydown.escape.window="closeModalAndReset()">
     {{-- Compact Filters Row --}}
     <div class="flex flex-wrap items-center gap-4 mb-8">
-        {{-- Data Range Group --}}
-        <div
-            class="flex items-center bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 px-1">
-            <input type="date" wire:model.live="startDate"
-                class="bg-transparent border-none focus:ring-0 text-xs font-bold text-gray-600 dark:text-gray-400 py-2 px-3">
-            <div class="w-px h-4 bg-gray-100 dark:bg-gray-700"></div>
-            <input type="date" wire:model.live="endDate"
-                class="bg-transparent border-none focus:ring-0 text-xs font-bold text-gray-600 dark:text-gray-400 py-2 px-3">
+        {{-- Type Filter --}}
+        <div class="w-40">
+            <x-custom-select wire:model.live="filterType" :options="[
+                ['value' => '', 'label' => 'Todos os Tipos'],
+                ['value' => 'debit', 'label' => 'Débitos'],
+                ['value' => 'credit', 'label' => 'Créditos']
+            ]" placeholder="Todos os Tipos" class="!py-2 !text-xs !font-bold" />
         </div>
 
         {{-- Status Filter --}}
         <div class="w-40">
             <x-custom-select wire:model.live="filterStatus" :options="[
-        ['value' => '', 'label' => 'Todos os Status'],
-        ['value' => 'pending', 'label' => 'Pendentes'],
-        ['value' => 'paid', 'label' => 'Pagos']
-    ]"            placeholder="Todos os Status" class="!py-2 !text-xs !font-bold" />
+                ['value' => '', 'label' => 'Todos os Status'],
+                ['value' => 'active', 'label' => 'Ativas'],
+                ['value' => 'inactive', 'label' => 'Inativas']
+            ]" placeholder="Todos os Status" class="!py-2 !text-xs !font-bold" />
         </div>
 
-        {{-- Type Filter --}}
-        <div class="w-40">
-            <x-custom-select wire:model.live="filterType" :options="[
-        ['value' => '', 'label' => 'Todos os Tipos'],
-        ['value' => 'debit', 'label' => 'Débitos'],
-        ['value' => 'credit', 'label' => 'Créditos']
-    ]"            placeholder="Todos os Tipos" class="!py-2 !text-xs !font-bold" />
-        </div>
-
-        {{-- Recurrence Filter --}}
+        {{-- Frequency Filter --}}
         <div class="w-44">
-            <x-custom-select wire:model.live="filterRecurrence" :options="[
-        ['value' => '', 'label' => 'Recorrência (Todos)'],
-        ['value' => 'recurring', 'label' => 'Recorrentes'],
-        ['value' => 'not_recurring', 'label' => 'Não recorrentes']
-    ]"            placeholder="Recorrência (Todos)" class="!py-2 !text-xs !font-bold" />
-        </div>
-
-        {{-- Tags Filter --}}
-        <div class="w-48">
-            <x-multi-select wire:model.live="selectedTags" :options="$this->tags" placeholder="Categorias"
-                class="!py-2 !text-xs !font-bold" />
+            <x-custom-select wire:model.live="filterFrequency" :options="[
+                ['value' => '', 'label' => 'Todas Frequências'],
+                ['value' => 'weekly', 'label' => 'Semanais'],
+                ['value' => 'monthly', 'label' => 'Mensais'],
+                ['value' => 'custom', 'label' => 'Personalizadas']
+            ]" placeholder="Todas Frequências" class="!py-2 !text-xs !font-bold" />
         </div>
 
         <button wire:click="clearFilters" @disabled(!$this->hasActiveFilters) @class([
@@ -83,11 +52,7 @@
         ])>
             Limpar filtros
         </button>
-
-
     </div>
-
-
 
     {{-- Main Content Card --}}
     <div
@@ -118,18 +83,13 @@
                 <input type="text" x-model="localSearch" @input="handleInput()" placeholder="Buscar (mín. 3 letras)..."
                     class="block w-full pl-9 pr-4 py-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-lg text-[11px] font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 transition-all shadow-sm">
             </div>
-
-            <x-button @click="openCreate()"
-                class="!bg-[#4ECDC4] hover:!bg-[#3dbdb5] !text-gray-900 shadow-sm py-1.5 px-4 rounded-lg active:scale-95 transition-all text-[11px] font-bold uppercase tracking-wider">
-                Nova Transação
-            </x-button>
         </div>
 
         {{-- Totals Summary Bar --}}
         <div class="flex items-center gap-6 px-6 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
             <div class="flex items-center gap-2">
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
-                    Total de Itens
+                    Total de Recorrências
                 </span>
                 <span
                     class="inline-flex items-center text-sm font-black text-[#4ECDC4] bg-[#4ECDC420] px-2 py-1 rounded-lg">
@@ -141,22 +101,22 @@
 
             <div class="flex items-center gap-2">
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
-                    Saldo Período
+                    Impacto Mensal Estimado
                 </span>
-                @if($this->totalAmount > 0)
+                @if($this->totalMonthlyAmount > 0)
                     <span
                         class="inline-flex items-center text-sm font-black px-2 py-1 rounded-lg !text-emerald-600 dark:!text-emerald-400 !bg-emerald-50 dark:!bg-emerald-500/10">
-                        R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
+                        R$ {{ number_format(abs($this->totalMonthlyAmount), 2, ',', '.') }}
                     </span>
-                @elseif($this->totalAmount < 0)
+                @elseif($this->totalMonthlyAmount < 0)
                     <span
                         class="inline-flex items-center text-sm font-black px-2 py-1 rounded-lg !text-rose-600 dark:!text-rose-400 !bg-rose-50 dark:!bg-rose-500/10">
-                        R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
+                        R$ {{ number_format(abs($this->totalMonthlyAmount), 2, ',', '.') }}
                     </span>
                 @else
                     <span
                         class="inline-flex items-center text-sm font-black px-2 py-1 rounded-lg !text-gray-600 dark:!text-gray-400 !bg-gray-50 dark:!bg-gray-700/50">
-                        R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
+                        R$ {{ number_format(abs($this->totalMonthlyAmount), 2, ',', '.') }}
                     </span>
                 @endif
             </div>
@@ -185,7 +145,7 @@
                             <div
                                 class="px-6 py-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between rounded-none">
                                 <h2 class="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
-                                    <span x-text="editingId ? 'Editar Transação' : 'Nova Transação'"></span>
+                                    Editar Recorrência
                                 </h2>
                                 <button type="button" @click="closeModalAndReset()"
                                     class="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
@@ -200,9 +160,9 @@
                             <div class="flex-1 flex items-center justify-center relative overflow-hidden">
                                 {{-- Component Content - No loader needed as modal opens instantly --}}
                                 <div class="w-full h-full px-6 py-8 overflow-y-auto custom-scrollbar">
-                                    {{-- Transaction Form (now handles both transaction and recurrence) --}}
-                                    <livewire:transaction-form :transaction-id="$editingTransactionId"
-                                        :key="'transaction-' . $modalCounter . '-' . ($editingTransactionId ?? 'new')" />
+                                    {{-- Recurring Transaction Form --}}
+                                    <livewire:recurring-transaction-form :recurring-id="$editingRecurringId"
+                                        :key="'recurring-' . $modalCounter . '-' . ($editingRecurringId ?? 'new')" />
                                 </div>
                             </div>
                         </div>
@@ -211,7 +171,7 @@
             </div>
         </div>
 
-        {{-- Tabela de Transações --}}
+        {{-- Tabela de Transações Recorrentes --}}
         <div class="overflow-hidden bg-white shadow dark:bg-gray-800 rounded-none">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -244,27 +204,27 @@
                                     @endif
                                 </div>
                             </th>
-                            <th scope="col" wire:click="sortBy('status')"
+                            <th scope="col" wire:click="sortBy('frequency')"
                                 class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center gap-1 whitespace-nowrap">
-                                    Status
-                                    @if ($sortField === 'status')
+                                    Frequência
+                                    @if ($sortField === 'frequency')
                                         <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                                     @endif
                                 </div>
                             </th>
-                            <th scope="col" wire:click="sortBy('due_date')"
+                            <th scope="col" wire:click="sortBy('next_due_date')"
                                 class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center gap-1 whitespace-nowrap min-w-[120px]">
-                                    Vencimento
-                                    @if ($sortField === 'due_date')
+                                    Próximo Vencimento
+                                    @if ($sortField === 'next_due_date')
                                         <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                                     @endif
                                 </div>
                             </th>
                             <th scope="col"
                                 class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                                Tags
+                                Status
                             </th>
                             <th scope="col" class="relative px-6 py-3">
                                 <span class="sr-only">Ações</span>
@@ -272,16 +232,107 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                        @forelse ($this->transactions as $transaction)
-                            <livewire:transaction-row
-                                :transaction="$transaction"
-                                :key="'tx-' . $transaction->id"
-                                wire:key="transaction-{{ $transaction->id }}"
-                            />
+                        @forelse ($this->recurringTransactions as $recurring)
+                            <tr class="hover:bg-gray-100 dark:hover:bg-gray-700/30 transition-colors">
+                                {{-- Title & Description --}}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-[#4ECDC4] flex-shrink-0" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        <div class="min-w-0 flex-1">
+                                            <span class="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                                {{ $recurring->title }}
+                                            </span>
+                                            @if ($recurring->description)
+                                                <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                    {{ Str::limit($recurring->description, 50) }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </td>
+
+                                {{-- Amount --}}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                        R$ {{ number_format($recurring->amount, 2, ',', '.') }}
+                                    </span>
+                                </td>
+
+                                {{-- Type --}}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span @class([
+                                        'inline-flex px-2 text-xs font-semibold leading-5 rounded-full',
+                                        'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' =>
+                                            $recurring->type->value === 'debit',
+                                        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' =>
+                                            $recurring->type->value === 'credit',
+                                    ])>
+                                        {{ $recurring->type->value === 'debit' ? 'Débito' : 'Crédito' }}
+                                    </span>
+                                </td>
+
+                                {{-- Frequency --}}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm text-gray-900 dark:text-gray-100">
+                                        @switch($recurring->frequency->value)
+                                            @case('weekly')
+                                                Semanal
+                                            @break
+
+                                            @case('monthly')
+                                                Mensal
+                                            @break
+
+                                            @case('custom')
+                                                Personalizada
+                                            @break
+                                        @endswitch
+                                    </span>
+                                </td>
+
+                                {{-- Next Due Date --}}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {{ $recurring->next_due_date ? $recurring->next_due_date->format('d/m/Y') : '-' }}
+                                    </span>
+                                </td>
+
+                                {{-- Status --}}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span @class([
+                                        'inline-flex px-2 text-xs font-semibold leading-5 rounded-full',
+                                        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' =>
+                                            $recurring->active,
+                                        'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' =>
+                                            !$recurring->active,
+                                    ])>
+                                        {{ $recurring->active ? 'Ativa' : 'Inativa' }}
+                                    </span>
+                                </td>
+
+                                {{-- Actions --}}
+                                <td class="px-2 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                    <div class="flex justify-end gap-2 pr-8">
+                                        <button @click="openEdit({{ $recurring->id }})"
+                                            class="text-gray-400 hover:text-[#4ECDC4] dark:text-gray-500 dark:hover:text-[#4ECDC4] transition-colors p-1 rounded-full hover:bg-[#4ECDC410] dark:hover:bg-[#4ECDC420]"
+                                            title="Editar recorrência">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
                         @empty
                             <tr>
                                 <td colspan="7" class="px-6 py-4 text-sm text-center text-gray-500 dark:text-gray-400">
-                                    Nenhuma transação encontrada.
+                                    Nenhuma transação recorrente encontrada.
                                 </td>
                             </tr>
                         @endforelse
@@ -291,7 +342,7 @@
 
             {{-- Paginação --}}
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700">
-                {{ $this->transactions->links() }}
+                {{ $this->recurringTransactions->links() }}
             </div>
         </div>
     </div>

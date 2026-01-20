@@ -17,7 +17,7 @@
     }
 }" class="relative">
     <div class="relative">
-        <button type="button" @click="show = !show" @click.away="show = false" {{ $attributes->merge(['class' => 'relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-100 dark:border-gray-700/50 rounded-xl shadow-none cursor-default focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 sm:text-sm text-gray-900 dark:bg-gray-900 dark:text-gray-300 transition-all']) }}>
+        <button type="button" @click="show = !show" @click.away="show = false" {{ $attributes->merge(['class' => 'relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 dark:border-gray-600 rounded-xl shadow-none cursor-default focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 sm:text-sm text-gray-900 dark:bg-gray-900 dark:text-gray-300 transition-all']) }}>
             <span class="block truncate" x-text="selectedLabel"></span>
             <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

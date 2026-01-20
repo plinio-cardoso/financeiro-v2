@@ -21,6 +21,10 @@ Route::middleware([
     // Transactions
     Route::resource('transactions', TransactionController::class)->except(['create']);
 
+    // Recurring Transactions
+    Route::get('/recurring-transactions', [App\Http\Controllers\RecurringTransactionController::class, 'index'])
+        ->name('recurring-transactions.index');
+
     // Notification Settings
     Route::get('/settings/notifications', [NotificationSettingController::class, 'edit'])
         ->name('settings.notifications.edit');

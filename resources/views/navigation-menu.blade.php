@@ -32,7 +32,9 @@
                         {{ __('Transações') }}
                     </x-nav-link>
 
-
+                    <x-nav-link href="{{ route('recurring-transactions.index') }}" :active="request()->routeIs('recurring-transactions.*')">
+                        {{ __('Recorrentes') }}
+                    </x-nav-link>
 
                     <x-nav-link href="{{ route('settings.notifications.edit') }}"
                         :active="request()->routeIs('settings.*')">
@@ -198,6 +200,11 @@
             <x-responsive-nav-link href="{{ route('transactions.index') }}"
                 :active="request()->routeIs('transactions.*')">
                 {{ __('Transações') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('recurring-transactions.index') }}"
+                :active="request()->routeIs('recurring-transactions.*')">
+                {{ __('Recorrentes') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link href="{{ route('settings.notifications.edit') }}"
