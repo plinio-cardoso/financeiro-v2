@@ -56,7 +56,8 @@
                 </h3>
             </div>
 
-            <div class="p-4 space-y-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <div
+                class="p-4 space-y-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
                 {{-- Título --}}
                 <div>
                     <label for="title" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
@@ -89,8 +90,7 @@
                         <label for="amount" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                             Valor *
                         </label>
-                        <input type="number" id="amount" wire:model="amount" step="0.01" min="0"
-                            placeholder="0,00"
+                        <input type="number" id="amount" wire:model="amount" step="0.01" min="0" placeholder="0,00"
                             class="w-full px-4 py-2 border border-gray-400 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500">
                         @error('amount')
                             <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
@@ -102,10 +102,9 @@
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                             Tipo *
                         </label>
-                        <x-custom-select wire:model="type" :options="[
-                            ['value' => 'debit', 'label' => 'Débito'],
-                            ['value' => 'credit', 'label' => 'Crédito'],
-                        ]" placeholder="Selecione o tipo" />
+                        <x-custom-select property="type" :options="[]"
+                            x-init="options = $store.options.types.filter(o => o.value !== '')"
+                            placeholder="Selecione o tipo" />
                         @error('type')
                             <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
                         @enderror
@@ -115,10 +114,10 @@
                 {{-- Tags --}}
                 <div>
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                        Categorias
+                        Tags
                     </label>
-                    <x-multi-select wire:model="selectedTags" :options="$this->tags"
-                        placeholder="Selecione categorias" />
+                    <x-multi-select property="selectedTags" :options="[]" x-init="options = $store.tags.list"
+                        placeholder="Selecione tags" />
                     @error('selectedTags')
                         <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
                     @enderror
@@ -135,63 +134,61 @@
                 </h3>
             </div>
 
-            <div class="p-4 space-y-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
-                {{-- Frequência --}}
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                        Frequência *
-                    </label>
-                    <x-custom-select wire:model.live="frequency" :options="[
-                        ['value' => 'weekly', 'label' => 'Semanal'],
-                        ['value' => 'monthly', 'label' => 'Mensal'],
-                        ['value' => 'custom', 'label' => 'Personalizada'],
-                    ]" placeholder="Selecione a frequência" />
-                    @error('frequency')
-                        <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                {{-- Intervalo --}}
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                        Repetir a cada *
-                    </label>
-                    <div class="flex items-center gap-2">
-                        <input type="number" wire:model="interval" min="1"
-                            class="w-20 px-3 py-2 border border-gray-400 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-                        <span class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                            @if ($frequency === 'weekly')
-                                semana(s)
-                            @elseif($frequency === 'monthly')
-                                mês(es)
-                            @else
-                                Dias
-                            @endif
-                        </span>
-                    </div>
-                    @error('interval')
-                        <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                {{-- Data Início --}}
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                        Data de Início
-                    </label>
-                    <input type="date" wire:model="startDate"
-                        class="w-full px-4 py-2 border border-gray-400 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-                    @error('startDate')
-                        <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                {{-- End Date & Occurrences Grid --}}
+            <div
+                class="p-4 space-y-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
+                {{-- Frequência & Intervalo --}}
                 <div class="grid grid-cols-2 gap-4">
-                    {{-- Data de Término --}}
                     <div>
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                            Terminar em (opcional)
+                            Frequência *
+                        </label>
+                        <x-custom-select property="frequency" :options="[]"
+                            x-init="options = $store.options.frequencies.filter(o => o.value !== '')"
+                            placeholder="Selecione a frequência" />
+                        @error('frequency')
+                            <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                            Repetir a cada *
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" wire:model="interval" min="1"
+                                class="w-full px-4 py-2 border border-gray-400 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+                            <span class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                @if ($frequency === 'weekly')
+                                    semana(s)
+                                @elseif($frequency === 'monthly')
+                                    mês(es)
+                                @else
+                                    dia(s)
+                                @endif
+                            </span>
+                        </div>
+                        @error('interval')
+                            <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                {{-- Início & Término --}}
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                            Data de Início *
+                        </label>
+                        <input type="date" wire:model="startDate"
+                            class="w-full px-4 py-2 border border-gray-400 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+                        @error('startDate')
+                            <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                            Data de Término
                         </label>
                         <input type="date" wire:model="endDate"
                             class="w-full px-4 py-2 border border-gray-400 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -199,31 +196,37 @@
                             <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+                </div>
 
-                    {{-- Número de Ocorrências --}}
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                            Ou após (ocorrências)
-                        </label>
-                        <input type="number" wire:model="occurrences" min="1" placeholder="Ex: 12"
-                            class="w-full px-4 py-2 border border-gray-400 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500">
-                        @error('occurrences')
-                            <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
+                {{-- Ocorrências --}}
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                        Ou após X ocorrências
+                    </label>
+                    <input type="number" wire:model="occurrences" min="1" placeholder="Ex: 12"
+                        class="w-full px-4 py-2 border border-gray-400 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500">
+                    @error('occurrences')
+                        <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
         </div>
 
-        {{-- Submit Button --}}
-        <div class="flex justify-end gap-3 pt-4">
-            <x-secondary-button type="button" @click="$dispatch('close-modal')">
-                Cancelar
-            </x-secondary-button>
+        <div class="pt-4">
             <x-button type="submit" wire:loading.attr="disabled" wire:target="save"
-                class="!bg-[#4ECDC4] hover:!bg-[#3dbdb5] !text-gray-900">
+                class="w-full h-12 flex justify-center items-center rounded-xl !bg-[#4ECDC4] hover:!bg-[#3dbdb5] !text-gray-900 font-bold text-base uppercase tracking-widest transition-all duration-200 shadow-sm active:scale-[0.98] disabled:opacity-50">
                 <span wire:loading.remove wire:target="save">Salvar</span>
-                <span wire:loading wire:target="save">Salvando...</span>
+                <div wire:loading wire:target="save" class="flex items-center gap-2">
+                    <svg class="animate-spin h-5 w-5 text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    <span>Salvando...</span>
+                </div>
             </x-button>
         </div>
     </form>

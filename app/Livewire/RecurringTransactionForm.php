@@ -41,12 +41,6 @@ class RecurringTransactionForm extends Component
 
     public bool $editing = false;
 
-    #[Computed]
-    public function tags()
-    {
-        return app(TagService::class)->getUserTags(auth()->id());
-    }
-
     public function mount(?int $recurringId = null): void
     {
         if ($recurringId) {
@@ -61,12 +55,12 @@ class RecurringTransactionForm extends Component
 
                 $this->title = $recurring->title;
                 $this->description = $recurring->description ?? '';
-                $this->amount = number_format($recurring->amount, 2, '.', '');
+                $this->amount = number_format((float) $recurring->amount, 2, '.', '');
                 $this->type = $recurring->type->value;
                 $this->frequency = $recurring->frequency->value;
                 $this->interval = $recurring->interval;
-                $this->startDate = $recurring->start_date?->format('Y-m-d');
-                $this->endDate = $recurring->end_date?->format('Y-m-d');
+                $this->startDate = $recurring->start_date instanceof \DateTimeInterface ? $recurring->start_date->format('Y-m-d') : null;
+                $this->endDate = $recurring->end_date instanceof \DateTimeInterface ? $recurring->end_date->format('Y-m-d') : null;
                 $this->occurrences = $recurring->occurrences;
 
                 // Load tags from the most recent transaction
@@ -82,7 +76,7 @@ class RecurringTransactionForm extends Component
     {
         $this->validate();
 
-        if (! $this->editing || ! $this->recurring) {
+        if (!$this->editing || !$this->recurring) {
             $this->dispatch('notify', message: 'Recorrência não encontrada.', type: 'error');
 
             return;
@@ -137,8 +131,8 @@ class RecurringTransactionForm extends Component
             'type' => 'required|in:debit,credit',
             'frequency' => 'required|in:weekly,monthly,custom',
             'interval' => 'required|integer|min:1',
-            'startDate' => 'nullable|date',
-            'endDate' => 'nullable|date|after:start_date',
+            'startDate' => 'required|date',
+            'endDate' => 'nullable|date|after_or_equal:startDate',
             'occurrences' => 'nullable|integer|min:1',
             'selectedTags' => 'array',
             'selectedTags.*' => 'exists:tags,id',

@@ -19,30 +19,23 @@
     <div class="flex flex-wrap items-center gap-4 mb-8">
         {{-- Type Filter --}}
         <div class="w-40">
-            <x-custom-select wire:model.live="filterType" :options="[
-                ['value' => '', 'label' => 'Todos os Tipos'],
-                ['value' => 'debit', 'label' => 'Débitos'],
-                ['value' => 'credit', 'label' => 'Créditos']
-            ]" placeholder="Todos os Tipos" class="!py-2 !text-xs !font-bold" />
+            <x-custom-select property="filterType" :options="[]"
+                x-init="options = $store.options.types"
+                placeholder="Todos os Tipos" class="!py-2 !text-xs !font-bold" />
         </div>
 
         {{-- Status Filter --}}
         <div class="w-40">
-            <x-custom-select wire:model.live="filterStatus" :options="[
-                ['value' => '', 'label' => 'Todos os Status'],
-                ['value' => 'active', 'label' => 'Ativas'],
-                ['value' => 'inactive', 'label' => 'Inativas']
-            ]" placeholder="Todos os Status" class="!py-2 !text-xs !font-bold" />
+            <x-custom-select property="filterStatus" :options="[]"
+                x-init="options = $store.options.recurringStatuses"
+                placeholder="Todos os Status" class="!py-2 !text-xs !font-bold" />
         </div>
 
         {{-- Frequency Filter --}}
         <div class="w-44">
-            <x-custom-select wire:model.live="filterFrequency" :options="[
-                ['value' => '', 'label' => 'Todas Frequências'],
-                ['value' => 'weekly', 'label' => 'Semanais'],
-                ['value' => 'monthly', 'label' => 'Mensais'],
-                ['value' => 'custom', 'label' => 'Personalizadas']
-            ]" placeholder="Todas Frequências" class="!py-2 !text-xs !font-bold" />
+            <x-custom-select property="filterFrequency" :options="[]"
+                x-init="options = $store.options.frequencies"
+                placeholder="Todas Frequências" class="!py-2 !text-xs !font-bold" />
         </div>
 
         <button wire:click="clearFilters" @disabled(!$this->hasActiveFilters) @class([
@@ -123,7 +116,7 @@
         </div>
 
         {{-- Slide-over Modal (Pure Alpine for speed) --}}
-        <div x-show="isOpen" class="fixed inset-0 z-50 overflow-hidden" style="display: none;"
+        <div x-show="isOpen" wire:ignore.self class="fixed inset-0 z-50 overflow-hidden" style="display: none;"
             x-transition:enter="transition ease-in-out duration-500" x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in-out duration-500"
             x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">

@@ -1,23 +1,8 @@
-@props(['options', 'placeholder' => 'Selecione'])
+@props(['property', 'options' => [], 'placeholder' => 'Selecione'])
 
-<div x-data="{
-    options: [],
-    selected: @entangle($attributes->wire('model')),
-    show: false,
-    get selectedLabel() {
-        const option = this.options.find(o => o.value == this.selected);
-        return option ? option.label : '{{ $placeholder }}';
-    },
-    select(value) {
-        this.selected = value;
-        this.show = false;
-    },
-    init() {
-        this.options = {{ json_encode($options) }};
-    }
-}" class="relative">
+<div x-data="customSelect('{{ $property }}', {{ json_encode($options) }}, '{{ $placeholder }}')" class="relative">
     <div class="relative">
-        <button type="button" @click="show = !show" @click.away="show = false" {{ $attributes->merge(['class' => 'relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 dark:border-gray-600 rounded-xl shadow-none cursor-default focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 sm:text-sm text-gray-900 dark:bg-gray-900 dark:text-gray-300 transition-all']) }}>
+        <button type="button" @click="show = !show" @click.away="show = false" {{ $attributes->merge(['class' => 'relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-400 dark:border-gray-700 rounded-xl shadow-none cursor-default focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] sm:text-sm text-gray-900 dark:bg-gray-900 dark:text-gray-300 transition-all']) }}>
             <span class="block truncate" x-text="selectedLabel"></span>
             <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -27,10 +12,9 @@
         </button>
     </div>
 
-    <div x-show="show" x-cloak x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
+    <div x-show="show" x-cloak x-transition:leave="transition ease-in duration-100"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
         class="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 max-h-60 overflow-hidden ring-1 ring-black ring-opacity-5 focus:outline-none">
-
         <ul
             class="py-1 overflow-auto text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm max-h-48">
             <template x-for="option in options" :key="option.value">

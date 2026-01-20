@@ -28,8 +28,14 @@ class TransactionForm extends Component
 
     public ?int $transactionId = null;
 
-    // Form fields (removidos: title, amount, dueDate - são inline)
+    // Form fields
+    public string $title = '';
+
     public string $description = '';
+
+    public string $amount = '';
+
+    public string $dueDate = '';
 
     public string $type = 'debit';
 
@@ -37,27 +43,51 @@ class TransactionForm extends Component
 
     public array $selectedTags = [];
 
-    // Computed
-    public bool $editing = false;
+    // Recurrence fields
+    public bool $isRecurring = false;
 
-    #[Computed]
-    public function tags()
-    {
-        return app(TagService::class)->getUserTags(auth()->id());
-    }
+    public string $frequency = 'monthly';
+
+    public int $interval = 1;
+
+    public ?string $startDate = null;
+
+    public ?string $endDate = null;
+
+    public ?int $occurrences = null;
+
+    // State
+    public bool $editing = false;
 
     public function mount(?int $transactionId = null): void
     {
+        $this->dueDate = now()->format('Y-m-d');
+        $this->startDate = now()->format('Y-m-d');
+
         if ($transactionId) {
-            $transaction = Transaction::with('tags')->find($transactionId);
+            $transaction = Transaction::with(['tags', 'recurringTransaction'])->find($transactionId);
 
             if ($transaction) {
                 $this->editing = true;
                 $this->transaction = $transaction;
+                $this->transactionId = $transactionId;
+                $this->title = $transaction->title;
                 $this->description = $transaction->description ?? '';
+                $this->amount = number_format((float) $transaction->amount, 2, '.', '');
+                $this->dueDate = $transaction->due_date instanceof \DateTimeInterface ? $transaction->due_date->format('Y-m-d') : now()->format('Y-m-d');
                 $this->type = $transaction->type->value;
                 $this->status = $transaction->status->value;
                 $this->selectedTags = $transaction->tags->pluck('id')->toArray();
+
+                if ($transaction->recurring_transaction_id) {
+                    $this->isRecurring = true;
+                    $recurring = $transaction->recurringTransaction;
+                    $this->frequency = $recurring->frequency->value;
+                    $this->interval = $recurring->interval;
+                    $this->startDate = $recurring->start_date instanceof \DateTimeInterface ? $recurring->start_date->format('Y-m-d') : null;
+                    $this->endDate = $recurring->end_date instanceof \DateTimeInterface ? $recurring->end_date->format('Y-m-d') : null;
+                    $this->occurrences = $recurring->occurrences;
+                }
             }
         }
     }
@@ -66,44 +96,81 @@ class TransactionForm extends Component
     {
         $this->validate();
 
-        if ($this->editing) {
-            // Editing existing transaction
-            $data = [
-                'description' => $this->description,
-                'type' => $this->type,
-                'status' => $this->status,
-                'tags' => $this->selectedTags,
-            ];
+        $data = [
+            'user_id' => auth()->id(),
+            'title' => $this->title,
+            'description' => $this->description,
+            'amount' => (float) str_replace(',', '.', $this->amount),
+            'type' => $this->type,
+            'status' => $this->status,
+            'due_date' => $this->dueDate,
+            'tags' => $this->selectedTags,
+        ];
 
-            // Update only this transaction
+        if ($this->editing) {
             $transactionService->updateTransaction($this->transaction->id, $data);
             $this->dispatch('transaction-saved');
+            $this->dispatch('notify', message: 'Transação atualizada com sucesso!', type: 'success');
         } else {
-            // Creating new transaction
-            $this->dispatch('notify', message: 'Por favor, crie transações usando o botão "Nova Transação"', type: 'info');
+            if ($this->isRecurring) {
+                $status = $this->status;
+                $recurringData = array_merge($data, [
+                    'frequency' => $this->frequency,
+                    'interval' => $this->interval,
+                    'start_date' => $this->startDate ?: $this->dueDate,
+                    'end_date' => $this->endDate,
+                    'occurrences' => $this->occurrences,
+                ]);
+
+                $transactionService->createRecurringTransaction($recurringData);
+                $this->dispatch('transaction-saved');
+                $this->dispatch('notify', message: 'Recorrência criada com sucesso!', type: 'success');
+            } else {
+                $transactionService->createTransaction($data);
+                $this->dispatch('transaction-saved');
+                $this->dispatch('notify', message: 'Transação criada com sucesso!', type: 'success');
+            }
         }
     }
 
     protected function rules(): array
     {
-        return [
+        $rules = [
+            'title' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'dueDate' => 'required|date',
             'description' => 'nullable|string',
             'type' => 'required|in:debit,credit',
             'status' => 'required|in:pending,paid',
             'selectedTags' => 'array',
             'selectedTags.*' => 'exists:tags,id',
         ];
+
+        if ($this->isRecurring && !$this->editing) {
+            $rules = array_merge($rules, [
+                'frequency' => 'required|in:weekly,monthly,custom',
+                'interval' => 'required|integer|min:1',
+                'startDate' => 'required|date',
+                'endDate' => 'nullable|date|after_or_equal:startDate',
+                'occurrences' => 'nullable|integer|min:1',
+            ]);
+        }
+
+        return $rules;
     }
 
     protected function messages(): array
     {
         return [
-            'description.string' => 'A descrição deve ser um texto.',
+            'title.required' => 'O título é obrigatório.',
+            'amount.required' => 'O valor é obrigatório.',
+            'amount.numeric' => 'O valor deve ser um número.',
+            'dueDate.required' => 'A data é obrigatória.',
             'type.required' => 'O tipo é obrigatório.',
-            'type.in' => 'O tipo deve ser débito ou crédito.',
             'status.required' => 'O status é obrigatório.',
-            'status.in' => 'O status deve ser pendente ou pago.',
-            'selectedTags.*.exists' => 'Uma ou mais tags selecionadas são inválidas.',
+            'frequency.required' => 'A frequência é obrigatória.',
+            'interval.required' => 'O intervalo é obrigatório.',
+            'startDate.required' => 'A data de início é obrigatória.',
         ];
     }
 

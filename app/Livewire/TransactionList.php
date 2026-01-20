@@ -51,6 +51,11 @@ class TransactionList extends Component
         'open-edit-modal' => 'openEditModal',
     ];
 
+    public function mount(): void
+    {
+        $this->dispatch('tags-loaded', tags: $this->tags);
+    }
+
     #[Computed]
     public function transactions()
     {

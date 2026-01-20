@@ -30,7 +30,8 @@
     }
 }" @transaction-saved.window="closeModalAndReset()" @recurring-saved.window="closeModalAndReset()"
     @close-modal.window="closeModalAndReset()" @keydown.escape.window="closeModalAndReset()"
-    @open-edit-modal.window="openEditTransaction($event.detail.transactionId)">
+    @open-edit-modal.window="openEditTransaction($event.detail.transactionId)"
+    @tags-loaded.window="$store.tags.setTags($event.detail.tags)">
     {{-- Compact Filters Row --}}
     <div class="flex flex-wrap items-center gap-4 mb-8">
         {{-- Data Range Group --}}
@@ -44,35 +45,29 @@
         </div>
 
         {{-- Status Filter --}}
-        <div class="w-40">
-            <x-custom-select wire:model.live="filterStatus" :options="[
-        ['value' => '', 'label' => 'Todos os Status'],
-        ['value' => 'pending', 'label' => 'Pendentes'],
-        ['value' => 'paid', 'label' => 'Pagos']
-    ]"            placeholder="Todos os Status" class="!py-2 !text-xs !font-bold" />
+        <div class="w-40" x-data x-init="$nextTick(() => options = $store.options.statuses)">
+            <x-custom-select property="filterStatus" :options="[]" placeholder="Todos os Status"
+                class="!py-2 !text-xs !font-bold" />
         </div>
 
         {{-- Type Filter --}}
-        <div class="w-40">
-            <x-custom-select wire:model.live="filterType" :options="[
-        ['value' => '', 'label' => 'Todos os Tipos'],
-        ['value' => 'debit', 'label' => 'Débitos'],
-        ['value' => 'credit', 'label' => 'Créditos']
-    ]"            placeholder="Todos os Tipos" class="!py-2 !text-xs !font-bold" />
+        <div class="w-40" x-data x-init="$nextTick(() => options = $store.options.types)">
+            <x-custom-select property="filterType" :options="[]" placeholder="Todos os Tipos"
+                class="!py-2 !text-xs !font-bold" />
         </div>
 
         {{-- Recurrence Filter --}}
         <div class="w-44">
-            <x-custom-select wire:model.live="filterRecurrence" :options="[
+            <x-custom-select property="filterRecurrence" :options="[
         ['value' => '', 'label' => 'Recorrência (Todos)'],
         ['value' => 'recurring', 'label' => 'Recorrentes'],
         ['value' => 'not_recurring', 'label' => 'Não recorrentes']
-    ]"            placeholder="Recorrência (Todos)" class="!py-2 !text-xs !font-bold" />
+    ]" placeholder="Recorrência (Todos)" class="!py-2 !text-xs !font-bold" />
         </div>
 
         {{-- Tags Filter --}}
-        <div class="w-48">
-            <x-multi-select wire:model.live="selectedTags" :options="$this->tags" placeholder="Categorias"
+        <div class="w-48" x-data x-init="$nextTick(() => options = $store.tags.list)">
+            <x-multi-select property="selectedTags" :options="[]" placeholder="Tags"
                 class="!py-2 !text-xs !font-bold" />
         </div>
 
@@ -163,7 +158,7 @@
         </div>
 
         {{-- Slide-over Modal (Pure Alpine for speed) --}}
-        <div x-show="isOpen" class="fixed inset-0 z-50 overflow-hidden" style="display: none;"
+        <div x-show="isOpen" wire:ignore.self class="fixed inset-0 z-50 overflow-hidden" style="display: none;"
             x-transition:enter="transition ease-in-out duration-500" x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in-out duration-500"
             x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
@@ -273,11 +268,8 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                         @forelse ($this->transactions as $transaction)
-                            <livewire:transaction-row
-                                :transaction="$transaction"
-                                :key="'tx-' . $transaction->id"
-                                wire:key="transaction-{{ $transaction->id }}"
-                            />
+                            <livewire:transaction-row :transaction="$transaction"
+                                wire:key="transaction-{{ $transaction->id }}" />
                         @empty
                             <tr>
                                 <td colspan="7" class="px-6 py-4 text-sm text-center text-gray-500 dark:text-gray-400">

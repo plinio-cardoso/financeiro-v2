@@ -1,35 +1,12 @@
-@props(['options', 'placeholder' => 'Select options'])
+@props(['property', 'options' => [], 'placeholder' => 'Select options'])
 
-<div x-data="{
-    options: [],
-    selected: @entangle($attributes->wire('model')),
-    show: false,
-    filter: '',
-    get filteredOptions() {
-        if (this.filter === '') return this.options;
-        return this.options.filter(option => option.name.toLowerCase().includes(this.filter.toLowerCase()));
-    },
-    toggle(id) {
-        if (this.selected.includes(id)) {
-            this.selected = this.selected.filter(item => item != id);
-        } else {
-            this.selected.push(id);
-        }
-    },
-    isSelected(id) {
-        return this.selected.includes(id);
-    },
-    init() {
-        this.options = {{ json_encode($options) }};
-        if (!this.selected) this.selected = [];
-        // Ensure selected are all integers if options ids are integers, or match types
-        // Livewire might send selected as strings
-    }
-}" class="relative" @click.away="show = false">
+<div x-data="multiSelect('{{ $property }}', {{ json_encode($options) }}, '{{ $placeholder }}')" class="relative"
+    @click.away="show = false">
     <div class="relative">
-        <button type="button" @click="show = !show" {{ $attributes->merge(['class' => 'relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-400 dark:border-gray-700 rounded-xl shadow-none cursor-default focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 sm:text-sm text-gray-900 dark:bg-gray-900 dark:text-gray-300 transition-all']) }}>
+        <button type="button" @click="show = !show" {{ $attributes->merge(['class' => 'relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-400 dark:border-gray-700 rounded-xl shadow-none cursor-default focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] sm:text-sm text-gray-900 dark:bg-gray-900 dark:text-gray-300 transition-all']) }}>
             <span class="block truncate font-bold">
-                <span x-text="selected.length === 0 ? '{{ $placeholder }}' : selected.length + ' selecionados'"></span>
+                <span
+                    x-text="selected.length === 0 ? '{{ $placeholder }}' : (selected.length === 1 ? '1 selecionado' : selected.length + ' selecionados')"></span>
             </span>
             <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -42,10 +19,9 @@
     <div x-show="show" x-cloak x-transition:leave="transition ease-in duration-100"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
         class="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 max-h-60 overflow-hidden ring-1 ring-black ring-opacity-5 focus:outline-none">
-
         <div class="p-2 border-b border-gray-200 dark:border-gray-700">
             <input x-model="filter" type="text" placeholder="Buscar..."
-                class="block w-full px-3 py-2 text-sm border-gray-300 rounded-md focus:ring-[#4ECDC4] focus:border-[#4ECDC4] dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 placeholder-gray-500">
+                class="block w-full px-3 py-2 text-sm border-gray-400 rounded-md focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 placeholder-gray-500">
         </div>
 
         <ul
