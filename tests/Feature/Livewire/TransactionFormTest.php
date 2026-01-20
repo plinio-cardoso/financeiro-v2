@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Livewire;
 
+use App\Enums\TransactionStatusEnum;
+use App\Enums\TransactionTypeEnum;
 use App\Livewire\TransactionForm;
 use App\Models\Tag;
 use App\Models\Transaction;
@@ -24,51 +26,45 @@ class TransactionFormTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function test_can_create_transaction(): void
+    public function test_can_edit_transaction(): void
     {
         $user = User::factory()->create();
+        $transaction = Transaction::factory()->create([
+            'user_id' => $user->id,
+            'description' => 'Original Description',
+            'type' => TransactionTypeEnum::Debit,
+            'status' => TransactionStatusEnum::Pending,
+        ]);
 
         $this->actingAs($user);
 
-        Livewire::test(TransactionForm::class)
-            ->set('title', 'Test Transaction')
-            ->set('description', 'Test Description')
-            ->set('amount', 100.50)
-            ->set('type', 'debit')
-            ->set('status', 'pending')
-            ->set('dueDate', '2024-12-31')
+        Livewire::test(TransactionForm::class, ['transactionId' => $transaction->id])
+            ->set('description', 'Updated Description')
+            ->set('type', 'credit')
+            ->set('status', 'paid')
             ->call('save')
             ->assertDispatched('transaction-saved');
 
         $this->assertDatabaseHas('transactions', [
-            'title' => 'Test Transaction',
-            'amount' => 100.50,
-            'user_id' => $user->id,
+            'id' => $transaction->id,
+            'description' => 'Updated Description',
+            'type' => 'credit',
+            'status' => 'paid',
         ]);
     }
 
     public function test_validation_works(): void
     {
         $user = User::factory()->create();
+        $transaction = Transaction::factory()->create(['user_id' => $user->id]);
 
         $this->actingAs($user);
 
-        Livewire::test(TransactionForm::class)
-            ->set('title', '')
-            ->set('amount', 0)
+        Livewire::test(TransactionForm::class, ['transactionId' => $transaction->id])
+            ->set('type', 'invalid')
+            ->set('status', 'invalid')
             ->call('save')
-            ->assertHasErrors(['title', 'amount']);
-    }
-
-    public function test_paid_at_field_shows_when_status_is_paid(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        Livewire::test(TransactionForm::class)
-            ->set('status', 'paid')
-            ->assertSee('Pagamento');
+            ->assertHasErrors(['type', 'status']);
     }
 
     public function test_can_attach_tags_to_transaction(): void
@@ -76,40 +72,41 @@ class TransactionFormTest extends TestCase
         $user = User::factory()->create();
         $tag1 = Tag::factory()->create(['name' => 'Tag 1']);
         $tag2 = Tag::factory()->create(['name' => 'Tag 2']);
+        $transaction = Transaction::factory()->create(['user_id' => $user->id]);
 
         $this->actingAs($user);
 
-        Livewire::test(TransactionForm::class)
-            ->set('title', 'Transaction with Tags')
-            ->set('amount', 50.00)
-            ->set('type', 'debit')
-            ->set('status', 'pending')
-            ->set('dueDate', '2024-12-31')
+        Livewire::test(TransactionForm::class, ['transactionId' => $transaction->id])
             ->set('selectedTags', [$tag1->id, $tag2->id])
             ->call('save');
 
-        $transaction = Transaction::where('title', 'Transaction with Tags')->first();
+        $transaction->refresh();
 
-        $this->assertNotNull($transaction);
         $this->assertEquals(2, $transaction->tags()->count());
+        $this->assertTrue($transaction->tags->contains($tag1));
+        $this->assertTrue($transaction->tags->contains($tag2));
     }
 
-    public function test_displays_banner_on_successful_save(): void
+    public function test_mounts_with_transaction_data(): void
     {
         $user = User::factory()->create();
+        $tag1 = Tag::factory()->create(['name' => 'Tag 1']);
+        $transaction = Transaction::factory()->create([
+            'user_id' => $user->id,
+            'description' => 'Test Description',
+            'type' => TransactionTypeEnum::Credit,
+            'status' => TransactionStatusEnum::Paid,
+        ]);
+        $transaction->tags()->attach($tag1);
 
         $this->actingAs($user);
 
-        Livewire::test(TransactionForm::class)
-            ->set('title', 'Test Transaction')
-            ->set('amount', 100.00)
-            ->set('type', 'debit')
-            ->set('status', 'pending')
-            ->set('dueDate', '2024-12-31')
-            ->call('save');
+        $component = Livewire::test(TransactionForm::class, ['transactionId' => $transaction->id]);
 
-        $this->assertDatabaseHas('transactions', [
-            'title' => 'Test Transaction',
-        ]);
+        $this->assertEquals('Test Description', $component->get('description'));
+        $this->assertEquals('credit', $component->get('type'));
+        $this->assertEquals('paid', $component->get('status'));
+        $this->assertContains($tag1->id, $component->get('selectedTags'));
+        $this->assertTrue($component->get('editing'));
     }
 }
