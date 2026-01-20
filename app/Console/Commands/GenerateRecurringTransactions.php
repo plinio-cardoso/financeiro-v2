@@ -80,7 +80,7 @@ class GenerateRecurringTransactions extends Command
             }
 
             // Check if transaction already exists (idempotency)
-            if (!$force && $this->transactionExists($recurring, $currentDate)) {
+            if (! $force && $this->transactionExists($recurring, $currentDate)) {
                 $currentDate = $this->calculateNextDate($currentDate, $recurring);
 
                 continue;

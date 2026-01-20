@@ -70,13 +70,13 @@ class RecurringTransactionForm extends Component
     public function save(): void
     {
         // Remove 'R$', dots and replace comma with dot, but ONLY if not empty
-        if (!empty($this->amount)) {
+        if (! empty($this->amount)) {
             $this->amount = (float) str_replace(['R$', '.', ','], ['', '', '.'], $this->amount);
         }
 
         $this->validate();
 
-        if (!$this->editing || !$this->recurring) {
+        if (! $this->editing || ! $this->recurring) {
             $this->dispatch('notify', message: 'Recorrência não encontrada.', type: 'error');
 
             return;
