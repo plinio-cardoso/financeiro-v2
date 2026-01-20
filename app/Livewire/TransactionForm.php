@@ -3,10 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Transaction;
-use App\Services\TagService;
 use App\Services\TransactionService;
 use Laravel\Jetstream\InteractsWithBanner;
-use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class TransactionForm extends Component
@@ -146,7 +144,7 @@ class TransactionForm extends Component
             'selectedTags.*' => 'exists:tags,id',
         ];
 
-        if ($this->isRecurring && !$this->editing) {
+        if ($this->isRecurring && ! $this->editing) {
             $rules = array_merge($rules, [
                 'frequency' => 'required|in:weekly,monthly,custom',
                 'interval' => 'required|integer|min:1',

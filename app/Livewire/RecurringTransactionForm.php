@@ -3,9 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\RecurringTransaction;
-use App\Services\TagService;
 use Laravel\Jetstream\InteractsWithBanner;
-use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class RecurringTransactionForm extends Component
@@ -76,7 +74,7 @@ class RecurringTransactionForm extends Component
     {
         $this->validate();
 
-        if (!$this->editing || !$this->recurring) {
+        if (! $this->editing || ! $this->recurring) {
             $this->dispatch('notify', message: 'Recorrência não encontrada.', type: 'error');
 
             return;
