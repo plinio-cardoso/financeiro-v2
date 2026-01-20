@@ -99,7 +99,7 @@ jobs:
           ENDSSH
 
       - name: Send deployment notification (Success)
-        if: success()
+        if: success() && vars.ENABLE_MAILGUN_NOTIFICATIONS == 'true'
         run: |
           echo "✅ Deployment successful for commit ${{ github.sha }}"
           curl -s --user 'api:${{ secrets.MAILGUN_SECRET }}' \

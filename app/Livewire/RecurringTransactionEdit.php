@@ -78,7 +78,7 @@ class RecurringTransactionEdit extends Component
             return 0;
         }
 
-        return Transaction::where('recurring_transaction_id', $this->recurring->id)
+        return $this->recurring->transactions
             ->where('due_date', '>=', now())
             ->where('status', 'pending')
             ->count();
@@ -91,7 +91,7 @@ class RecurringTransactionEdit extends Component
             return 0;
         }
 
-        return Transaction::where('recurring_transaction_id', $this->recurring->id)->count();
+        return $this->recurring->transactions->count();
     }
 
     public function save(): void

@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Tag;
 use App\Services\TransactionService;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -42,6 +43,9 @@ class TransactionList extends Component
     // Paginação
     public int $perPage = 15;
 
+    // Cache for aggregates to avoid multiple queries
+    private $aggregatesCache = null;
+
     #[Computed]
     public function transactions()
     {
@@ -51,19 +55,31 @@ class TransactionList extends Component
     #[Computed]
     public function totalCount(): int
     {
-        return $this->getFilteredQuery()->count();
+        $this->loadAggregates();
+
+        return $this->aggregatesCache->total_count ?? 0;
     }
 
     #[Computed]
     public function totalAmount(): float
     {
-        $query = $this->getFilteredQuery();
+        $this->loadAggregates();
 
-        // Sum credits and debits separately to calculate net amount
-        $credits = (clone $query)->where('type', 'credit')->sum('amount');
-        $debits = (clone $query)->where('type', 'debit')->sum('amount');
+        return ($this->aggregatesCache->total_credits ?? 0) - ($this->aggregatesCache->total_debits ?? 0);
+    }
 
-        return $credits - $debits;
+    private function loadAggregates(): void
+    {
+        if ($this->aggregatesCache === null) {
+            // Single query to get ALL totals across ALL filtered transactions
+            $this->aggregatesCache = $this->getFilteredQuery()
+                ->selectRaw('
+                    COUNT(*) as total_count,
+                    SUM(CASE WHEN type = "credit" THEN amount ELSE 0 END) as total_credits,
+                    SUM(CASE WHEN type = "debit" THEN amount ELSE 0 END) as total_debits
+                ')
+                ->first();
+        }
     }
 
     private function getFilteredQuery()
@@ -87,7 +103,9 @@ class TransactionList extends Component
     #[Computed]
     public function tags()
     {
-        return Tag::orderBy('name')->get();
+        return Cache::remember('user_tags', 604800, function () {
+            return Tag::orderBy('name')->get();
+        });
     }
 
     #[Computed]
