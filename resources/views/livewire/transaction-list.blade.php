@@ -1,8 +1,13 @@
 <div x-data="{
     isOpen: false,
-    editingId: @entangle('editingTransactionId')
-}" @transaction-saved.window="isOpen = false" @close-modal.window="isOpen = false"
-    @keydown.escape.window="isOpen = false">
+    editingId: @entangle('editingTransactionId'),
+    editingRecurringId: @entangle('editingRecurringId'),
+    closeModalAndReset() {
+        this.isOpen = false;
+        $wire.closeModal();
+    }
+}" @transaction-saved.window="closeModalAndReset()" @recurring-saved.window="closeModalAndReset()"
+    @close-modal.window="closeModalAndReset()" @keydown.escape.window="closeModalAndReset()">
     {{-- Compact Filters Row --}}
     <div class="flex flex-wrap items-center gap-4 mb-8">
         {{-- Data Range Group --}}
@@ -30,7 +35,16 @@
         ['value' => '', 'label' => 'Todos os Tipos'],
         ['value' => 'debit', 'label' => 'Débitos'],
         ['value' => 'credit', 'label' => 'Créditos']
-    ]"  placeholder="Todos os Tipos" class="!py-2 !text-xs !font-bold" />
+    ]"            placeholder="Todos os Tipos" class="!py-2 !text-xs !font-bold" />
+        </div>
+
+        {{-- Recurrence Filter --}}
+        <div class="w-44">
+            <x-custom-select wire:model.live="filterRecurrence" :options="[
+        ['value' => '', 'label' => 'Recorrência (Todos)'],
+        ['value' => 'recurring', 'label' => 'Recorrentes'],
+        ['value' => 'not_recurring', 'label' => 'Não recorrentes']
+    ]"            placeholder="Recorrência (Todos)" class="!py-2 !text-xs !font-bold" />
         </div>
 
         {{-- Tags Filter --}}
@@ -82,7 +96,7 @@
                     class="block w-full pl-9 pr-4 py-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-lg text-[11px] font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 transition-all shadow-sm">
             </div>
 
-            <x-button @click="isOpen = true; if(editingId !== null) $wire.createTransaction()"
+            <x-button @click="$wire.createTransaction().then(() => { isOpen = true; })"
                 class="!bg-[#4ECDC4] hover:!bg-[#3dbdb5] !text-gray-900 shadow-sm py-1.5 px-4 rounded-lg active:scale-95 transition-all text-[11px] font-bold uppercase tracking-wider">
                 Nova Transação
             </x-button>
@@ -134,7 +148,7 @@
             <div class="absolute inset-0 overflow-hidden">
                 {{-- Backdrop --}}
                 <div class="absolute inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity"
-                    @click="isOpen = false"></div>
+                    @click="closeModalAndReset()"></div>
 
                 <div class="fixed inset-y-0 right-0 flex max-w-full pl-10 pointer-events-none">
                     <div x-show="isOpen" class="w-screen max-w-md pointer-events-auto shadow-2xl"
@@ -148,9 +162,10 @@
                             <div
                                 class="px-6 py-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between rounded-none">
                                 <h2 class="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
-                                    <span x-text="editingId ? 'Editar Transação' : 'Nova Transação'"></span>
+                                    <span
+                                        x-text="editingRecurringId ? 'Editar Recorrência' : (editingId ? 'Editar Transação' : 'Nova Transação')"></span>
                                 </h2>
-                                <button type="button" @click="isOpen = false"
+                                <button type="button" @click="closeModalAndReset()"
                                     class="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
                                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -162,7 +177,7 @@
                             {{-- Content Area --}}
                             <div class="flex-1 flex items-center justify-center relative overflow-hidden">
                                 {{-- Centered Loader --}}
-                                <div wire:loading wire:target="createTransaction, editTransaction"
+                                <div wire:loading wire:target="createTransaction, editTransaction, editRecurring"
                                     class="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-900 z-50">
                                     <div class="flex flex-col items-center gap-4  pt-5">
                                         <div
@@ -175,10 +190,15 @@
                                 </div>
 
                                 {{-- Component Content --}}
-                                <div wire:loading.remove wire:target="createTransaction, editTransaction"
+                                <div wire:loading.remove wire:target="createTransaction, editTransaction, editRecurring"
                                     class="w-full h-full px-6 py-8 overflow-y-auto custom-scrollbar">
-                                    <livewire:transaction-form :transaction-id="$editingTransactionId"
-                                        :key="'transaction-form-' . ($editingTransactionId ?? 'new')" />
+                                    @if($editingRecurringId)
+                                        <livewire:recurring-transaction-edit :recurring-id="$editingRecurringId"
+                                            :key="'recurring-' . $modalCounter . '-' . $editingRecurringId" />
+                                    @else
+                                        <livewire:transaction-form :transaction-id="$editingTransactionId"
+                                            :key="'transaction-' . $modalCounter . '-' . ($editingTransactionId ?? 'new')" />
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -252,19 +272,26 @@
                             <tr wire:key="transaction-{{ $transaction->id }}">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div x-data="{
-                                                editing: false,
-                                                value: '{{ addslashes($transaction->title) }}',
-                                                original: '{{ addslashes($transaction->title) }}',
-                                                save() {
-                                                    if (this.value === this.original) { this.editing = false; return; }
-                                                    $wire.updateField({{ $transaction->id }}, 'title', this.value).then(() => {
-                                                        this.original = this.value;
-                                                        this.editing = false;
-                                                    });
-                                                }
-                                            }" class="min-w-[200px]">
+                                                                                                editing: false,
+                                                                                                value: '{{ addslashes($transaction->title) }}',
+                                                                                                original: '{{ addslashes($transaction->title) }}',
+                                                                                                save() {
+                                                                                                    if (this.value === this.original) { this.editing = false; return; }
+                                                                                                    $wire.updateField({{ $transaction->id }}, 'title', this.value).then(() => {
+                                                                                                        this.original = this.value;
+                                                                                                        this.editing = false;
+                                                                                                    });
+                                                                                                }
+                                                                                            }" class="min-w-[200px]">
                                         <div x-show="!editing" @click="editing = true"
                                             class="flex items-center gap-2 group cursor-pointer">
+                                            @if($transaction->recurring_transaction_id)
+                                                <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor" title="Transação recorrente">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                </svg>
+                                            @endif
                                             <span
                                                 class="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#4ECDC4] transition-colors">
                                                 {{ $transaction->title }}
@@ -281,17 +308,17 @@
                                             class="w-full px-2 py-1 text-sm font-bold bg-white dark:bg-gray-700 border-b-2 border-[#4ECDC4] border-t-0 border-x-0 focus:ring-0 focus:border-[#4ECDC4] text-gray-900 dark:text-gray-100 p-0">
                                     </div>
                                     <div x-data="{
-                                                editing: false,
-                                                value: '{{ addslashes($transaction->description ?? '') }}',
-                                                original: '{{ addslashes($transaction->description ?? '') }}',
-                                                save() {
-                                                    if (this.value === this.original) { this.editing = false; return; }
-                                                    $wire.updateField({{ $transaction->id }}, 'description', this.value).then(() => {
-                                                        this.original = this.value;
-                                                        this.editing = false;
-                                                    });
-                                                }
-                                            }" class="mt-1">
+                                                                                                editing: false,
+                                                                                                value: '{{ addslashes($transaction->description ?? '') }}',
+                                                                                                original: '{{ addslashes($transaction->description ?? '') }}',
+                                                                                                save() {
+                                                                                                    if (this.value === this.original) { this.editing = false; return; }
+                                                                                                    $wire.updateField({{ $transaction->id }}, 'description', this.value).then(() => {
+                                                                                                        this.original = this.value;
+                                                                                                        this.editing = false;
+                                                                                                    });
+                                                                                                }
+                                                                                            }" class="mt-1">
                                         <div x-show="!editing" @click="editing = true"
                                             class="flex items-center gap-2 group cursor-pointer min-h-[1.25rem]">
                                             <span
@@ -317,17 +344,18 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div x-data="{
-                                                editing: false,
-                                                value: '{{ number_format($transaction->amount, 2, '.', '') }}',
-                                                original: '{{ number_format($transaction->amount, 2, '.', '') }}',
-                                                save() {
-                                                    if (this.value === this.original) { this.editing = false; return; }
-                                                    $wire.updateField({{ $transaction->id }}, 'amount', this.value).then(() => {
-                                                        this.original = this.value;
-                                                        this.editing = false;
-                                                    });
-                                                }
-                                            }" class="flex flex-col items-start">
+                                                                                                editing: false,
+                                                                                                value: '{{ number_format($transaction->amount, 2, '.', '') }}',
+                                                                                                original: '{{ number_format($transaction->amount, 2, '.', '') }}',
+                                                                                                save() {
+                                                                                                    if (this.value === this.original) { this.editing = false; return; }
+                                                                                                    $wire.updateField({{ $transaction->id }}, 'amount', this.value).then(() => {
+                                                                                                        this.original = this.value;
+                                                                                                        this.editing = false;
+                                                                                                    });
+                                                                                                }
+                                                                                            }"
+                                        class="flex flex-col items-start">
                                         <div x-show="!editing" @click="editing = true"
                                             class="flex items-center gap-2 group cursor-pointer">
                                             <span
@@ -351,22 +379,22 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div x-data="{
-                                                show: false,
-                                                value: '{{ $transaction->type->value }}',
-                                                original: '{{ $transaction->type->value }}',
-                                                options: [
-                                                    { label: 'Débito', value: 'debit', color: '#EF4444' },
-                                                    { label: 'Crédito', value: 'credit', color: '#10B981' }
-                                                ],
-                                                select(val) {
-                                                    if (val === this.original) { this.show = false; return; }
-                                                    this.value = val;
-                                                    $wire.updateField({{ $transaction->id }}, 'type', this.value).then(() => {
-                                                        this.original = this.value;
-                                                        this.show = false;
-                                                    });
-                                                }
-                                            }" class="relative">
+                                                                                                show: false,
+                                                                                                value: '{{ $transaction->type->value }}',
+                                                                                                original: '{{ $transaction->type->value }}',
+                                                                                                options: [
+                                                                                                    { label: 'Débito', value: 'debit', color: '#EF4444' },
+                                                                                                    { label: 'Crédito', value: 'credit', color: '#10B981' }
+                                                                                                ],
+                                                                                                select(val) {
+                                                                                                    if (val === this.original) { this.show = false; return; }
+                                                                                                    this.value = val;
+                                                                                                    $wire.updateField({{ $transaction->id }}, 'type', this.value).then(() => {
+                                                                                                        this.original = this.value;
+                                                                                                        this.show = false;
+                                                                                                    });
+                                                                                                }
+                                                                                            }" class="relative">
                                         <div @click="show = !show" class="cursor-pointer group flex items-center gap-1">
                                             <span @class([
                                                 'inline-flex px-2 text-xs font-semibold leading-5 rounded-full transition-all group-hover:ring-2 group-hover:ring-[#4ECDC4]/30',
@@ -406,18 +434,18 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div x-data="{
-                                                show: false,
-                                                value: '{{ $transaction->status->value }}',
-                                                original: '{{ $transaction->status->value }}',
-                                                select(val) {
-                                                    if (val === this.original) { this.show = false; return; }
-                                                    this.value = val;
-                                                    $wire.updateField({{ $transaction->id }}, 'status', this.value).then(() => {
-                                                        this.original = this.value;
-                                                        this.show = false;
-                                                    });
-                                                }
-                                            }" class="relative">
+                                                                                                show: false,
+                                                                                                value: '{{ $transaction->status->value }}',
+                                                                                                original: '{{ $transaction->status->value }}',
+                                                                                                select(val) {
+                                                                                                    if (val === this.original) { this.show = false; return; }
+                                                                                                    this.value = val;
+                                                                                                    $wire.updateField({{ $transaction->id }}, 'status', this.value).then(() => {
+                                                                                                        this.original = this.value;
+                                                                                                        this.show = false;
+                                                                                                    });
+                                                                                                }
+                                                                                            }" class="relative">
                                         <div @click="show = !show" class="cursor-pointer group flex items-center gap-1">
                                             <span @class([
                                                 'inline-flex px-2 text-xs font-semibold leading-5 rounded-full transition-all group-hover:ring-2 group-hover:ring-[#4ECDC4]/30',
@@ -456,17 +484,17 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div x-data="{
-                                                editing: false,
-                                                value: '{{ $transaction->due_date->format('Y-m-d') }}',
-                                                original: '{{ $transaction->due_date->format('Y-m-d') }}',
-                                                save() {
-                                                    if (this.value === this.original) { this.editing = false; return; }
-                                                    $wire.updateField({{ $transaction->id }}, 'due_date', this.value).then(() => {
-                                                        this.original = this.value;
-                                                        this.editing = false;
-                                                    });
-                                                }
-                                            }">
+                                                                                                editing: false,
+                                                                                                value: '{{ $transaction->due_date->format('Y-m-d') }}',
+                                                                                                original: '{{ $transaction->due_date->format('Y-m-d') }}',
+                                                                                                save() {
+                                                                                                    if (this.value === this.original) { this.editing = false; return; }
+                                                                                                    $wire.updateField({{ $transaction->id }}, 'due_date', this.value).then(() => {
+                                                                                                        this.original = this.value;
+                                                                                                        this.editing = false;
+                                                                                                    });
+                                                                                                }
+                                                                                            }">
                                         <div x-show="!editing" @click="editing = true"
                                             class="flex items-center gap-2 group cursor-pointer">
                                             <span
@@ -488,40 +516,40 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div x-data="{
-                                            show: false,
-                                            selected: @js($transaction->tags->pluck('id')),
-                                            original: @js($transaction->tags->pluck('id')),
-                                            allTags: @js($this->tags),
-                                            position: { top: 0, left: 0 },
-                                            updatePosition() {
-                                                let rect = $refs.trigger.getBoundingClientRect();
-                                                this.position = {
-                                                    top: rect.bottom + 'px',
-                                                    left: rect.left + 'px'
-                                                };
-                                            },
-                                            save() {
-                                                let s = JSON.stringify(this.selected.sort());
-                                                let o = JSON.stringify(this.original.sort());
-                                                
-                                                if (s === o) {
-                                                    this.show = false;
-                                                    return;
-                                                }
+                                                                                            show: false,
+                                                                                            selected: @js($transaction->tags->pluck('id')),
+                                                                                            original: @js($transaction->tags->pluck('id')),
+                                                                                            allTags: @js($this->tags),
+                                                                                            position: { top: 0, left: 0 },
+                                                                                            updatePosition() {
+                                                                                                let rect = $refs.trigger.getBoundingClientRect();
+                                                                                                this.position = {
+                                                                                                    top: rect.bottom + 'px',
+                                                                                                    left: rect.left + 'px'
+                                                                                                };
+                                                                                            },
+                                                                                            save() {
+                                                                                                let s = JSON.stringify(this.selected.sort());
+                                                                                                let o = JSON.stringify(this.original.sort());
 
-                                                $wire.updateTags({{ $transaction->id }}, this.selected).then(() => {
-                                                    this.original = [...this.selected];
-                                                    this.show = false;
-                                                });
-                                            },
-                                            toggle(id) {
-                                                if (this.selected.includes(id)) {
-                                                    this.selected = this.selected.filter(i => i != id);
-                                                } else {
-                                                    this.selected.push(id);
-                                                }
-                                            }
-                                        }" class="relative">
+                                                                                                if (s === o) {
+                                                                                                    this.show = false;
+                                                                                                    return;
+                                                                                                }
+
+                                                                                                $wire.updateTags({{ $transaction->id }}, this.selected).then(() => {
+                                                                                                    this.original = [...this.selected];
+                                                                                                    this.show = false;
+                                                                                                });
+                                                                                            },
+                                                                                            toggle(id) {
+                                                                                                if (this.selected.includes(id)) {
+                                                                                                    this.selected = this.selected.filter(i => i != id);
+                                                                                                } else {
+                                                                                                    this.selected.push(id);
+                                                                                                }
+                                                                                            }
+                                                                                        }" class="relative">
                                         <div x-ref="trigger" @click="updatePosition(); show = !show"
                                             @scroll.window="show = false" @resize.window="show = false"
                                             class="flex flex-wrap gap-1 cursor-pointer group p-1 rounded transition-all min-h-[32px] items-center">
@@ -559,8 +587,8 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                    <div class="flex justify-end gap-2">
+                                <td class="px-2 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                    <div class="flex justify-end gap-2 pr-8">
                                         @if ($transaction->status->value === 'pending' && $transaction->type->value === 'debit')
                                             <button wire:click="markAsPaid({{ $transaction->id }})" wire:loading.attr="disabled"
                                                 wire:loading.class="opacity-50 cursor-not-allowed"
@@ -589,14 +617,18 @@
                                                 </svg>
                                             </button>
                                         @endif
-                                        <button @click="isOpen = true; $wire.editTransaction({{ $transaction->id }})"
-                                            class="text-[#4ECDC4] hover:text-[#3dbdb5] dark:text-[#4ECDC4] dark:hover:text-[#3dbdb5] transition-colors p-1 rounded-full hover:bg-[#4ECDC410] dark:hover:bg-[#4ECDC420]"
-                                            title="Editar">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
+
+                                        @if($transaction->recurring_transaction_id)
+                                            <button
+                                                @click="$wire.editRecurring({{ $transaction->recurring_transaction_id }}).then(() => { isOpen = true; })"
+                                                class="text-[#4ECDC4] hover:text-[#3dbdb5] dark:text-[#4ECDC4] dark:hover:text-[#3dbdb5] transition-colors p-1 rounded-full hover:bg-[#4ECDC410] dark:hover:bg-[#4ECDC420]"
+                                                title="Editar recorrência">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

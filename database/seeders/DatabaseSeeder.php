@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             TagSeeder::class,
             NotificationSettingSeeder::class,
+            RecurringTransactionSeeder::class,
             TransactionSeeder::class,
         ]);
     }

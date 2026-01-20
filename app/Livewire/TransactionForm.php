@@ -15,6 +15,17 @@ class TransactionForm extends Component
 
     public ?Transaction $transaction = null;
 
+    public function boot()
+    {
+        $this->withValidator(function ($validator) {
+            $validator->after(function ($validator) {
+                if ($validator->errors()->any()) {
+                    $this->dispatch('validation-failed');
+                }
+            });
+        });
+    }
+
     public ?int $transactionId = null;
 
     // Form fields
@@ -31,6 +42,17 @@ class TransactionForm extends Component
     public string $dueDate = '';
 
     public ?string $paidAt = null;
+
+    // Recurrence fields
+    public bool $isRecurring = false;
+
+    public string $frequency = 'monthly';
+
+    public int $interval = 1;
+
+    public ?string $endDate = null;
+
+    public ?int $occurrences = null;
 
     public array $selectedTags = [];
 
@@ -69,22 +91,39 @@ class TransactionForm extends Component
     {
         $this->validate();
 
-        $data = [
-            'title' => $this->title,
-            'description' => $this->description,
-            'amount' => $this->amount,
-            'type' => $this->type,
-            'status' => $this->status,
-            'due_date' => $this->dueDate,
-            'paid_at' => $this->paidAt,
-            'tags' => $this->selectedTags,
-        ];
+        if ($this->isRecurring && !$this->editing) {
+            $data = [
+                'user_id' => auth()->id(),
+                'title' => $this->title,
+                'description' => $this->description,
+                'amount' => $this->amount,
+                'type' => $this->type,
+                'frequency' => $this->frequency,
+                'interval' => $this->interval,
+                'start_date' => $this->dueDate,
+                'end_date' => $this->endDate,
+                'occurrences' => $this->occurrences,
+            ];
 
-        if ($this->editing) {
-            $transactionService->updateTransaction($this->transaction->id, $data);
+            $transactionService->createRecurringTransaction($data);
         } else {
-            $data['user_id'] = auth()->id();
-            $transactionService->createTransaction($data);
+            $data = [
+                'title' => $this->title,
+                'description' => $this->description,
+                'amount' => $this->amount,
+                'type' => $this->type,
+                'status' => $this->status,
+                'due_date' => $this->dueDate,
+                'paid_at' => $this->paidAt,
+                'tags' => $this->selectedTags,
+            ];
+
+            if ($this->editing) {
+                $transactionService->updateTransaction($this->transaction->id, $data);
+            } else {
+                $data['user_id'] = auth()->id();
+                $transactionService->createTransaction($data);
+            }
         }
 
         $this->dispatch('transaction-saved');
@@ -102,6 +141,11 @@ class TransactionForm extends Component
             'paidAt' => 'nullable|date',
             'selectedTags' => 'array',
             'selectedTags.*' => 'exists:tags,id',
+            'isRecurring' => 'boolean',
+            'frequency' => 'required_if:isRecurring,true|in:weekly,monthly,custom',
+            'interval' => 'required_if:isRecurring,true|integer|min:1',
+            'endDate' => 'nullable|date|after:dueDate',
+            'occurrences' => 'nullable|integer|min:1',
         ];
     }
 

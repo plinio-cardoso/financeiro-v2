@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('status')->default('pending');
             $table->date('due_date');
             $table->datetime('paid_at')->nullable();
+            $table->foreignId('recurring_transaction_id')->nullable()->constrained()->nullOnDelete();
+            $table->integer('sequence')->nullable();
             $table->timestamps();
 
             // Indexes for optimization
@@ -28,6 +30,7 @@ return new class extends Migration
             $table->index('due_date');
             $table->index('status');
             $table->index('type');
+            $table->index('recurring_transaction_id');
             $table->index(['user_id', 'due_date', 'status']);
         });
     }

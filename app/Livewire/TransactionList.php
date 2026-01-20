@@ -15,6 +15,10 @@ class TransactionList extends Component
 
     public ?int $editingTransactionId = null;
 
+    public ?int $editingRecurringId = null;
+
+    public int $modalCounter = 0;
+
     // Filtros
     public string $search = '';
 
@@ -27,6 +31,8 @@ class TransactionList extends Component
     public ?string $filterStatus = null;
 
     public ?string $filterType = null;
+
+    public ?string $filterRecurrence = null;
 
     // Ordenação
     public string $sortField = 'due_date';
@@ -71,6 +77,7 @@ class TransactionList extends Component
                 'tags' => $this->selectedTags,
                 'status' => $this->filterStatus,
                 'type' => $this->filterType,
+                'recurring' => $this->filterRecurrence,
                 'sort_by' => $this->sortField,
                 'sort_direction' => $this->sortDirection,
             ]
@@ -86,12 +93,13 @@ class TransactionList extends Component
     #[Computed]
     public function hasActiveFilters(): bool
     {
-        return ! empty($this->search)
-            || ! empty($this->startDate)
-            || ! empty($this->endDate)
-            || ! empty($this->selectedTags)
-            || ! empty($this->filterStatus)
-            || ! empty($this->filterType);
+        return !empty($this->search)
+            || !empty($this->startDate)
+            || !empty($this->endDate)
+            || !empty($this->selectedTags)
+            || !empty($this->filterStatus)
+            || !empty($this->filterType)
+            || !empty($this->filterRecurrence);
     }
 
     public function updatedSearch(): void
@@ -114,6 +122,11 @@ class TransactionList extends Component
         $this->resetPage();
     }
 
+    public function updatedFilterRecurrence(): void
+    {
+        $this->resetPage();
+    }
+
     public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
@@ -128,12 +141,31 @@ class TransactionList extends Component
 
     public function createTransaction(): void
     {
-        $this->editingTransactionId = null;
+        // Clear both IDs to force fresh component mount
+        $this->reset(['editingTransactionId', 'editingRecurringId']);
+        $this->modalCounter++;
     }
 
     public function editTransaction(int $id): void
     {
+        // Clear recurring ID first, then set transaction ID
+        $this->reset(['editingRecurringId']);
         $this->editingTransactionId = $id;
+        $this->modalCounter++;
+    }
+
+    public function editRecurring(int $recurringId): void
+    {
+        // Clear transaction ID first, then set recurring ID
+        $this->reset(['editingTransactionId']);
+        $this->editingRecurringId = $recurringId;
+        $this->modalCounter++;
+    }
+
+    public function closeModal(): void
+    {
+        // Reset both IDs when closing to ensure clean state
+        $this->reset(['editingTransactionId', 'editingRecurringId']);
     }
 
     public function clearFilters(): void
@@ -145,6 +177,7 @@ class TransactionList extends Component
             'selectedTags',
             'filterStatus',
             'filterType',
+            'filterRecurrence',
         ]);
     }
 
@@ -152,9 +185,20 @@ class TransactionList extends Component
     public function refreshList(): void
     {
         $this->editingTransactionId = null;
+        $this->editingRecurringId = null;
         $this->resetPage();
         $this->dispatch('close-modal');
         $this->dispatch('notify', message: 'Transação salva com sucesso!', type: 'success');
+    }
+
+    #[On('recurring-saved')]
+    public function refreshListRecurring(): void
+    {
+        $this->editingTransactionId = null;
+        $this->editingRecurringId = null;
+        $this->resetPage();
+        $this->dispatch('close-modal');
+        $this->dispatch('notify', message: 'Recorrência atualizada com sucesso!', type: 'success');
     }
 
     public function markAsPaid(int $transactionId): void
@@ -163,7 +207,7 @@ class TransactionList extends Component
             $transaction = app(TransactionService::class)
                 ->findTransactionById($transactionId, auth()->id());
 
-            if (! $transaction) {
+            if (!$transaction) {
                 $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
 
                 return;
@@ -180,7 +224,7 @@ class TransactionList extends Component
             $this->resetPage();
             $this->dispatch('notify', message: 'Transação marcada como paga com sucesso!', type: 'success');
         } catch (\Exception $e) {
-            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: '.$e->getMessage(), type: 'error');
+            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: ' . $e->getMessage(), type: 'error');
         }
     }
 
@@ -189,7 +233,7 @@ class TransactionList extends Component
         try {
             $transaction = app(TransactionService::class)->findTransactionById($id, auth()->id());
 
-            if (! $transaction) {
+            if (!$transaction) {
                 $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
 
                 return;
@@ -248,13 +292,13 @@ class TransactionList extends Component
                 $field => $validationValue,
             ]);
 
-            $this->dispatch('notify', message: ucfirst($fieldNames[$field]).' atualizado com sucesso!', type: 'success');
+            $this->dispatch('notify', message: ucfirst($fieldNames[$field]) . ' atualizado com sucesso!', type: 'success');
 
             // Refresh the component to show updated data
             // Since we are using Computed properties, we don't strictly need to redirect,
             // but we might need to reset items or just let Livewire do its thing.
         } catch (\Exception $e) {
-            $this->dispatch('notify', message: 'Erro ao atualizar: '.$e->getMessage(), type: 'error');
+            $this->dispatch('notify', message: 'Erro ao atualizar: ' . $e->getMessage(), type: 'error');
         }
     }
 
@@ -263,7 +307,7 @@ class TransactionList extends Component
         try {
             $transaction = app(TransactionService::class)->findTransactionById($id, auth()->id());
 
-            if (! $transaction) {
+            if (!$transaction) {
                 $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
 
                 return;
@@ -275,7 +319,7 @@ class TransactionList extends Component
 
             $this->dispatch('notify', message: 'Tags atualizadas com sucesso!', type: 'success');
         } catch (\Exception $e) {
-            $this->dispatch('notify', message: 'Erro ao analisar tags: '.$e->getMessage(), type: 'error');
+            $this->dispatch('notify', message: 'Erro ao analisar tags: ' . $e->getMessage(), type: 'error');
         }
     }
 

@@ -10,6 +10,41 @@ use Illuminate\Support\Collection;
 class TransactionService
 {
     /**
+     * Create a new recurring transaction
+     */
+    public function createRecurringTransaction(array $data): \App\Models\RecurringTransaction
+    {
+        $recurring = \App\Models\RecurringTransaction::create([
+            'user_id' => $data['user_id'],
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+            'amount' => $data['amount'],
+            'type' => $data['type'] ?? TransactionTypeEnum::Debit,
+            'frequency' => $data['frequency'],
+            'interval' => $data['interval'] ?? 1,
+            'start_date' => $data['start_date'],
+            'end_date' => $data['end_date'] ?? null,
+            'occurrences' => $data['occurrences'] ?? null,
+            'active' => true,
+            'next_due_date' => $data['start_date'],
+        ]);
+
+        // If start date is today or in the past, let the scheduled job pick it up
+        // OR we can generate the first one immediately.
+        // Let's generate immediately to give instant feedback to the user.
+        $startDate = \Carbon\Carbon::parse($data['start_date']);
+        if ($startDate->lte(today())) {
+            \Illuminate\Support\Facades\Artisan::call('app:generate-transactions', [
+                '--days' => 0, // Generate for today
+            ]);
+            // Reload to get updated next_due_date
+            $recurring->refresh();
+        }
+
+        return $recurring;
+    }
+
+    /**
      * Create a new transaction
      */
     public function createTransaction(array $data): Transaction
@@ -125,8 +160,8 @@ class TransactionService
 
         return [
             'total_due' => $transactions->sum('amount'),
-            'total_paid' => $transactions->filter(fn ($t) => $t->isPaid())->sum('amount'),
-            'total_pending' => $transactions->filter(fn ($t) => $t->isPending())->sum('amount'),
+            'total_paid' => $transactions->filter(fn($t) => $t->isPaid())->sum('amount'),
+            'total_pending' => $transactions->filter(fn($t) => $t->isPending())->sum('amount'),
         ];
     }
 
@@ -138,7 +173,7 @@ class TransactionService
         $nextMonth = \Carbon\Carbon::create($year, $month, 1)->addMonth();
 
         $transactions = $this->getMonthlyDebits($userId, $nextMonth->year, $nextMonth->month)
-            ->filter(fn ($t) => $t->isPending());
+            ->filter(fn($t) => $t->isPending());
 
         return $transactions->sum('amount');
     }
@@ -148,37 +183,46 @@ class TransactionService
      */
     public function getFilteredTransactions(int $userId, array $filters)
     {
-        $query = Transaction::where('user_id', $userId)->with('tags');
+        $query = Transaction::where('user_id', $userId)->with(['tags', 'recurringTransaction']);
 
         // Search filter
-        if (! empty($filters['search'])) {
-            $query->where('title', 'like', '%'.$filters['search'].'%');
+        if (!empty($filters['search'])) {
+            $query->where('title', 'like', '%' . $filters['search'] . '%');
         }
 
         // Date range filters
-        if (! empty($filters['start_date'])) {
+        if (!empty($filters['start_date'])) {
             $query->whereDate('due_date', '>=', $filters['start_date']);
         }
 
-        if (! empty($filters['end_date'])) {
+        if (!empty($filters['end_date'])) {
             $query->whereDate('due_date', '<=', $filters['end_date']);
         }
 
         // Tags filter
-        if (! empty($filters['tags']) && is_array($filters['tags'])) {
+        if (!empty($filters['tags']) && is_array($filters['tags'])) {
             $query->whereHas('tags', function ($q) use ($filters) {
                 $q->whereIn('tags.id', $filters['tags']);
             });
         }
 
         // Status filter
-        if (! empty($filters['status'])) {
+        if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
         // Type filter
-        if (! empty($filters['type'])) {
+        if (!empty($filters['type'])) {
             $query->where('type', $filters['type']);
+        }
+
+        // Recurring filter
+        if (!empty($filters['recurring'])) {
+            if ($filters['recurring'] === 'recurring') {
+                $query->whereNotNull('recurring_transaction_id');
+            } elseif ($filters['recurring'] === 'not_recurring') {
+                $query->whereNull('recurring_transaction_id');
+            }
         }
 
         // Sorting

@@ -102,7 +102,12 @@ jobs:
         if: success()
         run: |
           echo "✅ Deployment successful for commit ${{ github.sha }}"
-          # Add Slack/Discord/Email notification here if needed
+          curl -s --user 'api:${{ secrets.MAILGUN_SECRET }}' \
+            https://api.mailgun.net/v3/${{ secrets.MAILGUN_DOMAIN }}/messages \
+            -F from='Deploy Bot <noreply@${{ secrets.MAILGUN_DOMAIN }}>' \
+            -F to='${{ secrets.MAILGUN_RECIPIENT }}' \
+            -F subject='Deployment Successful: ${{ github.repository }}' \
+            -F text='Deployment to production was successful! Commit: ${{ github.sha }}'
 
       - name: Send deployment notification (Failure)
         if: failure()

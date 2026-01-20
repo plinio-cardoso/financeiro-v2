@@ -27,7 +27,7 @@
     }
 }" class="relative" @click.away="show = false">
     <div class="relative">
-        <button type="button" @click="show = !show" {{ $attributes->merge(['class' => 'relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-100 dark:border-gray-700/50 rounded-xl shadow-none cursor-default focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 sm:text-sm text-gray-900 dark:bg-gray-900 dark:text-gray-300 transition-all']) }}>
+        <button type="button" @click="show = !show" {{ $attributes->merge(['class' => 'relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-400 dark:border-gray-700 rounded-xl shadow-none cursor-default focus:outline-none focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 sm:text-sm text-gray-900 dark:bg-gray-900 dark:text-gray-300 transition-all']) }}>
             <span class="block truncate font-bold">
                 <span x-text="selected.length === 0 ? '{{ $placeholder }}' : selected.length + ' selecionados'"></span>
             </span>
@@ -39,8 +39,8 @@
         </button>
     </div>
 
-    <div x-show="show" x-cloak x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
+    <div x-show="show" x-cloak x-transition:leave="transition ease-in duration-100"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
         class="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 max-h-60 overflow-hidden ring-1 ring-black ring-opacity-5 focus:outline-none">
 
         <div class="p-2 border-b border-gray-200 dark:border-gray-700">
@@ -70,7 +70,8 @@
                     </span>
                 </li>
             </template>
-            <div x-show="filteredOptions.length === 0" x-cloak class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+            <div x-show="filteredOptions.length === 0" x-cloak
+                class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
                 Nenhum resultado encontrado.
             </div>
         </ul>

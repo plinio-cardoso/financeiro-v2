@@ -21,10 +21,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property TransactionStatusEnum $status
  * @property \Carbon\Carbon $due_date
  * @property \Carbon\Carbon|null $paid_at
+ * @property int|null $recurring_transaction_id
+ * @property int|null $sequence
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property-read User $user
  * @property-read \Illuminate\Database\Eloquent\Collection<Tag> $tags
+ * @property-read RecurringTransaction|null $recurringTransaction
  */
 class Transaction extends Model
 {
@@ -41,6 +44,8 @@ class Transaction extends Model
         'status',
         'due_date',
         'paid_at',
+        'recurring_transaction_id',
+        'sequence',
     ];
 
     protected function casts(): array
@@ -63,6 +68,11 @@ class Transaction extends Model
     {
         return $this->belongsToMany(Tag::class, 'transaction_tag')
             ->withTimestamps();
+    }
+
+    public function recurringTransaction(): BelongsTo
+    {
+        return $this->belongsTo(RecurringTransaction::class);
     }
 
     /**
