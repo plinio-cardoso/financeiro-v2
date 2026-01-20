@@ -90,7 +90,7 @@
                         <label for="amount" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                             Valor *
                         </label>
-                        <input type="number" id="amount" wire:model="amount" step="0.01" min="0" placeholder="0,00"
+                        <input type="text" id="amount" wire:model="amount" x-money placeholder="R$ 0,00"
                             class="w-full px-4 py-2 border border-gray-400 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500">
                         @error('amount')
                             <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
@@ -102,7 +102,7 @@
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                             Tipo *
                         </label>
-                        <x-custom-select property="type" :options="[]"
+                        <x-custom-select wire:model="type" :options="[]"
                             x-init="options = $store.options.types.filter(o => o.value !== '')"
                             placeholder="Selecione o tipo" />
                         @error('type')
@@ -116,7 +116,7 @@
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                         Tags
                     </label>
-                    <x-multi-select property="selectedTags" :options="[]" x-init="options = $store.tags.list"
+                    <x-multi-select wire:model="selectedTags" :options="[]" x-init="options = $store.tags.list"
                         placeholder="Selecione tags" />
                     @error('selectedTags')
                         <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
@@ -142,7 +142,7 @@
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                             Frequência *
                         </label>
-                        <x-custom-select property="frequency" :options="[]"
+                        <x-custom-select wire:model="frequency" :options="[]"
                             x-init="options = $store.options.frequencies.filter(o => o.value !== '')"
                             placeholder="Selecione a frequência" />
                         @error('frequency')
@@ -216,7 +216,7 @@
             <x-button type="submit" wire:loading.attr="disabled" wire:target="save"
                 class="w-full h-12 flex justify-center items-center rounded-xl !bg-[#4ECDC4] hover:!bg-[#3dbdb5] !text-gray-900 font-bold text-base uppercase tracking-widest transition-all duration-200 shadow-sm active:scale-[0.98] disabled:opacity-50">
                 <span wire:loading.remove wire:target="save">Salvar</span>
-                <div wire:loading wire:target="save" class="flex items-center gap-2">
+                <div wire:loading wire:target="save" class="flex items-center justify-center">
                     <svg class="animate-spin h-5 w-5 text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
@@ -225,7 +225,6 @@
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                         </path>
                     </svg>
-                    <span>Salvando...</span>
                 </div>
             </x-button>
         </div>

@@ -14,26 +14,26 @@
         $wire.closeModal();
     }
 }" @recurring-saved.window="closeModalAndReset()" @close-modal.window="closeModalAndReset()"
-    @keydown.escape.window="closeModalAndReset()">
+    @keydown.escape.window="closeModalAndReset()" @tags-loaded.window="$store.tags.setTags($event.detail.tags)">
     {{-- Compact Filters Row --}}
     <div class="flex flex-wrap items-center gap-4 mb-8">
         {{-- Type Filter --}}
         <div class="w-40">
-            <x-custom-select property="filterType" :options="[]"
+            <x-custom-select wire:model.live="filterType" :options="[]"
                 x-init="options = $store.options.types"
                 placeholder="Todos os Tipos" class="!py-2 !text-xs !font-bold" />
         </div>
 
         {{-- Status Filter --}}
         <div class="w-40">
-            <x-custom-select property="filterStatus" :options="[]"
+            <x-custom-select wire:model.live="filterStatus" :options="[]"
                 x-init="options = $store.options.recurringStatuses"
                 placeholder="Todos os Status" class="!py-2 !text-xs !font-bold" />
         </div>
 
         {{-- Frequency Filter --}}
         <div class="w-44">
-            <x-custom-select property="filterFrequency" :options="[]"
+            <x-custom-select wire:model.live="filterFrequency" :options="[]"
                 x-init="options = $store.options.frequencies"
                 placeholder="Todas Frequências" class="!py-2 !text-xs !font-bold" />
         </div>

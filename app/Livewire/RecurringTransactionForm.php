@@ -61,20 +61,22 @@ class RecurringTransactionForm extends Component
                 $this->endDate = $recurring->end_date instanceof \DateTimeInterface ? $recurring->end_date->format('Y-m-d') : null;
                 $this->occurrences = $recurring->occurrences;
 
-                // Load tags from the most recent transaction
-                $latestTransaction = $recurring->transactions()->with('tags')->latest()->first();
-                if ($latestTransaction) {
-                    $this->selectedTags = $latestTransaction->tags->pluck('id')->toArray();
-                }
+                // Load tags from the recurring transaction
+                $this->selectedTags = $recurring->tags->pluck('id')->toArray();
             }
         }
     }
 
     public function save(): void
     {
+        // Remove 'R$', dots and replace comma with dot, but ONLY if not empty
+        if (!empty($this->amount)) {
+            $this->amount = (float) str_replace(['R$', '.', ','], ['', '', '.'], $this->amount);
+        }
+
         $this->validate();
 
-        if (! $this->editing || ! $this->recurring) {
+        if (!$this->editing || !$this->recurring) {
             $this->dispatch('notify', message: 'Recorrência não encontrada.', type: 'error');
 
             return;
@@ -94,6 +96,7 @@ class RecurringTransactionForm extends Component
 
         // Update recurring transaction
         $this->recurring->update($data);
+        $this->recurring->tags()->sync($this->selectedTags);
 
         // If editScope is 'current_and_future', update existing pending transactions too
         if ($this->editScope === 'current_and_future') {

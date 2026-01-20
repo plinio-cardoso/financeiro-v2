@@ -31,4 +31,10 @@ class Tag extends Model
         return $this->belongsToMany(Transaction::class, 'transaction_tag')
             ->withTimestamps();
     }
+
+    public function recurringTransactions(): BelongsToMany
+    {
+        return $this->belongsToMany(RecurringTransaction::class, 'recurring_transaction_tag')
+            ->withTimestamps();
+    }
 }

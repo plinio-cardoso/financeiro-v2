@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\RecurringTransaction;
+use App\Services\TagService;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -14,6 +15,11 @@ class RecurringTransactionList extends Component
     public ?int $editingRecurringId = null;
 
     public int $modalCounter = 0;
+
+    public function mount(): void
+    {
+        $this->dispatch('tags-loaded', tags: $this->tags);
+    }
 
     // Ordenação
     public string $sortField = 'next_due_date';
@@ -44,8 +50,8 @@ class RecurringTransactionList extends Component
         // Busca
         if (strlen($this->search) >= 3) {
             $query->where(function ($q) {
-                $q->where('title', 'like', '%'.$this->search.'%')
-                    ->orWhere('description', 'like', '%'.$this->search.'%');
+                $q->where('title', 'like', '%' . $this->search . '%')
+                    ->orWhere('description', 'like', '%' . $this->search . '%');
             });
         }
 
@@ -77,8 +83,8 @@ class RecurringTransactionList extends Component
 
         if (strlen($this->search) >= 3) {
             $query->where(function ($q) {
-                $q->where('title', 'like', '%'.$this->search.'%')
-                    ->orWhere('description', 'like', '%'.$this->search.'%');
+                $q->where('title', 'like', '%' . $this->search . '%')
+                    ->orWhere('description', 'like', '%' . $this->search . '%');
             });
         }
 
@@ -107,8 +113,8 @@ class RecurringTransactionList extends Component
 
         if (strlen($this->search) >= 3) {
             $query->where(function ($q) {
-                $q->where('title', 'like', '%'.$this->search.'%')
-                    ->orWhere('description', 'like', '%'.$this->search.'%');
+                $q->where('title', 'like', '%' . $this->search . '%')
+                    ->orWhere('description', 'like', '%' . $this->search . '%');
             });
         }
 
@@ -130,6 +136,12 @@ class RecurringTransactionList extends Component
 
             return $recurring->type->value === 'credit' ? $monthlyAmount : -$monthlyAmount;
         });
+    }
+
+    #[Computed]
+    public function tags()
+    {
+        return app(TagService::class)->getUserTags(auth()->id());
     }
 
     #[Computed]

@@ -1,7 +1,7 @@
 @props(['property', 'options' => [], 'placeholder' => 'Select options'])
 
-<div x-data="multiSelect('{{ $property }}', {{ json_encode($options) }}, '{{ $placeholder }}')" class="relative"
-    @click.away="show = false">
+<div x-data="multiSelect(@entangle($attributes->wire('model')), {{ json_encode($options) }}, '{{ $placeholder }}')"
+    class="relative" @click.away="show = false">
     <div class="relative">
         <button type="button" @click="show = !show" {{ $attributes->merge(['class' => 'relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-400 dark:border-gray-700 rounded-xl shadow-none cursor-default focus:outline-none focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] sm:text-sm text-gray-900 dark:bg-gray-900 dark:text-gray-300 transition-all']) }}>
             <span class="block truncate font-bold">

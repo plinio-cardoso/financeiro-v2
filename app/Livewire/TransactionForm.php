@@ -92,13 +92,18 @@ class TransactionForm extends Component
 
     public function save(TransactionService $transactionService): void
     {
+        // Remove 'R$', dots and replace comma with dot, but ONLY if not empty
+        if (!empty($this->amount)) {
+            $this->amount = (float) str_replace(['R$', '.', ','], ['', '', '.'], $this->amount);
+        }
+
         $this->validate();
 
         $data = [
             'user_id' => auth()->id(),
             'title' => $this->title,
             'description' => $this->description,
-            'amount' => (float) str_replace(',', '.', $this->amount),
+            'amount' => $this->amount,
             'type' => $this->type,
             'status' => $this->status,
             'due_date' => $this->dueDate,
@@ -144,7 +149,7 @@ class TransactionForm extends Component
             'selectedTags.*' => 'exists:tags,id',
         ];
 
-        if ($this->isRecurring && ! $this->editing) {
+        if ($this->isRecurring && !$this->editing) {
             $rules = array_merge($rules, [
                 'frequency' => 'required|in:weekly,monthly,custom',
                 'interval' => 'required|integer|min:1',

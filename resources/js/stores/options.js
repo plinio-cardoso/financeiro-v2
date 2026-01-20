@@ -14,9 +14,9 @@ document.addEventListener('livewire:init', () => {
 
         frequencies: [
             { value: '', label: 'Todas Frequências' },
-            { value: 'weekly', label: 'Semanais' },
-            { value: 'monthly', label: 'Mensais' },
-            { value: 'custom', label: 'Personalizadas' }
+            { value: 'weekly', label: 'Semanal' },
+            { value: 'monthly', label: 'Mensal' },
+            { value: 'custom', label: 'Personalizada' }
         ],
 
         recurringStatuses: [

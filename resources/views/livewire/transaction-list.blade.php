@@ -45,20 +45,22 @@
         </div>
 
         {{-- Status Filter --}}
-        <div class="w-40" x-data x-init="$nextTick(() => options = $store.options.statuses)">
-            <x-custom-select property="filterStatus" :options="[]" placeholder="Todos os Status"
+        <div class="w-40">
+            <x-custom-select wire:model.live="filterStatus" :options="[]" placeholder="Todos os Status"
+                x-init="options = $store.options.statuses; $watch('$store.options.statuses', val => options = val)"
                 class="!py-2 !text-xs !font-bold" />
         </div>
 
         {{-- Type Filter --}}
-        <div class="w-40" x-data x-init="$nextTick(() => options = $store.options.types)">
-            <x-custom-select property="filterType" :options="[]" placeholder="Todos os Tipos"
+        <div class="w-40">
+            <x-custom-select wire:model.live="filterType" :options="[]" placeholder="Todos os Tipos"
+                x-init="options = $store.options.types; $watch('$store.options.types', val => options = val)"
                 class="!py-2 !text-xs !font-bold" />
         </div>
 
         {{-- Recurrence Filter --}}
         <div class="w-44">
-            <x-custom-select property="filterRecurrence" :options="[
+            <x-custom-select wire:model.live="filterRecurrence" :options="[
         ['value' => '', 'label' => 'Recorrência (Todos)'],
         ['value' => 'recurring', 'label' => 'Recorrentes'],
         ['value' => 'not_recurring', 'label' => 'Não recorrentes']
@@ -66,8 +68,9 @@
         </div>
 
         {{-- Tags Filter --}}
-        <div class="w-48" x-data x-init="$nextTick(() => options = $store.tags.list)">
-            <x-multi-select property="selectedTags" :options="[]" placeholder="Tags"
+        <div class="w-48">
+            <x-multi-select wire:model.live="selectedTags" :options="[]" placeholder="Tags"
+                x-init="options = $store.tags.list; $watch('$store.tags.list', val => options = val)"
                 class="!py-2 !text-xs !font-bold" />
         </div>
 

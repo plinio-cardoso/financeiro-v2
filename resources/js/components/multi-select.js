@@ -1,15 +1,12 @@
 document.addEventListener('livewire:init', () => {
-    Alpine.data('multiSelect', (wireProperty, options, placeholder = 'Selecione') => ({
+    Alpine.data('multiSelect', (model, options, placeholder = 'Selecione') => ({
         options: options,
-        selected: [],
+        selected: model,
         show: false,
         filter: '',
 
         init() {
-            this.selected = this.$wire.get(wireProperty) || [];
-            this.$watch('selected', value => {
-                this.$wire.set(wireProperty, value);
-            });
+            // Entangle handles sync automatically
         },
 
         get filteredOptions() {
@@ -20,6 +17,9 @@ document.addEventListener('livewire:init', () => {
         },
 
         toggle(id) {
+            if (!Array.isArray(this.selected)) {
+                this.selected = [];
+            }
             if (this.selected.includes(id)) {
                 this.selected = this.selected.filter(item => item != id);
             } else {
@@ -28,7 +28,7 @@ document.addEventListener('livewire:init', () => {
         },
 
         isSelected(id) {
-            return this.selected.includes(id);
+            return Array.isArray(this.selected) && this.selected.includes(id);
         }
     }));
 });

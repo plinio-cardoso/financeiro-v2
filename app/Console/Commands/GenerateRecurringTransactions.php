@@ -80,14 +80,14 @@ class GenerateRecurringTransactions extends Command
             }
 
             // Check if transaction already exists (idempotency)
-            if (! $force && $this->transactionExists($recurring, $currentDate)) {
+            if (!$force && $this->transactionExists($recurring, $currentDate)) {
                 $currentDate = $this->calculateNextDate($currentDate, $recurring);
 
                 continue;
             }
 
             // Create the transaction
-            Transaction::create([
+            $transaction = Transaction::create([
                 'user_id' => $recurring->user_id,
                 'title' => $recurring->title,
                 'description' => $recurring->description,
@@ -98,6 +98,11 @@ class GenerateRecurringTransactions extends Command
                 'recurring_transaction_id' => $recurring->id,
                 'sequence' => $recurring->generated_count + 1,
             ]);
+
+            // Sync tags from recurring transaction
+            if ($recurring->tags->isNotEmpty()) {
+                $transaction->tags()->sync($recurring->tags->pluck('id'));
+            }
 
             $generatedCount++;
             $recurring->increment('generated_count');
