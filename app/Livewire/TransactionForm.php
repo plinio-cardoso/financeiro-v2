@@ -91,7 +91,7 @@ class TransactionForm extends Component
     {
         $this->validate();
 
-        if ($this->isRecurring && !$this->editing) {
+        if ($this->isRecurring && ! $this->editing) {
             $data = [
                 'user_id' => auth()->id(),
                 'title' => $this->title,
