@@ -31,7 +31,7 @@ class TransactionFormTest extends TestCase
         $user = User::factory()->create();
         $transaction = Transaction::factory()->create([
             'user_id' => $user->id,
-            'description' => 'Original Description',
+            'title' => 'Original Title',
             'type' => TransactionTypeEnum::Debit,
             'status' => TransactionStatusEnum::Pending,
         ]);
@@ -39,7 +39,7 @@ class TransactionFormTest extends TestCase
         $this->actingAs($user);
 
         Livewire::test(TransactionForm::class, ['transactionId' => $transaction->id])
-            ->set('description', 'Updated Description')
+            ->set('title', 'Updated Title')
             ->set('type', 'credit')
             ->set('status', 'paid')
             ->call('save')
@@ -47,7 +47,7 @@ class TransactionFormTest extends TestCase
 
         $this->assertDatabaseHas('transactions', [
             'id' => $transaction->id,
-            'description' => 'Updated Description',
+            'title' => 'Updated Title',
             'type' => 'credit',
             'status' => 'paid',
         ]);
@@ -93,7 +93,7 @@ class TransactionFormTest extends TestCase
         $tag1 = Tag::factory()->create(['name' => 'Tag 1']);
         $transaction = Transaction::factory()->create([
             'user_id' => $user->id,
-            'description' => 'Test Description',
+            'title' => 'Test Transaction',
             'type' => TransactionTypeEnum::Credit,
             'status' => TransactionStatusEnum::Paid,
         ]);
@@ -103,7 +103,7 @@ class TransactionFormTest extends TestCase
 
         $component = Livewire::test(TransactionForm::class, ['transactionId' => $transaction->id]);
 
-        $this->assertEquals('Test Description', $component->get('description'));
+        $this->assertEquals('Test Transaction', $component->get('title'));
         $this->assertEquals('credit', $component->get('type'));
         $this->assertEquals('paid', $component->get('status'));
         $this->assertContains($tag1->id, $component->get('selectedTags'));
@@ -118,7 +118,6 @@ class TransactionFormTest extends TestCase
 
         Livewire::test(TransactionForm::class)
             ->set('title', 'New Transaction')
-            ->set('description', 'Test description')
             ->set('amount', '100.00')
             ->set('dueDate', '2024-12-25')
             ->set('type', 'debit')
@@ -190,6 +189,8 @@ class TransactionFormTest extends TestCase
             ->set('title', 'Recurring Bill')
             ->set('amount', '100.00')
             ->set('dueDate', '2024-12-25')
+            ->set('type', 'debit')
+            ->set('status', 'pending')
             ->set('isRecurring', true)
             ->call('save')
             ->assertHasErrors(['frequency', 'interval', 'startDate']);
@@ -208,7 +209,7 @@ class TransactionFormTest extends TestCase
             ->call('save')
             ->assertHasErrors(['title', 'amount', 'dueDate']);
 
-        $errors = $component->get('errors');
+        $errors = $component->instance()->getErrorBag();
         $this->assertStringContainsString('obrigatório', $errors->first('title'));
     }
 
@@ -231,7 +232,7 @@ class TransactionFormTest extends TestCase
         $recurring = \App\Models\RecurringTransaction::factory()->create([
             'user_id' => $user->id,
             'title' => 'Monthly Bill',
-            'frequency' => \App\Enums\FrequencyEnum::Monthly,
+            'frequency' => \App\Enums\RecurringFrequencyEnum::Monthly,
             'interval' => 2,
             'start_date' => '2024-01-01',
             'end_date' => '2024-12-31',
@@ -264,7 +265,7 @@ class TransactionFormTest extends TestCase
         $component = Livewire::test(TransactionForm::class);
 
         $this->assertEquals(now()->format('Y-m-d'), $component->get('dueDate'));
-        $this->assertEquals(now()->format('Y-m-d'), $component->get('startDate'));
+        $this->assertNull($component->get('startDate'));
         $this->assertFalse($component->get('editing'));
     }
 

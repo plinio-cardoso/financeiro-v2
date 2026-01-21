@@ -1,11 +1,9 @@
 <div x-data="{
     isOpen: false,
     editingId: @entangle('editingRecurringId'),
-    modalCounter: @entangle('modalCounter').live,
 
     openEdit(recurringId) {
         this.editingId = recurringId;
-        this.modalCounter++;
         this.isOpen = true;
     },
 
@@ -14,72 +12,18 @@
         $wire.closeModal();
     }
 }" @recurring-saved.window="closeModalAndReset()" @close-modal.window="closeModalAndReset()"
-    @keydown.escape.window="closeModalAndReset()" @tags-loaded.window="$store.tags.setTags($event.detail.tags)">
-    {{-- Compact Filters Row --}}
-    <div class="flex flex-wrap items-center gap-4 mb-8">
-        {{-- Type Filter --}}
-        <div class="w-40">
-            <x-custom-select wire:model.live="filterType" :options="[]"
-                x-init="options = $store.options.types"
-                placeholder="Todos os Tipos" class="!py-2 !text-xs !font-bold" />
-        </div>
-
-        {{-- Status Filter --}}
-        <div class="w-40">
-            <x-custom-select wire:model.live="filterStatus" :options="[]"
-                x-init="options = $store.options.recurringStatuses"
-                placeholder="Todos os Status" class="!py-2 !text-xs !font-bold" />
-        </div>
-
-        {{-- Frequency Filter --}}
-        <div class="w-44">
-            <x-custom-select wire:model.live="filterFrequency" :options="[]"
-                x-init="options = $store.options.frequencies"
-                placeholder="Todas Frequências" class="!py-2 !text-xs !font-bold" />
-        </div>
-
-        <button wire:click="clearFilters" @disabled(!$this->hasActiveFilters) @class([
-            'text-xs font-bold uppercase tracking-widest ml-2 transition-colors',
-            'text-gray-400 hover:text-[#4ECDC4] cursor-pointer' => $this->hasActiveFilters,
-            'text-gray-300 dark:text-gray-600 cursor-not-allowed opacity-50' => !$this->hasActiveFilters,
-        ])>
-            Limpar filtros
-        </button>
-    </div>
+    @keydown.escape.window="closeModalAndReset()">
 
     {{-- Main Content Card --}}
     <div
         class="bg-white dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-gray-700/50 shadow-sm overflow-hidden">
-        {{-- List Header with Search & Actions --}}
-        <div
-            class="px-6 py-3 border-b border-gray-50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/10 flex items-center justify-between">
-            <div class="relative w-64" x-data="{
-                searchValue: @entangle('search').live,
-                localSearch: '',
-                timeout: null,
-                handleInput() {
-                    clearTimeout(this.timeout);
-                    this.timeout = setTimeout(() => {
-                        if (this.localSearch.length >= 3 || this.localSearch === '') {
-                            this.searchValue = this.localSearch;
-                        }
-                    }, 500);
-                }
-            }" x-init="localSearch = searchValue">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-                <input type="text" x-model="localSearch" @input="handleInput()" placeholder="Buscar (mín. 3 letras)..."
-                    class="block w-full pl-9 pr-4 py-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-lg text-[11px] font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-[#4ECDC4]/10 focus:border-[#4ECDC4]/50 transition-all shadow-sm">
-            </div>
-        </div>
 
         {{-- Totals Summary Bar --}}
-        <div class="flex items-center gap-6 px-6 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
+        <div class="flex items-center gap-6 px-6 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm relative">
+            {{-- Loading overlay for aggregates --}}
+            <div wire:loading class="absolute inset-0 bg-white/50 dark:bg-gray-800/50 flex items-center justify-center rounded-2xl">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[#4ECDC4]"></div>
+            </div>
             <div class="flex items-center gap-2">
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
                     Total de Recorrências
@@ -155,7 +99,7 @@
                                 <div class="w-full h-full px-6 py-8 overflow-y-auto custom-scrollbar">
                                     {{-- Recurring Transaction Form --}}
                                     <livewire:recurring-transaction-form :recurring-id="$editingRecurringId"
-                                        :key="'recurring-' . $modalCounter . '-' . ($editingRecurringId ?? 'new')" />
+                                        :key="'recurring-form-' . ($editingRecurringId ?? 'new')" />
                                 </div>
                             </div>
                         </div>
@@ -165,7 +109,11 @@
         </div>
 
         {{-- Tabela de Transações Recorrentes --}}
-        <div class="overflow-hidden bg-white shadow dark:bg-gray-800 rounded-none">
+        <div class="overflow-hidden bg-white shadow dark:bg-gray-800 rounded-none relative">
+            {{-- Loading overlay for table --}}
+            <div wire:loading class="absolute inset-0 bg-white/50 dark:bg-gray-800/50 flex items-center justify-center z-10">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4ECDC4]"></div>
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">

@@ -3,7 +3,6 @@
 namespace App\Livewire;
 
 use App\Models\RecurringTransaction;
-use App\Services\TagService;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -14,12 +13,8 @@ class RecurringTransactionList extends Component
 
     public ?int $editingRecurringId = null;
 
-    public int $modalCounter = 0;
-
-    public function mount(): void
-    {
-        $this->dispatch('tags-loaded', tags: $this->tags);
-    }
+    // Active filters received from RecurringTransactionFilters component
+    public array $activeFilters = [];
 
     // Ordenação
     public string $sortField = 'next_due_date';
@@ -29,104 +24,102 @@ class RecurringTransactionList extends Component
     // Paginação
     public int $perPage = 15;
 
-    // Filtros
-    public string $search = '';
-
-    public string $filterType = '';
-
-    public string $filterStatus = '';
-
-    public string $filterFrequency = '';
+    // Cache for aggregates to avoid multiple queries
+    private $aggregatesCache = null;
 
     protected $listeners = [
         'recurring-saved' => 'refreshList',
+        'recurring-filters-updated' => 'applyFilters',
     ];
 
-    #[Computed]
-    public function recurringTransactions()
+    public function applyFilters(array $filters): void
+    {
+        $this->activeFilters = $filters;
+        $this->aggregatesCache = null;
+        $this->resetPage();
+    }
+
+    private function getFilteredQuery()
     {
         $query = RecurringTransaction::where('user_id', auth()->id());
 
+        $search = $this->activeFilters['search'] ?? '';
+        $type = $this->activeFilters['type'] ?? null;
+        $status = $this->activeFilters['status'] ?? null;
+        $frequency = $this->activeFilters['frequency'] ?? null;
+        $tags = $this->activeFilters['tags'] ?? [];
+
         // Busca
-        if (strlen($this->search) >= 3) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', '%'.$this->search.'%')
-                    ->orWhere('description', 'like', '%'.$this->search.'%');
-            });
+        if (strlen($search) >= 3) {
+            $query->where('title', 'like', '%'.$search.'%');
         }
 
         // Filtro de tipo
-        if ($this->filterType) {
-            $query->where('type', $this->filterType);
+        if ($type) {
+            $query->where('type', $type);
         }
 
         // Filtro de status
-        if ($this->filterStatus === 'active') {
+        if ($status === 'active') {
             $query->where('active', true);
-        } elseif ($this->filterStatus === 'inactive') {
+        } elseif ($status === 'inactive') {
             $query->where('active', false);
         }
 
         // Filtro de frequência
-        if ($this->filterFrequency) {
-            $query->where('frequency', $this->filterFrequency);
+        if ($frequency) {
+            $query->where('frequency', $frequency);
         }
 
-        return $query->orderBy($this->sortField, $this->sortDirection)
+        // Filtro de tags (NEW!)
+        if (! empty($tags)) {
+            $query->whereHas('tags', function ($q) use ($tags) {
+                $q->whereIn('tags.id', $tags);
+            });
+        }
+
+        return $query;
+    }
+
+    #[Computed]
+    public function recurringTransactions()
+    {
+        return $this->getFilteredQuery()
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
     }
 
     #[Computed]
     public function totalCount(): int
     {
-        $query = RecurringTransaction::where('user_id', auth()->id());
+        $this->loadAggregates();
 
-        if (strlen($this->search) >= 3) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', '%'.$this->search.'%')
-                    ->orWhere('description', 'like', '%'.$this->search.'%');
-            });
-        }
-
-        if ($this->filterType) {
-            $query->where('type', $this->filterType);
-        }
-
-        if ($this->filterStatus === 'active') {
-            $query->where('active', true);
-        } elseif ($this->filterStatus === 'inactive') {
-            $query->where('active', false);
-        }
-
-        if ($this->filterFrequency) {
-            $query->where('frequency', $this->filterFrequency);
-        }
-
-        return $query->count();
+        return $this->aggregatesCache->total_count ?? 0;
     }
 
     #[Computed]
     public function totalMonthlyAmount(): float
     {
-        $query = RecurringTransaction::where('user_id', auth()->id())
-            ->where('active', true);
+        $this->loadAggregates();
 
-        if (strlen($this->search) >= 3) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', '%'.$this->search.'%')
-                    ->orWhere('description', 'like', '%'.$this->search.'%');
-            });
+        return $this->aggregatesCache->total_monthly_amount ?? 0;
+    }
+
+    private function loadAggregates(): void
+    {
+        if ($this->aggregatesCache !== null) {
+            return;
         }
 
-        if ($this->filterType) {
-            $query->where('type', $this->filterType);
-        }
+        // Get count from query
+        $count = $this->getFilteredQuery()->count();
 
-        if ($this->filterFrequency) {
-            $query->where('frequency', $this->filterFrequency);
-        }
+        // For monthly amount, we need to calculate based on active recurring transactions
+        $activeRecurringTransactions = $this->getFilteredQuery()
+            ->where('active', true)
+            ->get();
 
-        return $query->get()->sum(function ($recurring) {
+        $monthlyAmount = $activeRecurringTransactions->sum(function ($recurring) {
             $monthlyAmount = match ($recurring->frequency->value) {
                 'weekly' => $recurring->amount * 4,
                 'monthly' => $recurring->amount,
@@ -136,33 +129,12 @@ class RecurringTransactionList extends Component
 
             return $recurring->type->value === 'credit' ? $monthlyAmount : -$monthlyAmount;
         });
-    }
 
-    #[Computed]
-    public function tags()
-    {
-        return app(TagService::class)->getUserTags(auth()->id());
-    }
-
-    #[Computed]
-    public function hasActiveFilters(): bool
-    {
-        return strlen($this->search) >= 3
-            || $this->filterType !== ''
-            || $this->filterStatus !== ''
-            || $this->filterFrequency !== '';
-    }
-
-    public function clearFilters(): void
-    {
-        $this->reset([
-            'search',
-            'filterType',
-            'filterStatus',
-            'filterFrequency',
-        ]);
-
-        $this->resetPage();
+        // Cache the results
+        $this->aggregatesCache = (object) [
+            'total_count' => $count,
+            'total_monthly_amount' => $monthlyAmount,
+        ];
     }
 
     public function sortBy(string $field): void
@@ -180,7 +152,6 @@ class RecurringTransactionList extends Component
     public function openEditModal(int $recurringId): void
     {
         $this->editingRecurringId = $recurringId;
-        $this->modalCounter++;
     }
 
     public function closeModal(): void
@@ -191,6 +162,7 @@ class RecurringTransactionList extends Component
     public function refreshList(): void
     {
         $this->editingRecurringId = null;
+        $this->aggregatesCache = null;
         $this->resetPage();
         $this->dispatch('close-modal');
     }

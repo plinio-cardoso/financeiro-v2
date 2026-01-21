@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Services\TagService;
 use App\Services\TransactionService;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
@@ -19,29 +18,8 @@ class TransactionList extends Component
 
     public ?int $editingRecurringId = null;
 
-    public int $modalCounter = 0;
-
-    // Filtros
-    #[Url(history: true)]
-    public string $search = '';
-
-    #[Url(history: true)]
-    public ?string $startDate = null;
-
-    #[Url(history: true)]
-    public ?string $endDate = null;
-
-    #[Url(history: true)]
-    public array $selectedTags = [];
-
-    #[Url(history: true)]
-    public ?string $filterStatus = null;
-
-    #[Url(history: true)]
-    public ?string $filterType = null;
-
-    #[Url(history: true)]
-    public ?string $filterRecurrence = null;
+    // Active filters received from TransactionFilters component
+    public array $activeFilters = [];
 
     // Ordenação
     #[Url(history: true)]
@@ -59,12 +37,8 @@ class TransactionList extends Component
     protected $listeners = [
         'transaction-updated' => 'refreshAggregates',
         'open-edit-modal' => 'openEditModal',
+        'filters-updated' => 'applyFilters',
     ];
-
-    public function mount(): void
-    {
-        $this->dispatch('tags-loaded', tags: $this->tags);
-    }
 
     #[Computed]
     public function transactions()
@@ -88,21 +62,20 @@ class TransactionList extends Component
         return ($this->aggregatesCache->total_credits ?? 0) - ($this->aggregatesCache->total_debits ?? 0);
     }
 
+    public function applyFilters(array $filters): void
+    {
+        $this->activeFilters = $filters;
+        $this->aggregatesCache = null;
+        $this->resetPage();
+    }
+
     private function loadAggregates(): void
     {
         if ($this->aggregatesCache === null) {
             // Single query to get ALL totals across ALL filtered transactions
             $this->aggregatesCache = app(TransactionService::class)->getFilteredTransactions(
                 auth()->id(),
-                [
-                    'search' => $this->search,
-                    'start_date' => $this->startDate,
-                    'end_date' => $this->endDate,
-                    'tags' => $this->selectedTags,
-                    'status' => $this->filterStatus,
-                    'type' => $this->filterType,
-                    'recurring' => $this->filterRecurrence,
-                ],
+                $this->activeFilters,
                 false // Don't include select for aggregates
             )
                 ->selectRaw('
@@ -118,78 +91,11 @@ class TransactionList extends Component
     {
         return app(TransactionService::class)->getFilteredTransactions(
             auth()->id(),
-            [
-                'search' => $this->search,
-                'start_date' => $this->startDate,
-                'end_date' => $this->endDate,
-                'tags' => $this->selectedTags,
-                'status' => $this->filterStatus,
-                'type' => $this->filterType,
-                'recurring' => $this->filterRecurrence,
+            array_merge($this->activeFilters, [
                 'sort_by' => $this->sortField,
                 'sort_direction' => $this->sortDirection,
-            ]
+            ])
         );
-    }
-
-    #[Computed]
-    public function tags()
-    {
-        return app(TagService::class)->getUserTags(auth()->id());
-    }
-
-    #[Computed]
-    public function hasActiveFilters(): bool
-    {
-        return !empty($this->search)
-            || !empty($this->startDate)
-            || !empty($this->endDate)
-            || !empty($this->selectedTags)
-            || !empty($this->filterStatus)
-            || !empty($this->filterType)
-            || !empty($this->filterRecurrence);
-    }
-
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
-        $this->aggregatesCache = null;
-    }
-
-    public function updatedSelectedTags(): void
-    {
-        $this->resetPage();
-        $this->aggregatesCache = null;
-    }
-
-    public function updatedFilterStatus(): void
-    {
-        $this->resetPage();
-        $this->aggregatesCache = null;
-    }
-
-    public function updatedFilterType(): void
-    {
-        $this->resetPage();
-        $this->aggregatesCache = null;
-    }
-
-    public function updatedFilterRecurrence(): void
-    {
-        $this->resetPage();
-        $this->aggregatesCache = null;
-    }
-
-    public function updatedStartDate(): void
-    {
-        $this->resetPage();
-        $this->aggregatesCache = null;
-    }
-
-    public function updatedEndDate(): void
-    {
-        $this->resetPage();
-        $this->aggregatesCache = null;
     }
 
     public function sortBy(string $field): void
@@ -208,19 +114,6 @@ class TransactionList extends Component
     {
         // Reset both IDs when closing to ensure clean state
         $this->reset(['editingTransactionId', 'editingRecurringId']);
-    }
-
-    public function clearFilters(): void
-    {
-        $this->reset([
-            'search',
-            'startDate',
-            'endDate',
-            'selectedTags',
-            'filterStatus',
-            'filterType',
-            'filterRecurrence',
-        ]);
     }
 
     #[On('transaction-saved')]
@@ -251,7 +144,6 @@ class TransactionList extends Component
     {
         $this->editingTransactionId = $transactionId;
         $this->editingRecurringId = null; // Reset - TransactionForm handles this internally now
-        $this->modalCounter++;
     }
 
     /**
@@ -265,7 +157,7 @@ class TransactionList extends Component
             $transaction = app(TransactionService::class)
                 ->findTransactionById($transactionId, auth()->id());
 
-            if (!$transaction) {
+            if (! $transaction) {
                 $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
 
                 return;
@@ -282,7 +174,7 @@ class TransactionList extends Component
             $this->refreshAggregates();
             $this->dispatch('notify', message: 'Transação marcada como paga com sucesso!', type: 'success');
         } catch (\Exception $e) {
-            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: ' . $e->getMessage(), type: 'error');
+            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: '.$e->getMessage(), type: 'error');
         }
     }
 

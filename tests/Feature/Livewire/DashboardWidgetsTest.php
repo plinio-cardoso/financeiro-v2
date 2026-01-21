@@ -258,7 +258,7 @@ class DashboardWidgetsTest extends TestCase
         $otherUser = User::factory()->create();
 
         // Transaction belongs to other user
-        $transaction = Transaction::factory()->for($otherUser)->create();
+        $transaction = Transaction::factory()->pending()->for($otherUser)->create();
 
         Livewire::actingAs($user)
             ->test(DashboardWidgets::class)

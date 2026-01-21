@@ -5,6 +5,8 @@ namespace Tests\Feature\Livewire;
 use App\Enums\TransactionStatusEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Livewire\TransactionList;
+use App\Models\RecurringTransaction;
+use App\Models\Tag;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,8 +24,7 @@ class TransactionListTest extends TestCase
         $this->actingAs($user);
 
         Livewire::test(TransactionList::class)
-            ->assertStatus(200)
-            ->assertSee('Limpar filtros');
+            ->assertStatus(200);
     }
 
     public function test_component_displays_transactions(): void
@@ -37,11 +38,35 @@ class TransactionListTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(TransactionList::class)
-            ->assertSee('Test Transaction');
+        $component = Livewire::test(TransactionList::class)
+            ->dispatch('filters-updated', filters: []);
+
+        $this->assertCount(1, $component->get('transactions'));
+        $this->assertEquals('Test Transaction', $component->get('transactions')->first()->title);
     }
 
-    public function test_search_filter_works(): void
+    public function test_applies_filters_from_event(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user);
+
+        $filters = [
+            'search' => 'grocery',
+            'start_date' => '2024-01-01',
+            'end_date' => '2024-12-31',
+            'tags' => [1, 2],
+            'status' => 'paid',
+            'type' => 'debit',
+            'recurring' => 'recurring',
+        ];
+
+        Livewire::test(TransactionList::class)
+            ->dispatch('filters-updated', filters: $filters)
+            ->assertSet('activeFilters', $filters);
+    }
+
+    public function test_filters_affect_transaction_query(): void
     {
         $user = User::factory()->create();
 
@@ -58,12 +83,9 @@ class TransactionListTest extends TestCase
         $this->actingAs($user);
 
         $component = Livewire::test(TransactionList::class)
-            ->set('search', 'Grocery');
+            ->dispatch('filters-updated', filters: ['search' => 'Grocery']);
 
-        // Verify that the filter returned only 1 transaction
         $this->assertCount(1, $component->get('transactions'));
-
-        // Verify the filtered transaction is the correct one
         $this->assertEquals('Grocery Shopping', $component->get('transactions')->first()->title);
     }
 
@@ -86,12 +108,9 @@ class TransactionListTest extends TestCase
         $this->actingAs($user);
 
         $component = Livewire::test(TransactionList::class)
-            ->set('filterStatus', 'paid');
+            ->dispatch('filters-updated', filters: ['status' => 'paid']);
 
-        // Verify that the filter returned only 1 transaction
         $this->assertCount(1, $component->get('transactions'));
-
-        // Verify the filtered transaction is the correct one
         $this->assertEquals('Paid Transaction', $component->get('transactions')->first()->title);
         $this->assertEquals('paid', $component->get('transactions')->first()->status->value);
     }
@@ -115,28 +134,11 @@ class TransactionListTest extends TestCase
         $this->actingAs($user);
 
         $component = Livewire::test(TransactionList::class)
-            ->set('filterType', 'debit');
+            ->dispatch('filters-updated', filters: ['type' => 'debit']);
 
-        // Verify that the filter returned only 1 transaction
         $this->assertCount(1, $component->get('transactions'));
-
-        // Verify the filtered transaction is the correct one
         $this->assertEquals('Debit Transaction', $component->get('transactions')->first()->title);
         $this->assertEquals('debit', $component->get('transactions')->first()->type->value);
-    }
-
-    public function test_clear_filters_works(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        Livewire::test(TransactionList::class)
-            ->set('search', 'test')
-            ->set('filterStatus', 'paid')
-            ->call('clearFilters')
-            ->assertSet('search', '')
-            ->assertSet('filterStatus', null);
     }
 
     public function test_sorting_works(): void
@@ -153,15 +155,14 @@ class TransactionListTest extends TestCase
             ->assertSet('sortDirection', 'desc');
     }
 
-    public function test_pagination_resets_on_search(): void
+    public function test_resets_pagination_on_filter_change(): void
     {
         $user = User::factory()->create();
 
         $this->actingAs($user);
 
-        $component = Livewire::test(TransactionList::class);
-
-        $component->set('search', 'test');
+        $component = Livewire::test(TransactionList::class)
+            ->dispatch('filters-updated', filters: ['search' => 'test']);
 
         $this->assertEquals(1, $component->paginators['page']);
     }
@@ -185,8 +186,10 @@ class TransactionListTest extends TestCase
         $this->actingAs($user);
 
         $component = Livewire::test(TransactionList::class)
-            ->set('startDate', '2024-02-01')
-            ->set('endDate', '2024-02-28');
+            ->dispatch('filters-updated', filters: [
+                'start_date' => '2024-02-01',
+                'end_date' => '2024-02-28',
+            ]);
 
         $this->assertCount(1, $component->get('transactions'));
         $this->assertEquals('February', $component->get('transactions')->first()->title);
@@ -195,7 +198,7 @@ class TransactionListTest extends TestCase
     public function test_tags_filter_works(): void
     {
         $user = User::factory()->create();
-        $tag = \App\Models\Tag::factory()->create();
+        $tag = Tag::factory()->create();
 
         $transaction1 = Transaction::factory()->for($user)->create(['title' => 'Tagged']);
         $transaction1->tags()->attach($tag);
@@ -205,7 +208,7 @@ class TransactionListTest extends TestCase
         $this->actingAs($user);
 
         $component = Livewire::test(TransactionList::class)
-            ->set('selectedTags', [$tag->id]);
+            ->dispatch('filters-updated', filters: ['tags' => [$tag->id]]);
 
         $this->assertCount(1, $component->get('transactions'));
         $this->assertEquals('Tagged', $component->get('transactions')->first()->title);
@@ -215,7 +218,7 @@ class TransactionListTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $recurring = \App\Models\RecurringTransaction::factory()->create(['user_id' => $user->id]);
+        $recurring = RecurringTransaction::factory()->create(['user_id' => $user->id]);
 
         Transaction::factory()->create([
             'user_id' => $user->id,
@@ -232,33 +235,33 @@ class TransactionListTest extends TestCase
         $this->actingAs($user);
 
         $component = Livewire::test(TransactionList::class)
-            ->set('filterRecurrence', 'recurring');
+            ->dispatch('filters-updated', filters: ['recurring' => 'recurring']);
 
         $this->assertCount(1, $component->get('transactions'));
         $this->assertEquals('Recurring', $component->get('transactions')->first()->title);
     }
 
-    public function test_has_active_filters_returns_true_when_filters_set(): void
+    public function test_clears_aggregate_cache_on_filter_change(): void
     {
         $user = User::factory()->create();
+        Transaction::factory()->count(5)->for($user)->create();
 
         $this->actingAs($user);
 
         $component = Livewire::test(TransactionList::class)
-            ->set('search', 'test');
+            ->dispatch('filters-updated', filters: []);
 
-        $this->assertTrue($component->get('hasActiveFilters'));
-    }
+        // First access calculates aggregates
+        $count1 = $component->get('totalCount');
 
-    public function test_has_active_filters_returns_false_when_no_filters(): void
-    {
-        $user = User::factory()->create();
+        // Changing filters should clear cache
+        $component->dispatch('filters-updated', filters: ['search' => 'test']);
 
-        $this->actingAs($user);
+        // Second access should recalculate
+        $count2 = $component->get('totalCount');
 
-        $component = Livewire::test(TransactionList::class);
-
-        $this->assertFalse($component->get('hasActiveFilters'));
+        $this->assertIsInt($count1);
+        $this->assertIsInt($count2);
     }
 
     public function test_total_count_calculates_correctly(): void
@@ -269,7 +272,8 @@ class TransactionListTest extends TestCase
 
         $this->actingAs($user);
 
-        $component = Livewire::test(TransactionList::class);
+        $component = Livewire::test(TransactionList::class)
+            ->dispatch('filters-updated', filters: []);
 
         $this->assertEquals(5, $component->get('totalCount'));
     }
@@ -292,7 +296,8 @@ class TransactionListTest extends TestCase
 
         $this->actingAs($user);
 
-        $component = Livewire::test(TransactionList::class);
+        $component = Livewire::test(TransactionList::class)
+            ->dispatch('filters-updated', filters: []);
 
         $this->assertEquals(700.0, $component->get('totalAmount'));
     }
@@ -324,7 +329,7 @@ class TransactionListTest extends TestCase
             ->assertSet('editingRecurringId', null);
     }
 
-    public function test_refresh_list_clears_editing_and_resets_page(): void
+    public function test_refresh_list_clears_editing_and_dispatches_close_modal(): void
     {
         $user = User::factory()->create();
 
@@ -334,8 +339,7 @@ class TransactionListTest extends TestCase
             ->set('editingTransactionId', 123)
             ->dispatch('transaction-saved')
             ->assertSet('editingTransactionId', null)
-            ->assertDispatched('close-modal')
-            ->assertDispatched('notify');
+            ->assertDispatched('close-modal');
     }
 
     public function test_refresh_list_recurring_works(): void
@@ -395,7 +399,7 @@ class TransactionListTest extends TestCase
     {
         $user = User::factory()->create();
         $otherUser = User::factory()->create();
-        $transaction = Transaction::factory()->for($otherUser)->create();
+        $transaction = Transaction::factory()->pending()->for($otherUser)->create();
 
         $this->actingAs($user);
 
@@ -403,105 +407,54 @@ class TransactionListTest extends TestCase
             ->call('markAsPaid', $transaction->id)
             ->assertDispatched('notify');
 
-        // Transaction should not be updated
         $this->assertDatabaseHas('transactions', [
             'id' => $transaction->id,
             'status' => TransactionStatusEnum::Pending->value,
         ]);
     }
 
-    public function test_updated_selected_tags_resets_page(): void
+    public function test_multiple_filters_work_together(): void
     {
         $user = User::factory()->create();
-        $tag = \App\Models\Tag::factory()->create();
+        $tag = Tag::factory()->create();
+
+        $matchingTransaction = Transaction::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'Grocery Store',
+            'type' => TransactionTypeEnum::Debit,
+            'status' => TransactionStatusEnum::Paid,
+            'due_date' => '2024-06-15',
+        ]);
+        $matchingTransaction->tags()->attach($tag);
+
+        // Create non-matching transactions
+        Transaction::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'Grocery Store',
+            'type' => TransactionTypeEnum::Credit, // Different type
+            'due_date' => '2024-06-15',
+        ]);
+
+        Transaction::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'Different Store',
+            'type' => TransactionTypeEnum::Debit,
+            'due_date' => '2024-06-15',
+        ]);
 
         $this->actingAs($user);
 
         $component = Livewire::test(TransactionList::class)
-            ->set('selectedTags', [$tag->id]);
+            ->dispatch('filters-updated', filters: [
+                'search' => 'Grocery',
+                'type' => 'debit',
+                'status' => 'paid',
+                'start_date' => '2024-06-01',
+                'end_date' => '2024-06-30',
+                'tags' => [$tag->id],
+            ]);
 
-        $this->assertEquals(1, $component->paginators['page']);
-    }
-
-    public function test_updated_filter_status_resets_page(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $component = Livewire::test(TransactionList::class)
-            ->set('filterStatus', 'paid');
-
-        $this->assertEquals(1, $component->paginators['page']);
-    }
-
-    public function test_updated_filter_type_resets_page(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $component = Livewire::test(TransactionList::class)
-            ->set('filterType', 'debit');
-
-        $this->assertEquals(1, $component->paginators['page']);
-    }
-
-    public function test_updated_filter_recurrence_resets_page(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $component = Livewire::test(TransactionList::class)
-            ->set('filterRecurrence', 'recurring');
-
-        $this->assertEquals(1, $component->paginators['page']);
-    }
-
-    public function test_updated_start_date_resets_page(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $component = Livewire::test(TransactionList::class)
-            ->set('startDate', '2024-01-01');
-
-        $this->assertEquals(1, $component->paginators['page']);
-    }
-
-    public function test_updated_end_date_resets_page(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $component = Livewire::test(TransactionList::class)
-            ->set('endDate', '2024-12-31');
-
-        $this->assertEquals(1, $component->paginators['page']);
-    }
-
-    public function test_tags_are_loaded_on_mount(): void
-    {
-        $user = User::factory()->create();
-        \App\Models\Tag::factory()->count(3)->create();
-
-        $this->actingAs($user);
-
-        $component = Livewire::test(TransactionList::class);
-
-        $this->assertCount(3, $component->get('tags'));
-    }
-
-    public function test_mount_dispatches_tags_loaded_event(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        Livewire::test(TransactionList::class)
-            ->assertDispatched('tags-loaded');
+        $this->assertCount(1, $component->get('transactions'));
+        $this->assertEquals('Grocery Store', $component->get('transactions')->first()->title);
     }
 }

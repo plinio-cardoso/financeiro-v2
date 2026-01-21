@@ -29,7 +29,7 @@ class OverdueTransactionsTest extends TestCase
 
         $mailable = new OverdueTransactions($transactions);
 
-        $mailable->assertHasView('emails.transactions.overdue');
+        $mailable->assertSeeInHtml('Contas Vencidas');
     }
 
     public function test_mail_contains_transactions(): void

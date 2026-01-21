@@ -29,7 +29,7 @@ class DueTodayTransactionsTest extends TestCase
 
         $mailable = new DueTodayTransactions($transactions);
 
-        $mailable->assertHasView('emails.transactions.due-today');
+        $mailable->assertSeeInHtml('Contas Vencendo Hoje');
     }
 
     public function test_mail_contains_transactions(): void

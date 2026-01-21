@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\RecurringFrequencyEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Models\RecurringTransaction;
@@ -197,7 +198,6 @@ class RecurringTransactionTest extends TestCase
             ->create([
                 'user_id' => $user->id,
                 'title' => 'Aluguel',
-                'description' => 'Pagamento mensal',
                 'amount' => 1500.00,
                 'type' => TransactionTypeEnum::Debit,
                 'start_date' => now()->startOfMonth(),
@@ -211,7 +211,6 @@ class RecurringTransactionTest extends TestCase
 
         $this->assertEquals($user->id, $transaction->user_id);
         $this->assertEquals('Aluguel', $transaction->title);
-        $this->assertEquals('Pagamento mensal', $transaction->description);
         $this->assertEquals(1500.00, $transaction->amount);
         $this->assertEquals(TransactionTypeEnum::Debit, $transaction->type);
         $this->assertEquals(TransactionStatusEnum::Pending, $transaction->status);
@@ -276,7 +275,7 @@ class RecurringTransactionTest extends TestCase
         $recurring = RecurringTransaction::factory()->create([
             'amount' => 123.45,
             'type' => TransactionTypeEnum::Debit,
-            'frequency' => \App\Enums\FrequencyEnum::Monthly,
+            'frequency' => RecurringFrequencyEnum::Monthly,
             'interval' => 2,
             'active' => true,
         ]);
@@ -284,7 +283,7 @@ class RecurringTransactionTest extends TestCase
         $this->assertIsString($recurring->amount);
         $this->assertEquals('123.45', $recurring->amount);
         $this->assertInstanceOf(TransactionTypeEnum::class, $recurring->type);
-        $this->assertInstanceOf(\App\Enums\FrequencyEnum::class, $recurring->frequency);
+        $this->assertInstanceOf(RecurringFrequencyEnum::class, $recurring->frequency);
         $this->assertIsInt($recurring->interval);
         $this->assertIsBool($recurring->active);
     }

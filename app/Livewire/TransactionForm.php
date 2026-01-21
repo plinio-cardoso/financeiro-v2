@@ -42,9 +42,9 @@ class TransactionForm extends Component
     // Recurrence fields
     public bool $isRecurring = false;
 
-    public string $frequency = 'monthly';
+    public ?string $frequency = null;
 
-    public int $interval = 1;
+    public ?int $interval = null;
 
     public ?string $startDate = null;
 
@@ -58,7 +58,6 @@ class TransactionForm extends Component
     public function mount(?int $transactionId = null): void
     {
         $this->dueDate = now()->format('Y-m-d');
-        $this->startDate = now()->format('Y-m-d');
 
         if ($transactionId) {
             $transaction = Transaction::with(['tags', 'recurringTransaction'])->find($transactionId);
@@ -90,7 +89,7 @@ class TransactionForm extends Component
     public function save(TransactionService $transactionService): void
     {
         // Remove everything except digits and comma, then convert to float
-        if (!empty($this->amount)) {
+        if (! empty($this->amount)) {
             $amount = preg_replace('/[^\d,.]/', '', $this->amount);
             // If it has a comma, it's Brazilian format, so we clean accordingly
             if (str_contains($amount, ',')) {
@@ -118,11 +117,10 @@ class TransactionForm extends Component
             $this->dispatch('notify', message: 'Transação atualizada com sucesso!', type: 'success');
         } else {
             if ($this->isRecurring) {
-                $status = $this->status;
                 $recurringData = array_merge($data, [
                     'frequency' => $this->frequency,
                     'interval' => $this->interval,
-                    'start_date' => $this->startDate ?: $this->dueDate,
+                    'start_date' => $this->startDate,
                     'end_date' => $this->endDate,
                     'occurrences' => $this->occurrences,
                 ]);
@@ -150,7 +148,7 @@ class TransactionForm extends Component
             'selectedTags.*' => 'exists:tags,id',
         ];
 
-        if ($this->isRecurring && !$this->editing) {
+        if ($this->isRecurring && ! $this->editing) {
             $rules = array_merge($rules, [
                 'frequency' => 'required|in:weekly,monthly,custom',
                 'interval' => 'required|integer|min:1',
