@@ -131,7 +131,7 @@
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                             Frequência *
                         </label>
-                        <x-custom-select wire:model="frequency" :options="[]"
+                        <x-custom-select wire:model.live="frequency" :options="[]"
                             x-init="options = $store.options.frequencies.filter(o => o.value !== '')"
                             placeholder="Selecione a frequência" />
                         @error('frequency')
