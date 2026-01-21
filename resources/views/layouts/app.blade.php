@@ -31,6 +31,7 @@
     </div>
 
     @stack('modals')
+    <livewire:transaction-modal />
 
     @livewireScripts
     @stack('scripts')

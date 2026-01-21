@@ -11,8 +11,6 @@ class RecurringTransactionList extends Component
 {
     use WithPagination;
 
-    public ?int $editingRecurringId = null;
-
     // Active filters received from RecurringTransactionFilters component
     public array $activeFilters = [];
 
@@ -30,7 +28,6 @@ class RecurringTransactionList extends Component
     protected $listeners = [
         'recurring-saved' => 'refreshList',
         'recurring-filters-updated' => 'applyFilters',
-        'open-recurring-edit-modal' => 'openEditModal',
     ];
 
     public function applyFilters(array $filters): void
@@ -52,7 +49,7 @@ class RecurringTransactionList extends Component
 
         // Busca
         if (strlen($search) >= 3) {
-            $query->where('title', 'like', '%'.$search.'%');
+            $query->where('title', 'like', '%' . $search . '%');
         }
 
         // Filtro de tipo
@@ -73,7 +70,7 @@ class RecurringTransactionList extends Component
         }
 
         // Filtro de tags (NEW!)
-        if (! empty($tags)) {
+        if (!empty($tags)) {
             $query->whereHas('tags', function ($q) use ($tags) {
                 $q->whereIn('tags.id', $tags);
             });
@@ -150,22 +147,19 @@ class RecurringTransactionList extends Component
         $this->resetPage();
     }
 
-    public function openEditModal(int $recurringId): void
-    {
-        $this->editingRecurringId = $recurringId;
-    }
-
     public function closeModal(): void
     {
-        $this->reset(['editingRecurringId']);
+        // No longer needed but keeping for potential clean events
     }
 
     public function refreshList(): void
     {
-        $this->editingRecurringId = null;
+        $this->refreshAggregates();
+    }
+
+    public function refreshAggregates(): void
+    {
         $this->aggregatesCache = null;
-        $this->resetPage();
-        $this->dispatch('close-modal');
     }
 
     public function render()

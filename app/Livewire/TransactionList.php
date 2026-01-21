@@ -14,10 +14,6 @@ class TransactionList extends Component
 {
     use WithPagination;
 
-    public ?int $editingTransactionId = null;
-
-    public ?int $editingRecurringId = null;
-
     // Active filters received from TransactionFilters component
     public array $activeFilters = [];
 
@@ -36,7 +32,6 @@ class TransactionList extends Component
 
     protected $listeners = [
         'transaction-updated' => 'refreshAggregates',
-        'open-edit-modal' => 'openEditModal',
         'filters-updated' => 'applyFilters',
     ];
 
@@ -110,40 +105,16 @@ class TransactionList extends Component
         $this->resetPage();
     }
 
-    public function closeModal(): void
-    {
-        // Reset both IDs when closing to ensure clean state
-        $this->reset(['editingTransactionId', 'editingRecurringId']);
-    }
-
     #[On('transaction-saved')]
+    #[On('recurring-saved')]
     public function refreshList(): void
     {
-        $this->editingTransactionId = null;
-        $this->editingRecurringId = null;
         $this->refreshAggregates();
-        $this->dispatch('close-modal');
-    }
-
-    #[On('recurring-saved')]
-    public function refreshListRecurring(): void
-    {
-        $this->editingTransactionId = null;
-        $this->editingRecurringId = null;
-        $this->refreshAggregates();
-        $this->dispatch('close-modal');
     }
 
     public function refreshAggregates(): void
     {
-        // Reset aggregates cache to force recalculation
         $this->aggregatesCache = null;
-    }
-
-    public function openEditModal(int $transactionId): void
-    {
-        $this->editingTransactionId = $transactionId;
-        $this->editingRecurringId = null; // Reset - TransactionForm handles this internally now
     }
 
     /**
@@ -157,7 +128,7 @@ class TransactionList extends Component
             $transaction = app(TransactionService::class)
                 ->findTransactionById($transactionId, auth()->id());
 
-            if (! $transaction) {
+            if (!$transaction) {
                 $this->dispatch('notify', message: 'Transação não encontrada.', type: 'error');
 
                 return;
@@ -174,7 +145,7 @@ class TransactionList extends Component
             $this->refreshAggregates();
             $this->dispatch('notify', message: 'Transação marcada como paga com sucesso!', type: 'success');
         } catch (\Exception $e) {
-            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: '.$e->getMessage(), type: 'error');
+            $this->dispatch('notify', message: 'Erro ao marcar transação como paga: ' . $e->getMessage(), type: 'error');
         }
     }
 

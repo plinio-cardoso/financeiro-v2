@@ -302,58 +302,6 @@ class TransactionListTest extends TestCase
         $this->assertEquals(700.0, $component->get('totalAmount'));
     }
 
-    public function test_close_modal_resets_editing_ids(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        Livewire::test(TransactionList::class)
-            ->set('editingTransactionId', 123)
-            ->set('editingRecurringId', 456)
-            ->call('closeModal')
-            ->assertSet('editingTransactionId', null)
-            ->assertSet('editingRecurringId', null);
-    }
-
-    public function test_open_edit_modal_sets_transaction_id(): void
-    {
-        $user = User::factory()->create();
-        $transaction = Transaction::factory()->for($user)->create();
-
-        $this->actingAs($user);
-
-        Livewire::test(TransactionList::class)
-            ->call('openEditModal', $transaction->id)
-            ->assertSet('editingTransactionId', $transaction->id)
-            ->assertSet('editingRecurringId', null);
-    }
-
-    public function test_refresh_list_clears_editing_and_dispatches_close_modal(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        Livewire::test(TransactionList::class)
-            ->set('editingTransactionId', 123)
-            ->dispatch('transaction-saved')
-            ->assertSet('editingTransactionId', null)
-            ->assertDispatched('close-modal');
-    }
-
-    public function test_refresh_list_recurring_works(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        Livewire::test(TransactionList::class)
-            ->set('editingRecurringId', 123)
-            ->dispatch('recurring-saved')
-            ->assertSet('editingRecurringId', null)
-            ->assertDispatched('close-modal');
-    }
 
     public function test_mark_as_paid_updates_transaction(): void
     {

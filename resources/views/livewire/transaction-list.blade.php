@@ -1,33 +1,6 @@
 <div x-data="{
-    isOpen: false,
-    editingId: @entangle('editingTransactionId'),
-    editingRecurringId: @entangle('editingRecurringId'),
-
-    openCreate() {
-        this.editingId = null;
-        this.editingRecurringId = null;
-        this.isOpen = true;
-    },
-
-    openEditRecurring(recurringId, transactionId) {
-        this.editingId = transactionId || null;
-        this.editingRecurringId = recurringId;
-        this.isOpen = true;
-    },
-
-    openEditTransaction(transactionId) {
-        this.editingId = transactionId;
-        this.editingRecurringId = null;
-        this.isOpen = true;
-    },
-
-    closeModalAndReset() {
-        this.isOpen = false;
-        $wire.closeModal();
-    }
-}" @transaction-saved.window="closeModalAndReset()" @recurring-saved.window="closeModalAndReset()"
-    @close-modal.window="closeModalAndReset()" @keydown.escape.window="closeModalAndReset()"
-    @open-edit-modal.window="openEditTransaction($event.detail.transactionId)">
+    // No longer needs to manage modal state
+}" @transaction-saved.window="$wire.refreshAggregates()" @recurring-saved.window="$wire.refreshAggregates()">
 
     {{-- Main Content Card --}}
     <div
@@ -46,7 +19,7 @@
                 </div>
             </div>
 
-            <x-button @click="openCreate()"
+            <x-button @click="$dispatch('open-edit-modal', { transactionId: null })"
                 class="!bg-[#4ECDC4] hover:!bg-[#3dbdb5] !text-gray-900 shadow-sm py-1.5 px-4 rounded-lg active:scale-95 transition-all text-[11px] font-bold uppercase tracking-wider">
                 Nova Transação
             </x-button>
@@ -96,67 +69,6 @@
                     </div>
                     <div wire:loading wire:target="applyFilters, sortBy, gotoPage"
                         class="h-7 w-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg"></div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Slide-over Modal (Pure Alpine for speed) --}}
-        <div x-show="isOpen" wire:ignore.self class="fixed inset-0 z-50 overflow-hidden" style="display: none;"
-            x-transition:enter="transition ease-in-out duration-500" x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in-out duration-500"
-            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-
-            <div class="absolute inset-0 overflow-hidden">
-                {{-- Backdrop --}}
-                <div class="absolute inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity"
-                    @click="closeModalAndReset()"></div>
-
-                <div class="fixed inset-y-0 right-0 flex max-w-full pl-10 pointer-events-none">
-                    <div x-show="isOpen" class="w-screen max-w-md pointer-events-auto shadow-2xl"
-                        x-transition:enter="transform transition ease-in-out duration-500"
-                        x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
-                        x-transition:leave="transform transition ease-in-out duration-500"
-                        x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
-
-                        <div class="flex flex-col h-full bg-white dark:bg-gray-900">
-                            {{-- Header --}}
-                            <div
-                                class="px-6 py-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between rounded-none">
-                                <h2 class="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
-                                    <span x-text="editingId ? 'Editar Transação' : 'Nova Transação'"></span>
-                                </h2>
-                                <button type="button" @click="closeModalAndReset()"
-                                    class="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            {{-- Content Area --}}
-                            <div class="flex-1 relative overflow-hidden">
-                                {{-- Loading Overlay for Modal Content --}}
-                                <div wire:loading wire:target="editingTransactionId, editingRecurringId"
-                                    class="absolute inset-0 z-[60] bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm flex items-center justify-center">
-                                    <div class="flex flex-col items-center gap-4">
-                                        <div
-                                            class="w-10 h-10 border-4 border-[#4ECDC4] border-t-transparent rounded-full animate-spin">
-                                        </div>
-                                        <span
-                                            class="text-[10px] font-black uppercase tracking-widest text-[#4ECDC4]">Carregando...</span>
-                                    </div>
-                                </div>
-
-                                {{-- Component Content --}}
-                                <div class="w-full h-full px-6 py-8 overflow-y-auto custom-scrollbar">
-                                    {{-- Transaction Form (now handles both transaction and recurrence) --}}
-                                    <livewire:transaction-form :transaction-id="$editingTransactionId"
-                                        :key="'transaction-form-' . ($editingTransactionId ?? 'new')" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
