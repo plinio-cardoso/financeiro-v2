@@ -154,8 +154,6 @@ class TransactionFormTest extends TestCase
         ]);
     }
 
-
-
     public function test_validation_messages_are_in_portuguese(): void
     {
         $user = User::factory()->create();
@@ -184,7 +182,6 @@ class TransactionFormTest extends TestCase
             ->call('save')
             ->assertDispatched('validation-failed');
     }
-
 
     public function test_mounts_with_default_dates_when_creating(): void
     {

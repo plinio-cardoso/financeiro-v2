@@ -11,8 +11,7 @@ class DashboardService
 {
     public function __construct(
         private TransactionService $transactionService
-    ) {
-    }
+    ) {}
 
     /**
      * Get current month statistics
@@ -150,7 +149,7 @@ class DashboardService
         $expenses = $this->getUpcomingExpenses($userId);
 
         return $expenses
-            ->groupBy(fn($expense) => $expense->due_date->startOfDay()->timestamp)
+            ->groupBy(fn ($expense) => $expense->due_date->startOfDay()->timestamp)
             ->all();
     }
 

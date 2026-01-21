@@ -32,9 +32,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Transaction extends Model
 {
     use HasFactory;
+    use SoftDeletes;
     use TransactionAccessorTrait;
     use TransactionActionTrait;
-    use SoftDeletes;
 
     protected $fillable = [
         'user_id',

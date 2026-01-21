@@ -81,7 +81,7 @@ class RecurringTransactionForm extends Component
     public function save(TransactionService $transactionService): void
     {
         // Remove everything except digits, comma and dot, then convert to float
-        if (!empty($this->amount)) {
+        if (! empty($this->amount)) {
             $amount = preg_replace('/[^\d,.]/', '', $this->amount);
             // If it has a comma, it's Brazilian format
             if (str_contains($amount, ',')) {
@@ -161,7 +161,7 @@ class RecurringTransactionForm extends Component
 
     public function deleteRecurring(TransactionService $transactionService): void
     {
-        if (!$this->editing || !$this->recurring) {
+        if (! $this->editing || ! $this->recurring) {
             return;
         }
 

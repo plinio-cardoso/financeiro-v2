@@ -41,8 +41,6 @@ class TransactionForm extends Component
 
     public array $selectedTags = [];
 
-
-
     // State
     public bool $editing = false;
 
@@ -69,7 +67,6 @@ class TransactionForm extends Component
                 $this->status = $transaction->status->value;
                 $this->selectedTags = $transaction->tags->pluck('id')->toArray();
 
-
             }
         }
     }
@@ -77,7 +74,7 @@ class TransactionForm extends Component
     public function save(TransactionService $transactionService): void
     {
         // Remove everything except digits and comma, then convert to float
-        if (!empty($this->amount)) {
+        if (! empty($this->amount)) {
             $amount = preg_replace('/[^\d,.]/', '', $this->amount);
             // If it has a comma, it's Brazilian format, so we clean accordingly
             if (str_contains($amount, ',')) {
@@ -112,7 +109,7 @@ class TransactionForm extends Component
 
     public function deleteTransaction(TransactionService $transactionService): void
     {
-        if (!$this->editing || !$this->transaction) {
+        if (! $this->editing || ! $this->transaction) {
             return;
         }
 
@@ -134,8 +131,6 @@ class TransactionForm extends Component
             'selectedTags' => 'array',
             'selectedTags.*' => 'exists:tags,id',
         ];
-
-
 
         return $rules;
     }

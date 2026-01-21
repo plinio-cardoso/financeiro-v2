@@ -21,7 +21,7 @@ class TransactionRow extends Component
             $isMatch = $this->transaction->id === $id ||
                 $this->transaction->recurring_transaction_id === $id;
 
-            if (!$isMatch) {
+            if (! $isMatch) {
                 return;
             }
         }
@@ -45,7 +45,7 @@ class TransactionRow extends Component
     {
         try {
             // Validate field name
-            if (!in_array($field, ['title', 'amount', 'due_date'])) {
+            if (! in_array($field, ['title', 'amount', 'due_date'])) {
                 $this->dispatch('notify', message: 'Campo inválido.', type: 'error');
 
                 return;
@@ -100,7 +100,7 @@ class TransactionRow extends Component
         } catch (Exception $e) {
             $this->dispatch(
                 'notify',
-                message: 'Erro ao atualizar: ' . $e->getMessage(),
+                message: 'Erro ao atualizar: '.$e->getMessage(),
                 type: 'error'
             );
             // Re-throw to let Alpine.js know the update failed
@@ -138,7 +138,7 @@ class TransactionRow extends Component
         } catch (\Exception $e) {
             $this->dispatch(
                 'notify',
-                message: 'Erro ao marcar como paga: ' . $e->getMessage(),
+                message: 'Erro ao marcar como paga: '.$e->getMessage(),
                 type: 'error'
             );
         }

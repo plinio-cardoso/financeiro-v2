@@ -40,11 +40,11 @@ class RecurringTransactionFilters extends Component
     #[Computed]
     public function hasActiveFilters(): bool
     {
-        return !empty($this->search)
-            || !empty($this->selectedTags)
-            || !empty($this->filterStatus)
-            || !empty($this->filterType)
-            || !empty($this->filterFrequency);
+        return ! empty($this->search)
+            || ! empty($this->selectedTags)
+            || ! empty($this->filterStatus)
+            || ! empty($this->filterType)
+            || ! empty($this->filterFrequency);
     }
 
     public function updated($property): void

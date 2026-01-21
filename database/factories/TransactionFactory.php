@@ -35,7 +35,7 @@ class TransactionFactory extends Factory
      */
     public function pending(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => TransactionStatusEnum::Pending,
             'paid_at' => null,
         ]);
@@ -46,7 +46,7 @@ class TransactionFactory extends Factory
      */
     public function paid(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => TransactionStatusEnum::Paid,
             'paid_at' => fake()->dateTimeBetween('-30 days', 'now'),
         ]);
@@ -57,7 +57,7 @@ class TransactionFactory extends Factory
      */
     public function debit(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'type' => TransactionTypeEnum::Debit,
         ]);
     }
@@ -67,7 +67,7 @@ class TransactionFactory extends Factory
      */
     public function credit(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'type' => TransactionTypeEnum::Credit,
         ]);
     }
@@ -77,7 +77,7 @@ class TransactionFactory extends Factory
      */
     public function dueToday(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'due_date' => today(),
         ]);
     }
@@ -87,7 +87,7 @@ class TransactionFactory extends Factory
      */
     public function overdue(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'due_date' => fake()->dateTimeBetween('-30 days', '-1 day'),
             'status' => TransactionStatusEnum::Pending,
             'paid_at' => null,

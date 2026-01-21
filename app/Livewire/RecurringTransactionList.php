@@ -52,7 +52,7 @@ class RecurringTransactionList extends Component
 
         // Busca
         if (strlen($search) >= 3) {
-            $query->where('title', 'like', '%' . $search . '%');
+            $query->where('title', 'like', '%'.$search.'%');
         }
 
         // Filtro de tipo
@@ -73,7 +73,7 @@ class RecurringTransactionList extends Component
         }
 
         // Filtro de tags (NEW!)
-        if (!empty($tags)) {
+        if (! empty($tags)) {
             $query->whereHas('tags', function ($q) use ($tags) {
                 $q->whereIn('tags.id', $tags);
             });

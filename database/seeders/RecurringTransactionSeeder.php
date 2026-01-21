@@ -17,13 +17,13 @@ class RecurringTransactionSeeder extends Seeder
     {
         $user = User::first();
 
-        if (!$user) {
+        if (! $user) {
             $this->command->warn('No users found. Please run UserSeeder first.');
 
             return;
         }
 
-        $this->command->info('Creating recurring transactions for user: ' . $user->name);
+        $this->command->info('Creating recurring transactions for user: '.$user->name);
 
         // Despesas mensais fixas
         $monthlyExpenses = [

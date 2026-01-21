@@ -46,13 +46,13 @@ class TransactionFilters extends Component
     #[Computed]
     public function hasActiveFilters(): bool
     {
-        return !empty($this->search)
-            || !empty($this->startDate)
-            || !empty($this->endDate)
-            || !empty($this->selectedTags)
-            || !empty($this->filterStatus)
-            || !empty($this->filterType)
-            || !empty($this->filterRecurrence);
+        return ! empty($this->search)
+            || ! empty($this->startDate)
+            || ! empty($this->endDate)
+            || ! empty($this->selectedTags)
+            || ! empty($this->filterStatus)
+            || ! empty($this->filterType)
+            || ! empty($this->filterRecurrence);
     }
 
     public function updated($property): void
