@@ -43,9 +43,12 @@ class RecurringTransactionForm extends Component
 
     public function mount(?int $recurringId = null): void
     {
+        // Load tags and dispatch to Alpine store
+        $this->dispatch('tags-loaded', tags: app(\App\Services\TagService::class)->getUserTags(auth()->id()));
+
         if ($recurringId) {
             $recurring = RecurringTransaction::where('user_id', auth()->id())
-                ->with('transactions')
+                ->with('tags')
                 ->find($recurringId);
 
             if ($recurring) {
@@ -65,10 +68,13 @@ class RecurringTransactionForm extends Component
                 // Load tags from the recurring transaction
                 $this->selectedTags = $recurring->tags->pluck('id')->toArray();
             }
+        } else {
+            $this->editing = false;
+            $this->startDate = now()->format('Y-m-d');
         }
     }
 
-    public function save(): void
+    public function save(\App\Services\TransactionService $transactionService): void
     {
         // Remove everything except digits, comma and dot, then convert to float
         if (!empty($this->amount)) {
@@ -83,13 +89,8 @@ class RecurringTransactionForm extends Component
 
         $this->validate();
 
-        if (!$this->editing || !$this->recurring) {
-            $this->dispatch('notify', message: 'Recorrência não encontrada.', type: 'error');
-
-            return;
-        }
-
         $data = [
+            'user_id' => auth()->id(),
             'title' => $this->title,
             'amount' => $this->amount,
             'type' => $this->type,
@@ -98,34 +99,42 @@ class RecurringTransactionForm extends Component
             'start_date' => $this->startDate,
             'end_date' => $this->endDate,
             'occurrences' => $this->occurrences,
+            'tags' => $this->selectedTags,
         ];
 
-        // Update recurring transaction
-        $this->recurring->update($data);
-        $this->recurring->tags()->sync($this->selectedTags);
+        if ($this->editing && $this->recurring) {
+            // Update recurring transaction
+            $this->recurring->update($data);
+            $this->recurring->tags()->sync($this->selectedTags);
 
-        // If editScope is 'current_and_future', update existing pending transactions too
-        if ($this->editScope === 'current_and_future') {
-            $this->recurring->transactions()
-                ->where('status', 'pending')
-                ->where('due_date', '>=', now())
-                ->update([
-                    'title' => $this->title,
-                    'amount' => $this->amount,
-                    'type' => $this->type,
-                ]);
+            // If editScope is 'current_and_future', update existing pending transactions too
+            if ($this->editScope === 'current_and_future') {
+                $this->recurring->transactions()
+                    ->where('status', 'pending')
+                    ->where('due_date', '>=', now())
+                    ->update([
+                        'title' => $this->title,
+                        'amount' => $this->amount,
+                        'type' => $this->type,
+                    ]);
 
-            // Update tags for pending transactions
-            $this->recurring->transactions()
-                ->where('status', 'pending')
-                ->where('due_date', '>=', now())
-                ->each(function ($transaction) {
-                    $transaction->tags()->sync($this->selectedTags);
-                });
+                // Update tags for pending transactions
+                $this->recurring->transactions()
+                    ->where('status', 'pending')
+                    ->where('due_date', '>=', now())
+                    ->each(function ($transaction) {
+                        $transaction->tags()->sync($this->selectedTags);
+                    });
+            }
+
+            $this->dispatch('recurring-saved', id: $this->recurring->id);
+            $this->dispatch('notify', message: 'Recorrência atualizada com sucesso!', type: 'success');
+        } else {
+            // Create new recurring transaction
+            $recurring = $transactionService->createRecurringTransaction($data);
+            $this->dispatch('recurring-saved', id: $recurring->id);
+            $this->dispatch('notify', message: 'Recorrência criada com sucesso!', type: 'success');
         }
-
-        $this->dispatch('recurring-saved', id: $this->recurring->id);
-        $this->dispatch('notify', message: 'Recorrência atualizada com sucesso!', type: 'success');
     }
 
     public function deleteRecurring(\App\Services\TransactionService $transactionService): void

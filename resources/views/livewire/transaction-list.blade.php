@@ -35,17 +35,15 @@
         {{-- List Header with Actions --}}
         <div
             class="px-6 py-3 border-b border-gray-50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/10 flex items-center justify-between">
-            {{-- Global Loading Indicator --}}
-            <div wire:loading.flex class="items-center gap-3">
-                <div class="w-4 h-4 border-2 border-[#4ECDC4] border-t-transparent rounded-full animate-spin"></div>
-                <span
-                    class="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                    Sincronizando...
-                </span>
-            </div>
-            <div wire:loading.remove>
-                {{-- Placeholder to maintain layout --}}
-                <div class="h-10"></div>
+            <div class="h-10 flex items-center">
+                {{-- Global Loading Indicator --}}
+                <div wire:loading.flex class="items-center gap-3">
+                    <div class="w-4 h-4 border-2 border-[#4ECDC4] border-t-transparent rounded-full animate-spin"></div>
+                    <span
+                        class="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        Sincronizando...
+                    </span>
+                </div>
             </div>
 
             <x-button @click="openCreate()"
@@ -216,7 +214,7 @@
                             </th>
                             <th scope="col"
                                 class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                                Tags
+                                Categorias
                             </th>
                             <th scope="col" class="relative px-6 py-3">
                                 <span class="sr-only">Ações</span>

@@ -243,9 +243,7 @@
             </div>
         @else
             <div @click="$dispatch('open-edit-modal', { transactionId: {{ $transaction->id }} })"
-                class="cursor-pointer p-1">
-                <span class="text-xs text-gray-400 dark:text-gray-500 italic hover:text-[#4ECDC4] transition-colors">Sem
-                    tags</span>
+                class="cursor-pointer p-1 min-h-[1.5rem]">
             </div>
         @endif
     </td>

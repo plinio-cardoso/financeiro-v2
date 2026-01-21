@@ -1,50 +1,52 @@
 <div>
     <form wire:submit="save" class="space-y-6">
-        {{-- Edit Scope Selector --}}
-        <div class="space-y-3">
-            <div class="flex items-center gap-2 px-1">
-                <div class="w-1.5 h-4 bg-[#4ECDC4] rounded-full"></div>
-                <h3 class="text-xs font-black tracking-widest text-gray-400 uppercase dark:text-gray-300">
-                    Escopo da Edição
-                </h3>
+        @if ($editing)
+            {{-- Edit Scope Selector --}}
+            <div class="space-y-3">
+                <div class="flex items-center gap-2 px-1">
+                    <div class="w-1.5 h-4 bg-[#4ECDC4] rounded-full"></div>
+                    <h3 class="text-xs font-black tracking-widest text-gray-400 uppercase dark:text-gray-300">
+                        Escopo da Edição
+                    </h3>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3">
+                    @foreach (['future_only' => ['title' => 'Apenas futuras', 'desc' => 'Altera apenas as próximas transações'], 'current_and_future' => ['title' => 'Atuais e futuras', 'desc' => 'Atualiza todas as transações pendentes']] as $value => $info)
+                        <label
+                            class="relative flex items-center gap-4 p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200 group"
+                            :class="$wire.editScope === '{{ $value }}'
+                                    ? 'bg-[#4ECDC4]/5 border-[#4ECDC4] shadow-sm'
+                                    : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'">
+
+                            <input type="radio" wire:model.live="editScope" value="{{ $value }}" class="sr-only">
+
+                            <div class="flex-1">
+                                <div class="text-sm font-black transition-colors"
+                                    :class="$wire.editScope === '{{ $value }}' ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'">
+                                    {{ $info['title'] }}
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                    {{ $info['desc'] }}
+                                </div>
+                            </div>
+
+                            <div x-show="$wire.editScope === '{{ $value }}'"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 scale-50" x-transition:enter-end="opacity-100 scale-100"
+                                class="flex-shrink-0">
+                                <div
+                                    class="w-6 h-6 bg-[#4ECDC4] rounded-full flex items-center justify-center shadow-sm shadow-[#4ECDC4]/20">
+                                    <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </label>
+                    @endforeach
+                </div>
             </div>
-
-            <div class="grid grid-cols-1 gap-3">
-                @foreach (['future_only' => ['title' => 'Apenas futuras', 'desc' => 'Altera apenas as próximas transações'], 'current_and_future' => ['title' => 'Atuais e futuras', 'desc' => 'Atualiza todas as transações pendentes']] as $value => $info)
-                    <label
-                        class="relative flex items-center gap-4 p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200 group"
-                        :class="$wire.editScope === '{{ $value }}'
-                                ? 'bg-[#4ECDC4]/5 border-[#4ECDC4] shadow-sm'
-                                : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'">
-
-                        <input type="radio" wire:model.live="editScope" value="{{ $value }}" class="sr-only">
-
-                        <div class="flex-1">
-                            <div class="text-sm font-black transition-colors"
-                                :class="$wire.editScope === '{{ $value }}' ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'">
-                                {{ $info['title'] }}
-                            </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-                                {{ $info['desc'] }}
-                            </div>
-                        </div>
-
-                        <div x-show="$wire.editScope === '{{ $value }}'"
-                            x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0 scale-50" x-transition:enter-end="opacity-100 scale-100"
-                            class="flex-shrink-0">
-                            <div
-                                class="w-6 h-6 bg-[#4ECDC4] rounded-full flex items-center justify-center shadow-sm shadow-[#4ECDC4]/20">
-                                <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4"
-                                        d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                        </div>
-                    </label>
-                @endforeach
-            </div>
-        </div>
+        @endif
 
         {{-- Basic Information --}}
         <div class="space-y-3">
@@ -97,13 +99,14 @@
                     </div>
                 </div>
 
-                {{-- Tags --}}
+                {{-- Categorias --}}
                 <div>
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                        Tags
+                        Categorias
                     </label>
-                    <x-multi-select wire:model="selectedTags" :options="[]" x-init="options = $store.tags.list"
-                        placeholder="Selecione tags" />
+                    <x-multi-select wire:model="selectedTags" :options="[]" 
+                        x-init="options = $store.tags.list; $watch('$store.tags.list', val => options = val)"
+                        placeholder="Selecione categorias" />
                     @error('selectedTags')
                         <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
                     @enderror

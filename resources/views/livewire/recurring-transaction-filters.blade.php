@@ -33,9 +33,9 @@
             class="!py-2 !text-xs !font-bold" />
     </div>
 
-    {{-- Tags Filter (NEW!) --}}
+    {{-- Categorias Filter (NEW!) --}}
     <div class="w-48">
-        <x-multi-select wire:model.live="selectedTags" :options="[]" placeholder="Tags"
+        <x-multi-select wire:model.live="selectedTags" :options="[]" placeholder="Categorias"
             x-init="options = $store.tags.list; $watch('$store.tags.list', val => options = val)"
             class="!py-2 !text-xs !font-bold" />
     </div>

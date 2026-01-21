@@ -39,18 +39,7 @@ class TransactionForm extends Component
 
     public array $selectedTags = [];
 
-    // Recurrence fields
-    public bool $isRecurring = false;
 
-    public ?string $frequency = null;
-
-    public ?int $interval = null;
-
-    public ?string $startDate = null;
-
-    public ?string $endDate = null;
-
-    public ?int $occurrences = null;
 
     // State
     public bool $editing = false;
@@ -59,6 +48,9 @@ class TransactionForm extends Component
 
     public function mount(?int $transactionId = null): void
     {
+        // Load tags and dispatch to Alpine store
+        $this->dispatch('tags-loaded', tags: app(\App\Services\TagService::class)->getUserTags(auth()->id()));
+
         $this->dueDate = now()->format('Y-m-d');
 
         if ($transactionId) {
@@ -75,15 +67,7 @@ class TransactionForm extends Component
                 $this->status = $transaction->status->value;
                 $this->selectedTags = $transaction->tags->pluck('id')->toArray();
 
-                if ($transaction->recurring_transaction_id) {
-                    $this->isRecurring = true;
-                    $recurring = $transaction->recurringTransaction;
-                    $this->frequency = $recurring->frequency->value;
-                    $this->interval = $recurring->interval;
-                    $this->startDate = $recurring->start_date instanceof \DateTimeInterface ? $recurring->start_date->format('Y-m-d') : null;
-                    $this->endDate = $recurring->end_date instanceof \DateTimeInterface ? $recurring->end_date->format('Y-m-d') : null;
-                    $this->occurrences = $recurring->occurrences;
-                }
+
             }
         }
     }
@@ -118,23 +102,9 @@ class TransactionForm extends Component
             $this->dispatch('transaction-saved', id: $this->transaction->id);
             $this->dispatch('notify', message: 'Transação atualizada com sucesso!', type: 'success');
         } else {
-            if ($this->isRecurring) {
-                $recurringData = array_merge($data, [
-                    'frequency' => $this->frequency,
-                    'interval' => $this->interval,
-                    'start_date' => $this->startDate,
-                    'end_date' => $this->endDate,
-                    'occurrences' => $this->occurrences,
-                ]);
-
-                $recurring = $transactionService->createRecurringTransaction($recurringData);
-                $this->dispatch('transaction-saved'); // Still general as many might be created
-                $this->dispatch('notify', message: 'Recorrência criada com sucesso!', type: 'success');
-            } else {
-                $transaction = $transactionService->createTransaction($data);
-                $this->dispatch('transaction-saved', id: $transaction->id);
-                $this->dispatch('notify', message: 'Transação criada com sucesso!', type: 'success');
-            }
+            $transaction = $transactionService->createTransaction($data);
+            $this->dispatch('transaction-saved', id: $transaction->id);
+            $this->dispatch('notify', message: 'Transação criada com sucesso!', type: 'success');
         }
     }
 
@@ -163,15 +133,7 @@ class TransactionForm extends Component
             'selectedTags.*' => 'exists:tags,id',
         ];
 
-        if ($this->isRecurring && !$this->editing) {
-            $rules = array_merge($rules, [
-                'frequency' => 'required|in:weekly,monthly,custom',
-                'interval' => 'required|integer|min:1',
-                'startDate' => 'required|date',
-                'endDate' => 'nullable|date|after_or_equal:startDate',
-                'occurrences' => 'nullable|integer|min:1',
-            ]);
-        }
+
 
         return $rules;
     }
@@ -185,9 +147,7 @@ class TransactionForm extends Component
             'dueDate.required' => 'A data é obrigatória.',
             'type.required' => 'O tipo é obrigatório.',
             'status.required' => 'O status é obrigatório.',
-            'frequency.required' => 'A frequência é obrigatória.',
-            'interval.required' => 'O intervalo é obrigatório.',
-            'startDate.required' => 'A data de início é obrigatória.',
+
         ];
     }
 

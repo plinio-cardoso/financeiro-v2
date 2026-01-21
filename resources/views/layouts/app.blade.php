@@ -5,7 +5,7 @@
     <x-head />
 </head>
 
-<body class="font-sans antialiased">
+<body class="font-sans antialiased" @tags-loaded.window="$store.tags.setTags($event.detail.tags)">
     <x-toast-container />
 
     <div class="flex h-screen overflow-hidden bg-gray-100 dark:bg-gray-900">
