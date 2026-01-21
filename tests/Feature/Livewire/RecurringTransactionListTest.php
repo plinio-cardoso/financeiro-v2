@@ -259,7 +259,6 @@ class RecurringTransactionListTest extends TestCase
         $this->assertEquals(5000.0, $component->get('totalMonthlyAmount'));
     }
 
-
     public function test_clears_aggregate_cache_on_filter_change(): void
     {
         $user = User::factory()->create();

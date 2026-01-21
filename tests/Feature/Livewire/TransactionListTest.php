@@ -302,7 +302,6 @@ class TransactionListTest extends TestCase
         $this->assertEquals(700.0, $component->get('totalAmount'));
     }
 
-
     public function test_mark_as_paid_updates_transaction(): void
     {
         $user = User::factory()->create();

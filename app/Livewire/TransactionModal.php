@@ -8,7 +8,9 @@ use Livewire\Component;
 class TransactionModal extends Component
 {
     public ?int $transactionId = null;
+
     public ?int $recurringId = null;
+
     public string $mode = 'transaction'; // 'transaction' or 'recurring'
 
     protected $listeners = [
