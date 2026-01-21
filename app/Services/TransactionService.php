@@ -6,8 +6,11 @@ use App\Enums\RecurringFrequencyEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Models\RecurringTransaction;
+use App\Models\Tag;
 use App\Models\Transaction;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Artisan;
 
 class TransactionService
 {
@@ -43,7 +46,7 @@ class TransactionService
         $targetDate = now()->addMonth()->endOfMonth();
         $daysToGenerate = now()->diffInDays($targetDate);
 
-        \Illuminate\Support\Facades\Artisan::call('app:generate-transactions', [
+        Artisan::call('app:generate-transactions', [
             '--days' => max(0, (int) $daysToGenerate),
         ]);
 
@@ -134,7 +137,7 @@ class TransactionService
     {
         // 1. Delete future pending transactions
         $recurring->transactions()
-            ->where('status', \App\Enums\TransactionStatusEnum::Pending)
+            ->where('status', TransactionStatusEnum::Pending)
             ->where('due_date', '>=', today())
             ->delete();
 
@@ -143,7 +146,7 @@ class TransactionService
         // If start_date is in the future, that's the next due date.
         // If start_date is in the past, we calculate forward.
 
-        $startDate = $recurring->start_date;
+        $startDate = \Carbon\Carbon::parse($recurring->start_date);
         $nextDate = $startDate->copy();
 
         if ($nextDate->isPast()) {
@@ -181,7 +184,7 @@ class TransactionService
             case 'future':
                 // Delete only future pending transactions
                 $recurring->transactions()
-                    ->where('status', \App\Enums\TransactionStatusEnum::Pending)
+                    ->where('status', TransactionStatusEnum::Pending)
                     ->where('due_date', '>=', today())
                     ->delete();
                 break;
@@ -243,7 +246,7 @@ class TransactionService
      */
     public function getNextMonthTotal(int $userId, int $year, int $month): float
     {
-        $nextMonth = \Carbon\Carbon::create($year, $month, 1)->addMonth();
+        $nextMonth = Carbon::create($year, $month, 1)->addMonth();
 
         $transactions = $this->getMonthlyDebits($userId, $nextMonth->year, $nextMonth->month)
             ->filter(fn($t) => $t->isPending());
@@ -367,7 +370,7 @@ class TransactionService
      */
     private function getMonthlyDebits(int $userId, int $year, int $month): Collection
     {
-        $startDate = \Carbon\Carbon::create($year, $month, 1)->startOfMonth();
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
         $endDate = $startDate->copy()->endOfMonth();
 
         return Transaction::where('user_id', $userId)

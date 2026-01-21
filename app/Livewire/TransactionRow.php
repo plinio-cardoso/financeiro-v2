@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Transaction;
+use Exception;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -87,7 +89,7 @@ class TransactionRow extends Component
             // Notify parent to recalculate aggregates
             $this->dispatch('transaction-updated');
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             $this->dispatch(
                 'notify',
                 message: $e->validator->errors()->first(),
@@ -95,7 +97,7 @@ class TransactionRow extends Component
             );
             // Re-throw to let Alpine.js know the update failed
             throw $e;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->dispatch(
                 'notify',
                 message: 'Erro ao atualizar: ' . $e->getMessage(),

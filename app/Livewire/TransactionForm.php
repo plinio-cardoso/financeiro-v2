@@ -3,7 +3,9 @@
 namespace App\Livewire;
 
 use App\Models\Transaction;
+use App\Services\TagService;
 use App\Services\TransactionService;
+use DateTimeInterface;
 use Laravel\Jetstream\InteractsWithBanner;
 use Livewire\Component;
 
@@ -49,7 +51,7 @@ class TransactionForm extends Component
     public function mount(?int $transactionId = null): void
     {
         // Load tags and dispatch to Alpine store
-        $this->dispatch('tags-loaded', tags: app(\App\Services\TagService::class)->getUserTags(auth()->id()));
+        $this->dispatch('tags-loaded', tags: app(TagService::class)->getUserTags(auth()->id()));
 
         $this->dueDate = now()->format('Y-m-d');
 
@@ -62,7 +64,7 @@ class TransactionForm extends Component
                 $this->transactionId = $transactionId;
                 $this->title = $transaction->title;
                 $this->amount = (float) $transaction->amount;
-                $this->dueDate = $transaction->due_date instanceof \DateTimeInterface ? $transaction->due_date->format('Y-m-d') : now()->format('Y-m-d');
+                $this->dueDate = $transaction->due_date instanceof DateTimeInterface ? $transaction->due_date->format('Y-m-d') : now()->format('Y-m-d');
                 $this->type = $transaction->type->value;
                 $this->status = $transaction->status->value;
                 $this->selectedTags = $transaction->tags->pluck('id')->toArray();

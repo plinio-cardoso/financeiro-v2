@@ -4,13 +4,15 @@ namespace App\Services;
 
 use App\Enums\TransactionTypeEnum;
 use App\Models\Transaction;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class DashboardService
 {
     public function __construct(
         private TransactionService $transactionService
-    ) {}
+    ) {
+    }
 
     /**
      * Get current month statistics
@@ -65,7 +67,7 @@ class DashboardService
         $year = $year ?? now()->year;
         $month = $month ?? now()->month;
 
-        $startDate = \Carbon\Carbon::create($year, $month, 1)->startOfMonth();
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
         $endDate = $startDate->copy()->endOfMonth();
 
         return Transaction::where('user_id', $userId)
@@ -148,7 +150,7 @@ class DashboardService
         $expenses = $this->getUpcomingExpenses($userId);
 
         return $expenses
-            ->groupBy(fn ($expense) => $expense->due_date->startOfDay()->timestamp)
+            ->groupBy(fn($expense) => $expense->due_date->startOfDay()->timestamp)
             ->all();
     }
 

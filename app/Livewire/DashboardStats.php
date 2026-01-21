@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Services\DashboardService;
+use App\Services\TagService;
 use Livewire\Component;
 
 class DashboardStats extends Component
@@ -14,7 +15,7 @@ class DashboardStats extends Component
     public function mount(DashboardService $dashboardService): void
     {
         // Load tags and dispatch to Alpine store
-        $this->dispatch('tags-loaded', tags: app(\App\Services\TagService::class)->getUserTags(auth()->id()));
+        $this->dispatch('tags-loaded', tags: app(TagService::class)->getUserTags(auth()->id()));
 
         $this->userId = auth()->id();
         $stats = $dashboardService->getCurrentMonthStats($this->userId);

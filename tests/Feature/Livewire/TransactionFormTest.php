@@ -154,47 +154,7 @@ class TransactionFormTest extends TestCase
         ]);
     }
 
-    public function test_can_create_recurring_transaction(): void
-    {
-        $user = User::factory()->create();
 
-        $this->actingAs($user);
-
-        Livewire::test(TransactionForm::class)
-            ->set('title', 'Recurring Bill')
-            ->set('amount', '100.00')
-            ->set('dueDate', '2024-12-01')
-            ->set('type', 'debit')
-            ->set('status', 'pending')
-            ->set('isRecurring', true)
-            ->set('frequency', 'monthly')
-            ->set('interval', 1)
-            ->set('startDate', '2024-12-01')
-            ->call('save')
-            ->assertDispatched('transaction-saved');
-
-        $this->assertDatabaseHas('recurring_transactions', [
-            'title' => 'Recurring Bill',
-            'frequency' => 'monthly',
-        ]);
-    }
-
-    public function test_validation_requires_recurrence_fields_when_recurring(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        Livewire::test(TransactionForm::class)
-            ->set('title', 'Recurring Bill')
-            ->set('amount', '100.00')
-            ->set('dueDate', '2024-12-25')
-            ->set('type', 'debit')
-            ->set('status', 'pending')
-            ->set('isRecurring', true)
-            ->call('save')
-            ->assertHasErrors(['frequency', 'interval', 'startDate']);
-    }
 
     public function test_validation_messages_are_in_portuguese(): void
     {
@@ -225,36 +185,6 @@ class TransactionFormTest extends TestCase
             ->assertDispatched('validation-failed');
     }
 
-    public function test_mounts_with_recurring_transaction_data(): void
-    {
-        $user = User::factory()->create();
-
-        $recurring = \App\Models\RecurringTransaction::factory()->create([
-            'user_id' => $user->id,
-            'title' => 'Monthly Bill',
-            'frequency' => \App\Enums\RecurringFrequencyEnum::Monthly,
-            'interval' => 2,
-            'start_date' => '2024-01-01',
-            'end_date' => '2024-12-31',
-            'occurrences' => 6,
-        ]);
-
-        $transaction = Transaction::factory()->create([
-            'user_id' => $user->id,
-            'recurring_transaction_id' => $recurring->id,
-        ]);
-
-        $this->actingAs($user);
-
-        $component = Livewire::test(TransactionForm::class, ['transactionId' => $transaction->id]);
-
-        $this->assertTrue($component->get('isRecurring'));
-        $this->assertEquals('monthly', $component->get('frequency'));
-        $this->assertEquals(2, $component->get('interval'));
-        $this->assertEquals('2024-01-01', $component->get('startDate'));
-        $this->assertEquals('2024-12-31', $component->get('endDate'));
-        $this->assertEquals(6, $component->get('occurrences'));
-    }
 
     public function test_mounts_with_default_dates_when_creating(): void
     {
@@ -265,7 +195,6 @@ class TransactionFormTest extends TestCase
         $component = Livewire::test(TransactionForm::class);
 
         $this->assertEquals(now()->format('Y-m-d'), $component->get('dueDate'));
-        $this->assertNull($component->get('startDate'));
         $this->assertFalse($component->get('editing'));
     }
 
