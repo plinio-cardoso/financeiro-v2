@@ -26,7 +26,6 @@ class RecurringTransactionFactory extends Factory
         return [
             'user_id' => User::factory(),
             'title' => $this->generateTitle($type),
-            'description' => fake()->optional()->sentence(),
             'amount' => fake()->randomFloat(2, 50, 5000),
             'type' => $type,
             'frequency' => $frequency,
@@ -68,7 +67,7 @@ class RecurringTransactionFactory extends Factory
 
     public function monthly(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'frequency' => RecurringFrequencyEnum::Monthly,
             'interval' => 1,
         ]);
@@ -76,7 +75,7 @@ class RecurringTransactionFactory extends Factory
 
     public function weekly(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'frequency' => RecurringFrequencyEnum::Weekly,
             'interval' => 1,
         ]);
@@ -84,7 +83,7 @@ class RecurringTransactionFactory extends Factory
 
     public function debit(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'type' => TransactionTypeEnum::Debit,
             'title' => $this->generateTitle(TransactionTypeEnum::Debit),
         ]);
@@ -92,7 +91,7 @@ class RecurringTransactionFactory extends Factory
 
     public function credit(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'type' => TransactionTypeEnum::Credit,
             'title' => $this->generateTitle(TransactionTypeEnum::Credit),
         ]);
@@ -100,21 +99,21 @@ class RecurringTransactionFactory extends Factory
 
     public function withEndDate(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'end_date' => fake()->dateTimeBetween('+6 months', '+2 years'),
         ]);
     }
 
     public function withOccurrences(int $count = 12): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'occurrences' => $count,
         ]);
     }
 
     public function inactive(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'active' => false,
         ]);
     }

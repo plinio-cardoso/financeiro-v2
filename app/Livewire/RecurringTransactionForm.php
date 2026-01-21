@@ -19,8 +19,6 @@ class RecurringTransactionForm extends Component
     // Form fields
     public string $title = '';
 
-    public string $description = '';
-
     public string $amount = '';
 
     public string $type = 'debit';
@@ -52,8 +50,7 @@ class RecurringTransactionForm extends Component
                 $this->recurringId = $recurringId;
 
                 $this->title = $recurring->title;
-                $this->description = $recurring->description ?? '';
-                $this->amount = number_format((float) $recurring->amount, 2, '.', '');
+                $this->amount = (float) $recurring->amount;
                 $this->type = $recurring->type->value;
                 $this->frequency = $recurring->frequency->value;
                 $this->interval = $recurring->interval;
@@ -69,14 +66,20 @@ class RecurringTransactionForm extends Component
 
     public function save(): void
     {
-        // Remove 'R$', dots and replace comma with dot, but ONLY if not empty
-        if (! empty($this->amount)) {
-            $this->amount = (float) str_replace(['R$', '.', ','], ['', '', '.'], $this->amount);
+        // Remove everything except digits, comma and dot, then convert to float
+        if (!empty($this->amount)) {
+            $amount = preg_replace('/[^\d,.]/', '', $this->amount);
+            // If it has a comma, it's Brazilian format
+            if (str_contains($amount, ',')) {
+                $amount = str_replace('.', '', $amount); // remove thousand separator
+                $amount = str_replace(',', '.', $amount); // change decimal separator
+            }
+            $this->amount = (float) $amount;
         }
 
         $this->validate();
 
-        if (! $this->editing || ! $this->recurring) {
+        if (!$this->editing || !$this->recurring) {
             $this->dispatch('notify', message: 'Recorrência não encontrada.', type: 'error');
 
             return;
@@ -84,7 +87,6 @@ class RecurringTransactionForm extends Component
 
         $data = [
             'title' => $this->title,
-            'description' => $this->description,
             'amount' => $this->amount,
             'type' => $this->type,
             'frequency' => $this->frequency,
@@ -105,7 +107,6 @@ class RecurringTransactionForm extends Component
                 ->where('due_date', '>=', now())
                 ->update([
                     'title' => $this->title,
-                    'description' => $this->description,
                     'amount' => $this->amount,
                     'type' => $this->type,
                 ]);
@@ -119,7 +120,7 @@ class RecurringTransactionForm extends Component
                 });
         }
 
-        $this->dispatch('recurring-saved');
+        $this->dispatch('recurring-saved', id: $this->recurring->id);
         $this->dispatch('notify', message: 'Recorrência atualizada com sucesso!', type: 'success');
     }
 
@@ -127,7 +128,6 @@ class RecurringTransactionForm extends Component
     {
         return [
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
             'amount' => 'required|numeric|min:0',
             'type' => 'required|in:debit,credit',
             'frequency' => 'required|in:weekly,monthly,custom',
@@ -147,7 +147,6 @@ class RecurringTransactionForm extends Component
             'title.required' => 'O título é obrigatório.',
             'title.string' => 'O título deve ser um texto.',
             'title.max' => 'O título não pode ter mais de 255 caracteres.',
-            'description.string' => 'A descrição deve ser um texto.',
             'amount.required' => 'O valor é obrigatório.',
             'amount.numeric' => 'O valor deve ser um número.',
             'amount.min' => 'O valor deve ser maior ou igual a zero.',

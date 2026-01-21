@@ -17,19 +17,18 @@ class RecurringTransactionSeeder extends Seeder
     {
         $user = User::first();
 
-        if (! $user) {
+        if (!$user) {
             $this->command->warn('No users found. Please run UserSeeder first.');
 
             return;
         }
 
-        $this->command->info('Creating recurring transactions for user: '.$user->name);
+        $this->command->info('Creating recurring transactions for user: ' . $user->name);
 
         // Despesas mensais fixas
         $monthlyExpenses = [
             [
                 'title' => 'Aluguel',
-                'description' => 'Pagamento mensal de aluguel',
                 'amount' => 1500.00,
                 'type' => TransactionTypeEnum::Debit,
                 'frequency' => RecurringFrequencyEnum::Monthly,
@@ -37,7 +36,6 @@ class RecurringTransactionSeeder extends Seeder
             ],
             [
                 'title' => 'Conta de Luz',
-                'description' => 'Energia elétrica',
                 'amount' => 250.00,
                 'type' => TransactionTypeEnum::Debit,
                 'frequency' => RecurringFrequencyEnum::Monthly,
@@ -45,7 +43,6 @@ class RecurringTransactionSeeder extends Seeder
             ],
             [
                 'title' => 'Internet',
-                'description' => 'Plano de internet 500MB',
                 'amount' => 99.90,
                 'type' => TransactionTypeEnum::Debit,
                 'frequency' => RecurringFrequencyEnum::Monthly,
@@ -53,7 +50,6 @@ class RecurringTransactionSeeder extends Seeder
             ],
             [
                 'title' => 'Netflix',
-                'description' => 'Assinatura Premium',
                 'amount' => 55.90,
                 'type' => TransactionTypeEnum::Debit,
                 'frequency' => RecurringFrequencyEnum::Monthly,
@@ -61,7 +57,6 @@ class RecurringTransactionSeeder extends Seeder
             ],
             [
                 'title' => 'Academia',
-                'description' => 'Mensalidade da academia',
                 'amount' => 120.00,
                 'type' => TransactionTypeEnum::Debit,
                 'frequency' => RecurringFrequencyEnum::Monthly,
@@ -73,7 +68,6 @@ class RecurringTransactionSeeder extends Seeder
             RecurringTransaction::create([
                 'user_id' => $user->id,
                 'title' => $expense['title'],
-                'description' => $expense['description'],
                 'amount' => $expense['amount'],
                 'type' => $expense['type'],
                 'frequency' => $expense['frequency'],
@@ -91,7 +85,6 @@ class RecurringTransactionSeeder extends Seeder
         RecurringTransaction::create([
             'user_id' => $user->id,
             'title' => 'Salário',
-            'description' => 'Salário mensal',
             'amount' => 5000.00,
             'type' => TransactionTypeEnum::Credit,
             'frequency' => RecurringFrequencyEnum::Monthly,
@@ -108,7 +101,6 @@ class RecurringTransactionSeeder extends Seeder
         RecurringTransaction::create([
             'user_id' => $user->id,
             'title' => 'Feira Semanal',
-            'description' => 'Compras de supermercado',
             'amount' => 200.00,
             'type' => TransactionTypeEnum::Debit,
             'frequency' => RecurringFrequencyEnum::Weekly,
@@ -125,7 +117,6 @@ class RecurringTransactionSeeder extends Seeder
         RecurringTransaction::create([
             'user_id' => $user->id,
             'title' => 'Financiamento do Carro',
-            'description' => 'Parcela mensal do financiamento',
             'amount' => 800.00,
             'type' => TransactionTypeEnum::Debit,
             'frequency' => RecurringFrequencyEnum::Monthly,
@@ -142,7 +133,6 @@ class RecurringTransactionSeeder extends Seeder
         RecurringTransaction::create([
             'user_id' => $user->id,
             'title' => 'Curso Online',
-            'description' => 'Pagamento em 6x',
             'amount' => 150.00,
             'type' => TransactionTypeEnum::Debit,
             'frequency' => RecurringFrequencyEnum::Monthly,

@@ -29,8 +29,6 @@ class TransactionForm extends Component
     // Form fields
     public string $title = '';
 
-    public string $description = '';
-
     public string $amount = '';
 
     public string $dueDate = '';
@@ -70,8 +68,7 @@ class TransactionForm extends Component
                 $this->transaction = $transaction;
                 $this->transactionId = $transactionId;
                 $this->title = $transaction->title;
-                $this->description = $transaction->description ?? '';
-                $this->amount = number_format((float) $transaction->amount, 2, '.', '');
+                $this->amount = (float) $transaction->amount;
                 $this->dueDate = $transaction->due_date instanceof \DateTimeInterface ? $transaction->due_date->format('Y-m-d') : now()->format('Y-m-d');
                 $this->type = $transaction->type->value;
                 $this->status = $transaction->status->value;
@@ -92,9 +89,15 @@ class TransactionForm extends Component
 
     public function save(TransactionService $transactionService): void
     {
-        // Remove 'R$', dots and replace comma with dot, but ONLY if not empty
-        if (! empty($this->amount)) {
-            $this->amount = (float) str_replace(['R$', '.', ','], ['', '', '.'], $this->amount);
+        // Remove everything except digits and comma, then convert to float
+        if (!empty($this->amount)) {
+            $amount = preg_replace('/[^\d,.]/', '', $this->amount);
+            // If it has a comma, it's Brazilian format, so we clean accordingly
+            if (str_contains($amount, ',')) {
+                $amount = str_replace('.', '', $amount); // remove thousand separator
+                $amount = str_replace(',', '.', $amount); // change decimal separator
+            }
+            $this->amount = (float) $amount;
         }
 
         $this->validate();
@@ -102,7 +105,6 @@ class TransactionForm extends Component
         $data = [
             'user_id' => auth()->id(),
             'title' => $this->title,
-            'description' => $this->description,
             'amount' => $this->amount,
             'type' => $this->type,
             'status' => $this->status,
@@ -112,7 +114,7 @@ class TransactionForm extends Component
 
         if ($this->editing) {
             $transactionService->updateTransaction($this->transaction->id, $data);
-            $this->dispatch('transaction-saved');
+            $this->dispatch('transaction-saved', id: $this->transaction->id);
             $this->dispatch('notify', message: 'Transação atualizada com sucesso!', type: 'success');
         } else {
             if ($this->isRecurring) {
@@ -125,12 +127,12 @@ class TransactionForm extends Component
                     'occurrences' => $this->occurrences,
                 ]);
 
-                $transactionService->createRecurringTransaction($recurringData);
-                $this->dispatch('transaction-saved');
+                $recurring = $transactionService->createRecurringTransaction($recurringData);
+                $this->dispatch('transaction-saved'); // Still general as many might be created
                 $this->dispatch('notify', message: 'Recorrência criada com sucesso!', type: 'success');
             } else {
-                $transactionService->createTransaction($data);
-                $this->dispatch('transaction-saved');
+                $transaction = $transactionService->createTransaction($data);
+                $this->dispatch('transaction-saved', id: $transaction->id);
                 $this->dispatch('notify', message: 'Transação criada com sucesso!', type: 'success');
             }
         }
@@ -142,14 +144,13 @@ class TransactionForm extends Component
             'title' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0',
             'dueDate' => 'required|date',
-            'description' => 'nullable|string',
             'type' => 'required|in:debit,credit',
             'status' => 'required|in:pending,paid',
             'selectedTags' => 'array',
             'selectedTags.*' => 'exists:tags,id',
         ];
 
-        if ($this->isRecurring && ! $this->editing) {
+        if ($this->isRecurring && !$this->editing) {
             $rules = array_merge($rules, [
                 'frequency' => 'required|in:weekly,monthly,custom',
                 'interval' => 'required|integer|min:1',

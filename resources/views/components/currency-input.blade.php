@@ -1,50 +1,68 @@
-@props(['placeholder' => 'R$ 0,00'])
+@props(['placeholder' => '0,00'])
 
 <div x-data="{
-    value: @entangle($attributes->wire('model')),
-    format(value) {
-        if (!value) return '';
+    displayValue: '',
+    realValue: @entangle($attributes->wire('model')),
+    
+    init() {
+        if (this.realValue) {
+            this.displayValue = this.format(this.realValue);
+        }
         
-        // Remove everything that is not a number
-        let number = value.replace(/\D/g, '');
-        
-        // Convert to decimal
-        number = (number / 100).toFixed(2);
-        
-        // Split decimal and integer parts
-        let parts = number.split('.');
-        
-        // Add thousands separator
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        
-        return 'R$ ' + parts.join(',');
+        this.$watch('realValue', value => {
+            if (value === null || value === '') {
+                this.displayValue = '';
+                return;
+            }
+            // Sync display if realValue changes from outside
+            let currentParsed = this.parse(this.displayValue);
+            if (parseFloat(value) !== currentParsed) {
+                this.displayValue = this.format(value);
+            }
+        });
     },
-    input(event) {
-        let val = event.target.value;
+
+    format(val) {
+        if (val === null || val === '' || isNaN(val)) return '';
+        return new Intl.NumberFormat('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(val);
+    },
+
+    parse(val) {
+        if (!val) return null;
+        let clean = val.replace(/\D/g, '');
+        if (!clean) return 0;
+        return parseFloat(clean) / 100;
+    },
+
+    handleInput(e) {
+        let val = e.target.value;
+        // Keep only digits
+        let digits = val.replace(/\D/g, '');
         
-        // Remove non-digits
-        let number = val.replace(/\D/g, '');
-        
-        if (number === '') {
-            this.value = '';
-            event.target.value = '';
+        if (!digits) {
+            this.displayValue = '';
+            this.realValue = null;
             return;
         }
+
+        let numeric = parseFloat(digits) / 100;
+        this.realValue = numeric;
+        this.displayValue = this.format(numeric);
         
-        // Update the displayed value
-        event.target.value = this.format(number);
-        
-        // Update the Livewire model with the actual float value (1234.56)
-        this.value = (parseFloat(number) / 100).toFixed(2);
-    },
-    init() {
-        if (this.value) {
-            // If value comes as float (e.g. 10.50), convert to string '1050' then format
-            let strVal = parseFloat(this.value).toFixed(2).replace('.', '');
-            this.$refs.input.value = this.format(strVal);
-        }
+        // Ensure cursor stays at the end for consistent cents-first experience
+        this.$nextTick(() => {
+            e.target.setSelectionRange(e.target.value.length, e.target.value.length);
+        });
     }
 }" class="relative">
-    <input x-ref="input" type="text" @input="input($event)" placeholder="{{ $placeholder }}"
-        class="block w-full mt-1 border-gray-400 text-gray-900 bg-white rounded-xl shadow-sm focus:border-[#4ECDC4] focus:ring-[#4ECDC4] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600" />
+    <div class="relative mt-1">
+        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+            <span class="text-gray-500 dark:text-gray-400 font-bold">R$</span>
+        </div>
+        <input type="text" x-model="displayValue" @input="handleInput($event)" placeholder="{{ $placeholder }}"
+            class="block w-full rounded-xl border-gray-400 pl-11 text-gray-900 bg-white shadow-sm focus:border-[#4ECDC4] focus:ring-[#4ECDC4] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600 font-bold" />
+    </div>
 </div>

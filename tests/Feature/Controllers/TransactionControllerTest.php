@@ -29,8 +29,6 @@ class TransactionControllerTest extends TestCase
         $response->assertViewIs('transactions.index');
     }
 
-    // Note: create route is excluded in web.php, using Livewire component instead
-
     public function test_store_requires_authentication(): void
     {
         $response = $this->post(route('transactions.store'), [

@@ -247,4 +247,45 @@ class RecurringTransactionTest extends TestCase
         $this->assertGreaterThan(0, Transaction::where('recurring_transaction_id', $active->id)->count());
         $this->assertEquals(0, Transaction::where('recurring_transaction_id', $inactive->id)->count());
     }
+
+    public function test_recurring_transaction_belongs_to_user(): void
+    {
+        $user = User::factory()->create();
+
+        $recurring = RecurringTransaction::factory()->create([
+            'user_id' => $user->id,
+        ]);
+
+        $this->assertInstanceOf(User::class, $recurring->user);
+        $this->assertEquals($user->id, $recurring->user->id);
+    }
+
+    public function test_recurring_transaction_can_have_tags(): void
+    {
+        $recurring = RecurringTransaction::factory()->create();
+        $tags = \App\Models\Tag::factory()->count(3)->create();
+
+        $recurring->tags()->attach($tags->pluck('id'));
+
+        $this->assertCount(3, $recurring->tags);
+        $this->assertTrue($recurring->tags->contains($tags->first()));
+    }
+
+    public function test_recurring_transaction_casts_attributes_correctly(): void
+    {
+        $recurring = RecurringTransaction::factory()->create([
+            'amount' => 123.45,
+            'type' => TransactionTypeEnum::Debit,
+            'frequency' => \App\Enums\FrequencyEnum::Monthly,
+            'interval' => 2,
+            'active' => true,
+        ]);
+
+        $this->assertIsString($recurring->amount);
+        $this->assertEquals('123.45', $recurring->amount);
+        $this->assertInstanceOf(TransactionTypeEnum::class, $recurring->type);
+        $this->assertInstanceOf(\App\Enums\FrequencyEnum::class, $recurring->frequency);
+        $this->assertIsInt($recurring->interval);
+        $this->assertIsBool($recurring->active);
+    }
 }

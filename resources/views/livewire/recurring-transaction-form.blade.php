@@ -1,49 +1,48 @@
 <div>
     <form wire:submit="save" class="space-y-6">
         {{-- Edit Scope Selector --}}
-        <div class="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30">
-            <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div class="flex-1">
-                    <p class="text-sm font-bold text-blue-700 dark:text-blue-200 mb-3">
-                        Escolha o escopo da edição:
-                    </p>
-                    <div class="space-y-2">
-                        <label
-                            class="flex items-start gap-3 p-3 rounded-lg cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                            :class="{ 'bg-blue-100/70 dark:bg-blue-900/30': $wire.editScope === 'future_only' }">
-                            <input type="radio" wire:model.live="editScope" value="future_only"
-                                class="mt-1 w-3.5 h-3.5 text-[#4ECDC4] focus:ring-1 focus:ring-[#4ECDC4] border-gray-300 dark:border-gray-600">
-                            <div class="flex-1">
-                                <div class="text-sm font-bold text-gray-900 dark:text-white">
-                                    Alterar apenas futuras transações
-                                </div>
-                                <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                    As transações já geradas não serão alteradas, apenas as próximas
-                                </div>
-                            </div>
-                        </label>
+        <div class="space-y-3">
+            <div class="flex items-center gap-2 px-1">
+                <div class="w-1.5 h-4 bg-[#4ECDC4] rounded-full"></div>
+                <h3 class="text-xs font-black tracking-widest text-gray-400 uppercase dark:text-gray-300">
+                    Escopo da Edição
+                </h3>
+            </div>
 
-                        <label
-                            class="flex items-start gap-3 p-3 rounded-lg cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                            :class="{ 'bg-blue-100/70 dark:bg-blue-900/30': $wire.editScope === 'current_and_future' }">
-                            <input type="radio" wire:model.live="editScope" value="current_and_future"
-                                class="mt-1 w-3.5 h-3.5 text-[#4ECDC4] focus:ring-1 focus:ring-[#4ECDC4] border-gray-300 dark:border-gray-600">
-                            <div class="flex-1">
-                                <div class="text-sm font-bold text-gray-900 dark:text-white">
-                                    Alterar transações atuais e futuras
-                                </div>
-                                <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                    Atualiza todas as transações pendentes (atuais e futuras)
-                                </div>
+            <div class="grid grid-cols-1 gap-3">
+                @foreach (['future_only' => ['title' => 'Apenas futuras', 'desc' => 'Altera apenas as próximas transações'], 'current_and_future' => ['title' => 'Atuais e futuras', 'desc' => 'Atualiza todas as transações pendentes']] as $value => $info)
+                    <label
+                        class="relative flex items-center gap-4 p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200 group"
+                        :class="$wire.editScope === '{{ $value }}'
+                                ? 'bg-[#4ECDC4]/5 border-[#4ECDC4] shadow-sm'
+                                : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'">
+
+                        <input type="radio" wire:model.live="editScope" value="{{ $value }}" class="sr-only">
+
+                        <div class="flex-1">
+                            <div class="text-sm font-black transition-colors"
+                                :class="$wire.editScope === '{{ $value }}' ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'">
+                                {{ $info['title'] }}
                             </div>
-                        </label>
-                    </div>
-                </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                {{ $info['desc'] }}
+                            </div>
+                        </div>
+
+                        <div x-show="$wire.editScope === '{{ $value }}'"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 scale-50" x-transition:enter-end="opacity-100 scale-100"
+                            class="flex-shrink-0">
+                            <div
+                                class="w-6 h-6 bg-[#4ECDC4] rounded-full flex items-center justify-center shadow-sm shadow-[#4ECDC4]/20">
+                                <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </label>
+                @endforeach
             </div>
         </div>
 
@@ -70,18 +69,6 @@
                     @enderror
                 </div>
 
-                {{-- Descrição --}}
-                <div>
-                    <label for="description" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                        Descrição
-                    </label>
-                    <textarea id="description" wire:model="description" rows="3"
-                        placeholder="Adicione detalhes sobre esta recorrência..."
-                        class="w-full px-4 py-2 border border-gray-400 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"></textarea>
-                    @error('description')
-                        <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
 
                 {{-- Valor e Tipo Grid --}}
                 <div class="grid grid-cols-2 gap-4">
@@ -90,8 +77,7 @@
                         <label for="amount" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                             Valor *
                         </label>
-                        <input type="text" id="amount" wire:model="amount" x-money placeholder="R$ 0,00"
-                            class="w-full px-4 py-2 border border-gray-400 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500">
+                        <x-currency-input wire:model="amount" />
                         @error('amount')
                             <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
                         @enderror

@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property int $id
  * @property int $user_id
  * @property string $title
- * @property string|null $description
  * @property float $amount
  * @property TransactionTypeEnum $type
  * @property TransactionStatusEnum $status
@@ -38,7 +37,6 @@ class Transaction extends Model
     protected $fillable = [
         'user_id',
         'title',
-        'description',
         'amount',
         'type',
         'status',

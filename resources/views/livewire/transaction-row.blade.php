@@ -1,10 +1,10 @@
-<tr wire:key="transaction-{{ $transaction->id }}" class="hover:bg-gray-100 dark:hover:bg-gray-700/30 transition-colors">
+<tr class="hover:bg-gray-100 dark:hover:bg-gray-700/30 transition-colors">
     {{-- Title & Description (inline editable) --}}
     <td class="px-6 py-4 whitespace-nowrap">
         <div x-data="{
             editing: false,
-            value: '{{ addslashes($transaction->title) }}',
-            original: '{{ addslashes($transaction->title) }}',
+            value: @js($transaction->title),
+            original: @js($transaction->title),
             save() {
                 if (!this.value || this.value.trim() === '') {
                     this.value = this.original;
@@ -49,31 +49,26 @@
                 class="w-full px-2 py-1 text-sm font-bold bg-white dark:bg-gray-700 border-b-2 border-[#4ECDC4] border-t-0 border-x-0 focus:ring-0 focus:border-[#4ECDC4] text-gray-900 dark:text-gray-100 p-0">
         </div>
 
-        {{-- Description - Click to open modal --}}
-        <div @click="$dispatch('open-edit-modal', { transactionId: {{ $transaction->id }} })"
-            class="mt-1 group cursor-pointer min-h-[1.25rem]">
-            <span class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-[#4ECDC4] transition-colors">
-                @if($transaction->description)
-                    {{ Str::limit($transaction->description, 50) }}
-                @else
-                    <span class="text-xs italic opacity-30">{{ __('Adicionar descrição...') }}</span>
-                @endif
-            </span>
-        </div>
+
     </td>
 
     {{-- Amount (inline editable) --}}
     <td class="px-6 py-4 whitespace-nowrap">
         <div x-data="{
             editing: false,
-            value: '{{ number_format($transaction->amount, 2, '.', '') }}',
-            original: '{{ number_format($transaction->amount, 2, '.', '') }}',
+            value: @js(number_format($transaction->amount, 2, ',', '.')),
+            original: @js(number_format($transaction->amount, 2, ',', '.')),
+            
+            init() {
+                this.$watch('editing', val => {
+                    if (val) {
+                        this.value = @js(number_format($transaction->amount, 2, ',', '.'));
+                        this.original = this.value;
+                    }
+                });
+            },
+
             save() {
-                if (!this.value || parseFloat(this.value) <= 0) {
-                    this.value = this.original;
-                    this.editing = false;
-                    return;
-                }
                 if (this.value === this.original) {
                     this.editing = false;
                     return;
@@ -89,7 +84,23 @@
                     });
             },
             formatDisplay() {
-                return 'R$ ' + parseFloat(this.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                return 'R$ ' + this.value;
+            },
+            handleInput(e) {
+                let digits = e.target.value.replace(/\D/g, '');
+                if (!digits) {
+                    this.value = '0,00';
+                    return;
+                }
+                let numeric = parseFloat(digits) / 100;
+                this.value = new Intl.NumberFormat('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(numeric);
+                
+                this.$nextTick(() => {
+                    e.target.setSelectionRange(e.target.value.length, e.target.value.length);
+                });
             }
         }" class="flex flex-col items-start">
             <div x-show="!editing" @click="editing = true" class="flex items-center gap-2 group cursor-pointer">
@@ -104,10 +115,10 @@
             </div>
             <div x-show="editing" x-cloak class="flex items-center">
                 <span class="text-sm mr-1 font-bold text-gray-900 dark:text-gray-100">R$</span>
-                <input x-ref="input" x-model="value" @focusout="save()" @keydown.enter="save()"
-                    @keydown.escape="editing = false; value = original"
+                <input x-ref="input" x-model="value" @input="handleInput($event)" @focusout="save()"
+                    @keydown.enter="save()" @keydown.escape="editing = false; value = original"
                     x-effect="if(editing) { $nextTick(() => $refs.input.focus()); }" type="text"
-                    class="w-24 px-1 py-0 text-sm font-bold bg-white dark:bg-gray-700 border-b border-[#4ECDC4] border-t-0 border-x-0 focus:ring-0 focus:border-[#4ECDC4] text-gray-900 dark:text-gray-100 p-0">
+                    class="w-32 px-1 py-0 text-sm font-bold bg-white dark:bg-gray-700 border-b border-[#4ECDC4] border-t-0 border-x-0 focus:ring-0 focus:border-[#4ECDC4] text-gray-900 dark:text-gray-100 p-0 text-left">
             </div>
         </div>
     </td>
@@ -144,8 +155,8 @@
     <td class="px-6 py-4 whitespace-nowrap">
         <div x-data="{
             editing: false,
-            value: '{{ $transaction->due_date->format('Y-m-d') }}',
-            original: '{{ $transaction->due_date->format('Y-m-d') }}',
+            value: @js($transaction->due_date->format('Y-m-d')),
+            original: @js($transaction->due_date->format('Y-m-d')),
             save() {
                 if (!this.value) {
                     this.value = this.original;

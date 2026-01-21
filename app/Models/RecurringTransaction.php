@@ -16,7 +16,6 @@ class RecurringTransaction extends Model
     protected $fillable = [
         'user_id',
         'title',
-        'description',
         'amount',
         'type',
         'frequency',

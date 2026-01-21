@@ -39,7 +39,6 @@ class TransactionSeeder extends Seeder
             $transaction = Transaction::create([
                 'user_id' => $user->id,
                 'title' => $debit['title'],
-                'description' => 'Pagamento realizado',
                 'amount' => $debit['amount'],
                 'type' => TransactionTypeEnum::Debit,
                 'status' => TransactionStatusEnum::Paid,
@@ -61,7 +60,6 @@ class TransactionSeeder extends Seeder
             $transaction = Transaction::create([
                 'user_id' => $user->id,
                 'title' => $debit['title'],
-                'description' => 'Aguardando pagamento',
                 'amount' => $debit['amount'],
                 'type' => TransactionTypeEnum::Debit,
                 'status' => TransactionStatusEnum::Pending,
@@ -82,7 +80,6 @@ class TransactionSeeder extends Seeder
             $transaction = Transaction::create([
                 'user_id' => $user->id,
                 'title' => $debit['title'],
-                'description' => 'Vence hoje',
                 'amount' => $debit['amount'],
                 'type' => TransactionTypeEnum::Debit,
                 'status' => TransactionStatusEnum::Pending,
@@ -103,7 +100,6 @@ class TransactionSeeder extends Seeder
             $transaction = Transaction::create([
                 'user_id' => $user->id,
                 'title' => $debit['title'],
-                'description' => 'Pagamento em atraso',
                 'amount' => $debit['amount'],
                 'type' => TransactionTypeEnum::Debit,
                 'status' => TransactionStatusEnum::Pending,
@@ -124,7 +120,6 @@ class TransactionSeeder extends Seeder
             $transaction = Transaction::create([
                 'user_id' => $user->id,
                 'title' => $credit['title'],
-                'description' => 'Recebido',
                 'amount' => $credit['amount'],
                 'type' => TransactionTypeEnum::Credit,
                 'status' => TransactionStatusEnum::Paid,
@@ -139,7 +134,6 @@ class TransactionSeeder extends Seeder
         $transaction = Transaction::create([
             'user_id' => $user->id,
             'title' => 'Projeto Freelance',
-            'description' => 'A receber',
             'amount' => 2000.00,
             'type' => TransactionTypeEnum::Credit,
             'status' => TransactionStatusEnum::Pending,

@@ -3,11 +3,29 @@
 namespace App\Livewire;
 
 use App\Models\Transaction;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class TransactionRow extends Component
 {
     public Transaction $transaction;
+
+    #[On('transaction-saved')]
+    #[On('recurring-saved')]
+    public function refreshComponent(?int $id = null): void
+    {
+        // If an ID is provided, check if it relates to this row
+        if ($id) {
+            $isMatch = $this->transaction->id === $id ||
+                $this->transaction->recurring_transaction_id === $id;
+
+            if (!$isMatch) {
+                return;
+            }
+        }
+
+        $this->transaction->refresh();
+    }
 
     protected function rules(): array
     {
@@ -25,15 +43,21 @@ class TransactionRow extends Component
     {
         try {
             // Validate field name
-            if (! in_array($field, ['title', 'amount', 'due_date'])) {
+            if (!in_array($field, ['title', 'amount', 'due_date'])) {
                 $this->dispatch('notify', message: 'Campo inválido.', type: 'error');
 
                 return;
             }
 
-            // For amount, convert comma to dot
             if ($field === 'amount') {
-                $value = str_replace(',', '.', $value);
+                // Remove everything except digits, comma and dot
+                $cleanValue = preg_replace('/[^\d,.]/', '', $value);
+                // If it has a comma, it's Brazilian format
+                if (str_contains($cleanValue, ',')) {
+                    $cleanValue = str_replace('.', '', $cleanValue); // remove thousand separator
+                    $cleanValue = str_replace(',', '.', $cleanValue); // change decimal separator
+                }
+                $value = (float) $cleanValue;
             }
 
             // Update the field
@@ -54,7 +78,8 @@ class TransactionRow extends Component
                 'due_date' => 'Data de vencimento',
             ];
 
-            $this->dispatch('notify',
+            $this->dispatch(
+                'notify',
                 message: "{$fieldNames[$field]} atualizado com sucesso!",
                 type: 'success'
             );
@@ -63,15 +88,17 @@ class TransactionRow extends Component
             $this->dispatch('transaction-updated');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            $this->dispatch('notify',
+            $this->dispatch(
+                'notify',
                 message: $e->validator->errors()->first(),
                 type: 'error'
             );
             // Re-throw to let Alpine.js know the update failed
             throw $e;
         } catch (\Exception $e) {
-            $this->dispatch('notify',
-                message: 'Erro ao atualizar: '.$e->getMessage(),
+            $this->dispatch(
+                'notify',
+                message: 'Erro ao atualizar: ' . $e->getMessage(),
                 type: 'error'
             );
             // Re-throw to let Alpine.js know the update failed
@@ -86,7 +113,8 @@ class TransactionRow extends Component
     {
         try {
             if ($this->transaction->status->value === 'paid') {
-                $this->dispatch('notify',
+                $this->dispatch(
+                    'notify',
                     message: 'Esta transação já está marcada como paga.',
                     type: 'info'
                 );
@@ -96,7 +124,8 @@ class TransactionRow extends Component
 
             $this->transaction->markAsPaid();
 
-            $this->dispatch('notify',
+            $this->dispatch(
+                'notify',
                 message: 'Transação marcada como paga com sucesso!',
                 type: 'success'
             );
@@ -105,8 +134,9 @@ class TransactionRow extends Component
             $this->dispatch('transaction-updated');
 
         } catch (\Exception $e) {
-            $this->dispatch('notify',
-                message: 'Erro ao marcar como paga: '.$e->getMessage(),
+            $this->dispatch(
+                'notify',
+                message: 'Erro ao marcar como paga: ' . $e->getMessage(),
                 type: 'error'
             );
         }

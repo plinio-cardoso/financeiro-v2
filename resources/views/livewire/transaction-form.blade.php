@@ -30,8 +30,7 @@
                         <label for="amount" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                             Valor *
                         </label>
-                        <input type="text" id="amount" wire:model="amount" x-money placeholder="R$ 0,00"
-                            class="w-full px-4 py-2 border border-gray-400 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500">
+                        <x-currency-input wire:model="amount" />
                         @error('amount')
                             <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
                         @enderror
@@ -50,15 +49,6 @@
                     </div>
                 </div>
 
-                {{-- Descrição --}}
-                <div>
-                    <label for="description" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                        Descrição
-                    </label>
-                    <textarea id="description" wire:model="description" rows="2"
-                        placeholder="Adicione detalhes importantes sobre esta transação..."
-                        class="w-full px-4 py-2 border border-gray-400 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#4ECDC4] focus:border-[#4ECDC4] bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"></textarea>
-                </div>
 
                 {{-- Type & Status Grid --}}
                 <div class="grid grid-cols-2 gap-4">

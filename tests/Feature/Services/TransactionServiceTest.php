@@ -428,4 +428,237 @@ class TransactionServiceTest extends TestCase
         $this->assertTrue($result->relationLoaded('tags'));
         $this->assertCount(1, $result->tags);
     }
+
+    public function test_get_filtered_transactions_filters_by_recurring(): void
+    {
+        $user = User::factory()->create();
+        $recurring = \App\Models\RecurringTransaction::factory()->create(['user_id' => $user->id]);
+
+        Transaction::factory()->for($user)->create([
+            'title' => 'Recurring',
+            'recurring_transaction_id' => $recurring->id,
+        ]);
+
+        Transaction::factory()->for($user)->create([
+            'title' => 'Not Recurring',
+            'recurring_transaction_id' => null,
+        ]);
+
+        $query = $this->transactionService->getFilteredTransactions($user->id, [
+            'recurring' => 'recurring',
+        ]);
+
+        $results = $query->get();
+
+        $this->assertCount(1, $results);
+        $this->assertEquals('Recurring', $results->first()->title);
+    }
+
+    public function test_get_filtered_transactions_filters_by_not_recurring(): void
+    {
+        $user = User::factory()->create();
+        $recurring = \App\Models\RecurringTransaction::factory()->create(['user_id' => $user->id]);
+
+        Transaction::factory()->for($user)->create([
+            'recurring_transaction_id' => $recurring->id,
+        ]);
+
+        Transaction::factory()->for($user)->create([
+            'title' => 'Not Recurring',
+            'recurring_transaction_id' => null,
+        ]);
+
+        $query = $this->transactionService->getFilteredTransactions($user->id, [
+            'recurring' => 'not_recurring',
+        ]);
+
+        $results = $query->get();
+
+        $this->assertCount(1, $results);
+        $this->assertEquals('Not Recurring', $results->first()->title);
+    }
+
+    public function test_get_filtered_transactions_can_skip_select(): void
+    {
+        $user = User::factory()->create();
+        Transaction::factory()->for($user)->create(['amount' => 100]);
+
+        $query = $this->transactionService->getFilteredTransactions($user->id, [], false);
+        $result = $query->selectRaw('SUM(amount) as total')->first();
+
+        $this->assertEquals(100, $result->total);
+    }
+
+    // ==================== Find Transaction ====================
+
+    public function test_find_transaction_by_id_returns_transaction(): void
+    {
+        $user = User::factory()->create();
+        $transaction = Transaction::factory()->for($user)->create();
+
+        $found = $this->transactionService->findTransactionById($transaction->id, $user->id);
+
+        $this->assertInstanceOf(Transaction::class, $found);
+        $this->assertEquals($transaction->id, $found->id);
+    }
+
+    public function test_find_transaction_by_id_returns_null_for_wrong_user(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $transaction = Transaction::factory()->for($otherUser)->create();
+
+        $found = $this->transactionService->findTransactionById($transaction->id, $user->id);
+
+        $this->assertNull($found);
+    }
+
+    public function test_find_transaction_by_id_returns_null_for_non_existent(): void
+    {
+        $user = User::factory()->create();
+
+        $found = $this->transactionService->findTransactionById(99999, $user->id);
+
+        $this->assertNull($found);
+    }
+
+    // ==================== Pending/Overdue/Due Today ====================
+
+    public function test_get_pending_transactions_returns_only_pending(): void
+    {
+        $user = User::factory()->create();
+
+        Transaction::factory()->pending()->for($user)->create(['title' => 'Pending']);
+        Transaction::factory()->paid()->for($user)->create(['title' => 'Paid']);
+
+        $pending = $this->transactionService->getPendingTransactions($user->id);
+
+        $this->assertCount(1, $pending);
+        $this->assertEquals('Pending', $pending->first()->title);
+    }
+
+    public function test_get_pending_transactions_eager_loads_tags(): void
+    {
+        $user = User::factory()->create();
+        $transaction = Transaction::factory()->pending()->for($user)->create();
+        $tag = Tag::factory()->create();
+        $transaction->tags()->attach($tag);
+
+        $pending = $this->transactionService->getPendingTransactions($user->id);
+
+        $this->assertTrue($pending->first()->relationLoaded('tags'));
+    }
+
+    public function test_get_overdue_transactions_returns_past_due_pending_only(): void
+    {
+        $user = User::factory()->create();
+
+        Transaction::factory()->pending()->for($user)->create([
+            'title' => 'Overdue',
+            'due_date' => now()->subDay(),
+        ]);
+
+        Transaction::factory()->pending()->for($user)->create([
+            'title' => 'Future',
+            'due_date' => now()->addDay(),
+        ]);
+
+        Transaction::factory()->paid()->for($user)->create([
+            'title' => 'Paid Overdue',
+            'due_date' => now()->subDay(),
+        ]);
+
+        $overdue = $this->transactionService->getOverdueTransactions($user->id);
+
+        $this->assertCount(1, $overdue);
+        $this->assertEquals('Overdue', $overdue->first()->title);
+    }
+
+    public function test_get_transactions_due_today_returns_only_today_pending(): void
+    {
+        $user = User::factory()->create();
+
+        Transaction::factory()->pending()->for($user)->create([
+            'title' => 'Due Today',
+            'due_date' => today(),
+        ]);
+
+        Transaction::factory()->pending()->for($user)->create([
+            'title' => 'Due Tomorrow',
+            'due_date' => today()->addDay(),
+        ]);
+
+        Transaction::factory()->paid()->for($user)->create([
+            'title' => 'Paid Today',
+            'due_date' => today(),
+        ]);
+
+        $dueToday = $this->transactionService->getTransactionsDueToday($user->id);
+
+        $this->assertCount(1, $dueToday);
+        $this->assertEquals('Due Today', $dueToday->first()->title);
+    }
+
+    // ==================== Create Recurring Transaction ====================
+
+    public function test_create_recurring_transaction_creates_record(): void
+    {
+        $user = User::factory()->create();
+
+        $data = [
+            'user_id' => $user->id,
+            'title' => 'Monthly Bill',
+            'amount' => 100.00,
+            'type' => TransactionTypeEnum::Debit,
+            'frequency' => \App\Enums\RecurringFrequencyEnum::Monthly,
+            'interval' => 1,
+            'start_date' => now()->addDay()->format('Y-m-d'),
+        ];
+
+        $recurring = $this->transactionService->createRecurringTransaction($data);
+
+        $this->assertInstanceOf(\App\Models\RecurringTransaction::class, $recurring);
+        $this->assertDatabaseHas('recurring_transactions', [
+            'title' => 'Monthly Bill',
+            'user_id' => $user->id,
+        ]);
+    }
+
+    public function test_create_recurring_transaction_sets_defaults(): void
+    {
+        $user = User::factory()->create();
+
+        $data = [
+            'user_id' => $user->id,
+            'title' => 'Bill',
+            'amount' => 50,
+            'frequency' => \App\Enums\RecurringFrequencyEnum::Weekly,
+            'start_date' => now()->addWeek()->format('Y-m-d'),
+        ];
+
+        $recurring = $this->transactionService->createRecurringTransaction($data);
+
+        $this->assertEquals(TransactionTypeEnum::Debit, $recurring->type);
+        $this->assertEquals(1, $recurring->interval);
+        $this->assertTrue($recurring->active);
+    }
+
+    public function test_create_recurring_transaction_associates_tags(): void
+    {
+        $user = User::factory()->create();
+        $tags = Tag::factory()->count(2)->create();
+
+        $data = [
+            'user_id' => $user->id,
+            'title' => 'Tagged Recurring',
+            'amount' => 100,
+            'frequency' => \App\Enums\RecurringFrequencyEnum::Monthly,
+            'start_date' => now()->addMonth()->format('Y-m-d'),
+            'tags' => $tags->pluck('id')->toArray(),
+        ];
+
+        $recurring = $this->transactionService->createRecurringTransaction($data);
+
+        $this->assertCount(2, $recurring->tags);
+    }
 }

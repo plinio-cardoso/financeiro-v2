@@ -272,7 +272,7 @@
                     <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                         @forelse ($this->transactions as $transaction)
                             <livewire:transaction-row :transaction="$transaction"
-                                wire:key="transaction-{{ $transaction->id }}" />
+                                wire:key="row-{{ $transaction->id }}-{{ $transaction->updated_at?->timestamp ?? time() }}" />
                         @empty
                             <tr>
                                 <td colspan="7" class="px-6 py-4 text-sm text-center text-gray-500 dark:text-gray-400">
