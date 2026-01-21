@@ -7,6 +7,7 @@ use App\Services\TransactionService;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -21,23 +22,32 @@ class TransactionList extends Component
     public int $modalCounter = 0;
 
     // Filtros
+    #[Url(history: true)]
     public string $search = '';
 
+    #[Url(history: true)]
     public ?string $startDate = null;
 
+    #[Url(history: true)]
     public ?string $endDate = null;
 
+    #[Url(history: true)]
     public array $selectedTags = [];
 
+    #[Url(history: true)]
     public ?string $filterStatus = null;
 
+    #[Url(history: true)]
     public ?string $filterType = null;
 
+    #[Url(history: true)]
     public ?string $filterRecurrence = null;
 
     // Ordenação
+    #[Url(history: true)]
     public string $sortField = 'due_date';
 
+    #[Url(history: true)]
     public string $sortDirection = 'asc';
 
     // Paginação
