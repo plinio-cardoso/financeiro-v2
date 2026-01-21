@@ -103,11 +103,21 @@ class RecurringTransactionForm extends Component
         ];
 
         if ($this->editing && $this->recurring) {
+            // Check if schedule parameters changed
+            $scheduleChanged = $this->recurring->frequency->value !== $this->frequency ||
+                $this->recurring->interval !== $this->interval ||
+                ($this->recurring->start_date instanceof \DateTimeInterface ? $this->recurring->start_date->format('Y-m-d') : null) !== $this->startDate;
+
             // Update recurring transaction
             $this->recurring->update($data);
             $this->recurring->tags()->sync($this->selectedTags);
 
-            // If editScope is 'current_and_future', update existing pending transactions too
+            // If schedule changed, recalculate future transactions
+            if ($scheduleChanged) {
+                $transactionService->handleRecurrenceScheduleChange($this->recurring);
+            }
+
+            // If editScope is 'current_and_future', update existing pending transactions too (only basics)
             if ($this->editScope === 'current_and_future') {
                 $this->recurring->transactions()
                     ->where('status', 'pending')
@@ -129,6 +139,14 @@ class RecurringTransactionForm extends Component
 
             $this->dispatch('recurring-saved', id: $this->recurring->id);
             $this->dispatch('notify', message: 'Recorrência atualizada com sucesso!', type: 'success');
+
+            // Trigger generation to ensure forecast is up to date
+            $targetDate = now()->addMonth()->endOfMonth();
+            $daysToGenerate = now()->diffInDays($targetDate);
+
+            \Illuminate\Support\Facades\Artisan::call('app:generate-transactions', [
+                '--days' => max(0, (int) $daysToGenerate),
+            ]);
         } else {
             // Create new recurring transaction
             $recurring = $transactionService->createRecurringTransaction($data);

@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Enums\RecurringFrequencyEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Enums\TransactionTypeEnum;
+use App\Models\RecurringTransaction;
 use App\Models\Transaction;
 use Illuminate\Support\Collection;
 
@@ -12,9 +14,9 @@ class TransactionService
     /**
      * Create a new recurring transaction
      */
-    public function createRecurringTransaction(array $data): \App\Models\RecurringTransaction
+    public function createRecurringTransaction(array $data): RecurringTransaction
     {
-        $recurring = \App\Models\RecurringTransaction::create([
+        $recurring = RecurringTransaction::create([
             'user_id' => $data['user_id'],
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
@@ -36,14 +38,17 @@ class TransactionService
         // If start date is today or in the past, let the scheduled job pick it up
         // OR we can generate the first one immediately.
         // Let's generate immediately to give instant feedback to the user.
-        $startDate = \Carbon\Carbon::parse($data['start_date']);
-        if ($startDate->lte(today())) {
-            \Illuminate\Support\Facades\Artisan::call('app:generate-transactions', [
-                '--days' => 0, // Generate for today
-            ]);
-            // Reload to get updated next_due_date
-            $recurring->refresh();
-        }
+        // Generate transactions for the rest of this month + all of next month
+        // This ensures the user has a correct forecast.
+        $targetDate = now()->addMonth()->endOfMonth();
+        $daysToGenerate = now()->diffInDays($targetDate);
+
+        \Illuminate\Support\Facades\Artisan::call('app:generate-transactions', [
+            '--days' => max(0, (int) $daysToGenerate),
+        ]);
+
+        // Reload to get updated next_due_date
+        $recurring->refresh();
 
         return $recurring;
     }
@@ -123,12 +128,49 @@ class TransactionService
     }
 
     /**
+     * Handle changes to recurrence schedule (frequency, interval, start date)
+     */
+    public function handleRecurrenceScheduleChange(RecurringTransaction $recurring): void
+    {
+        // 1. Delete future pending transactions
+        $recurring->transactions()
+            ->where('status', \App\Enums\TransactionStatusEnum::Pending)
+            ->where('due_date', '>=', today())
+            ->delete();
+
+        // 2. Recalculate next_due_date
+        // We need to find the next occurrence relative to start_date that is >= today
+        // If start_date is in the future, that's the next due date.
+        // If start_date is in the past, we calculate forward.
+
+        $startDate = $recurring->start_date;
+        $nextDate = $startDate->copy();
+
+        if ($nextDate->isPast()) {
+            // Simulate progression until we reach today or future
+            while ($nextDate->lt(today())) {
+                $nextDate = match ($recurring->frequency) {
+                    RecurringFrequencyEnum::Weekly => $nextDate->addWeeks($recurring->interval),
+                    RecurringFrequencyEnum::Monthly => $nextDate->addMonths($recurring->interval),
+                    RecurringFrequencyEnum::Custom => $nextDate->addDays($recurring->interval),
+                };
+            }
+        }
+
+        // 3. Update recurrence
+        $recurring->update([
+            'next_due_date' => $nextDate,
+            'active' => true, // Ensure it's active if it was finished
+        ]);
+    }
+
+    /**
      * Delete a recurring transaction and its associated transactions based on option
      */
-    public function deleteRecurringTransaction(int|\App\Models\RecurringTransaction $recurring, string $option = 'only_recurrence'): bool
+    public function deleteRecurringTransaction(int|RecurringTransaction $recurring, string $option = 'only_recurrence'): bool
     {
         if (is_int($recurring)) {
-            $recurring = \App\Models\RecurringTransaction::findOrFail($recurring);
+            $recurring = RecurringTransaction::findOrFail($recurring);
         }
 
         switch ($option) {
