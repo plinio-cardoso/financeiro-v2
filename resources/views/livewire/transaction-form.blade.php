@@ -1,4 +1,4 @@
-<div>
+<div x-data="{ confirmingDeletion: false }">
     <form wire:submit="save" class="space-y-6">
         {{-- Basic Information --}}
         <div class="space-y-3">
@@ -96,7 +96,7 @@
         <div class="pt-4 space-y-3">
             <div class="flex gap-3">
                 @if ($editing)
-                    <button type="button" wire:click="$set('confirmingDeletion', true)"
+                    <button type="button" @click="confirmingDeletion = true"
                         class="flex-1 h-12 flex justify-center items-center rounded-xl border-2 border-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs uppercase tracking-widest transition-all duration-200 hover:bg-rose-50 dark:hover:bg-rose-500/10 active:scale-[0.98]">
                         Remover
                     </button>
@@ -119,24 +119,22 @@
             </div>
 
             {{-- Deletion Confirmation Overlay --}}
-            @if ($confirmingDeletion)
-                <div
-                    class="p-6 rounded-2xl bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 animate-in fade-in zoom-in-95 duration-200">
-                    <p class="text-xs font-bold text-rose-800 dark:text-rose-300 mb-4 text-center">
-                        Tem certeza que deseja remover esta transação?
-                    </p>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button type="button" wire:click="$set('confirmingDeletion', false)"
-                            class="h-10 rounded-xl bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-bold text-[10px] uppercase tracking-wider border border-gray-200 dark:border-gray-700 hover:bg-gray-50">
-                            Cancelar
-                        </button>
-                        <button type="button" wire:click="deleteTransaction"
-                            class="h-10 rounded-xl bg-rose-600 text-white font-bold text-[10px] uppercase tracking-wider hover:bg-rose-700 shadow-md shadow-rose-600/20">
-                            Sim, Remover
-                        </button>
-                    </div>
+            <div x-show="confirmingDeletion" x-cloak
+                class="p-6 rounded-2xl bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 animate-in fade-in zoom-in-95 duration-200">
+                <p class="text-xs font-bold text-rose-800 dark:text-rose-300 mb-4 text-center">
+                    Tem certeza que deseja remover esta transação?
+                </p>
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" @click="confirmingDeletion = false"
+                        class="h-10 rounded-xl bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-bold text-[10px] uppercase tracking-wider border border-gray-200 dark:border-gray-700 hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="button" wire:click="deleteTransaction"
+                        class="h-10 rounded-xl bg-rose-600 text-white font-bold text-[10px] uppercase tracking-wider hover:bg-rose-700 shadow-md shadow-rose-600/20">
+                        Sim, Remover
+                    </button>
                 </div>
-            @endif
+            </div>
         </div>
     </form>
 </div>

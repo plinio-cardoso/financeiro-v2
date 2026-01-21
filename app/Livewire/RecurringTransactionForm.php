@@ -20,8 +20,6 @@ class RecurringTransactionForm extends Component
 
     public string $editScope = 'future_only'; // 'future_only' ou 'current_and_future'
 
-    public bool $confirmingDeletion = false;
-
     public string $deletionOption = 'only_recurrence'; // 'only_recurrence', 'future', 'all'
 
     // Form fields
@@ -169,7 +167,6 @@ class RecurringTransactionForm extends Component
 
         $this->dispatch('recurring-saved');
         $this->dispatch('notify', message: 'Recorrência removida com sucesso!', type: 'success');
-        $this->confirmingDeletion = false;
     }
 
     protected function rules(): array

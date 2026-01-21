@@ -44,8 +44,6 @@ class TransactionForm extends Component
     // State
     public bool $editing = false;
 
-    public bool $confirmingDeletion = false;
-
     public function mount(?int $transactionId = null): void
     {
         // Load tags and dispatch to Alpine store
@@ -117,7 +115,6 @@ class TransactionForm extends Component
 
         $this->dispatch('transaction-saved');
         $this->dispatch('notify', message: 'Transação removida com sucesso!', type: 'success');
-        $this->confirmingDeletion = false;
     }
 
     protected function rules(): array

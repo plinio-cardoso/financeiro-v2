@@ -1,4 +1,4 @@
-<div>
+<div x-data="{ confirmingDeletion: false }">
     <form wire:submit="save" class="space-y-6">
         @if ($editing)
             {{-- Edit Scope Selector --}}
@@ -204,7 +204,7 @@
         <div class="pt-4 space-y-4">
             <div class="flex gap-3">
                 @if ($editing)
-                    <button type="button" wire:click="$set('confirmingDeletion', true)"
+                    <button type="button" @click="confirmingDeletion = true"
                         class="flex-1 h-12 flex justify-center items-center rounded-xl border-2 border-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs uppercase tracking-widest transition-all duration-200 hover:bg-rose-50 dark:hover:bg-rose-500/10 active:scale-[0.98]">
                         Remover
                     </button>
@@ -227,66 +227,65 @@
             </div>
 
             {{-- Deletion Confirmation Overlay --}}
-            @if ($confirmingDeletion)
-                <div class="p-6 rounded-2xl bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 animate-in fade-in zoom-in-95 duration-200 space-y-4">
-                    <div class="text-center space-y-1">
-                        <p class="text-sm font-black text-rose-900 dark:text-rose-300 uppercase tracking-tight">
-                            Remover Recorrência
-                        </p>
-                        <p class="text-[11px] text-rose-700/70 dark:text-rose-400/60 font-medium">
-                            Escolha o que deseja fazer com as transações vinculadas:
-                        </p>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-2">
-                        @foreach ([
-                            'only_recurrence' => 'Manter todas as transações (apenas parar regra)',
-                            'future' => 'Remover apenas transações futuras',
-                            'all' => 'Remover TODAS as transações relacionadas'
-                        ] as $val => $label)
-                            <label
-                                class="relative flex items-center gap-4 p-3 rounded-xl cursor-pointer border-2 transition-all duration-200 group"
-                                :class="$wire.deletionOption === '{{ $val }}'
-                                        ? 'bg-rose-600/5 border-rose-600 shadow-sm'
-                                        : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'">
-
-                                <input type="radio" wire:model.live="deletionOption" value="{{ $val }}" class="sr-only">
-
-                                <div class="flex-1">
-                                    <div class="text-xs font-bold transition-colors"
-                                        :class="$wire.deletionOption === '{{ $val }}' ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'">
-                                        {{ $label }}
-                                    </div>
-                                </div>
-
-                                <div x-show="$wire.deletionOption === '{{ $val }}'"
-                                    x-transition:enter="transition ease-out duration-200"
-                                    x-transition:enter-start="opacity-0 scale-50" x-transition:enter-end="opacity-100 scale-100"
-                                    class="flex-shrink-0">
-                                    <div
-                                        class="w-5 h-5 bg-rose-600 rounded-full flex items-center justify-center shadow-sm shadow-rose-600/20">
-                                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4"
-                                                d="M5 13l4 4L19 7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </label>
-                        @endforeach
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 pt-2">
-                        <button type="button" wire:click="$set('confirmingDeletion', false)"
-                            class="h-10 rounded-xl bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-bold text-[10px] uppercase tracking-wider border border-gray-200 dark:border-gray-700 hover:bg-gray-50">
-                            Cancelar
-                        </button>
-                        <button type="button" wire:click="deleteRecurring"
-                            class="h-10 rounded-xl bg-rose-600 text-white font-bold text-[10px] uppercase tracking-wider hover:bg-rose-700 shadow-md shadow-rose-600/20">
-                            Confirmar
-                        </button>
-                    </div>
+            <div x-show="confirmingDeletion" x-cloak
+                class="p-6 rounded-2xl bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 animate-in fade-in zoom-in-95 duration-200 space-y-4">
+                <div class="text-center space-y-1">
+                    <p class="text-sm font-black text-rose-900 dark:text-rose-300 uppercase tracking-tight">
+                        Remover Recorrência
+                    </p>
+                    <p class="text-[11px] text-rose-700/70 dark:text-rose-400/60 font-medium">
+                        Escolha o que deseja fazer com as transações vinculadas:
+                    </p>
                 </div>
-            @endif
+
+                <div class="grid grid-cols-1 gap-2">
+                    @foreach ([
+                        'only_recurrence' => 'Manter todas as transações (apenas parar regra)',
+                        'future' => 'Remover apenas transações futuras',
+                        'all' => 'Remover TODAS as transações relacionadas'
+                    ] as $val => $label)
+                        <label
+                            class="relative flex items-center gap-4 p-3 rounded-xl cursor-pointer border-2 transition-all duration-200 group"
+                            :class="$wire.deletionOption === '{{ $val }}'
+                                    ? 'bg-rose-600/5 border-rose-600 shadow-sm'
+                                    : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'">
+
+                            <input type="radio" wire:model.live="deletionOption" value="{{ $val }}" class="sr-only">
+
+                            <div class="flex-1">
+                                <div class="text-xs font-bold transition-colors"
+                                    :class="$wire.deletionOption === '{{ $val }}' ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'">
+                                    {{ $label }}
+                                </div>
+                            </div>
+
+                            <div x-show="$wire.deletionOption === '{{ $val }}'"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 scale-50" x-transition:enter-end="opacity-100 scale-100"
+                                class="flex-shrink-0">
+                                <div
+                                    class="w-5 h-5 bg-rose-600 rounded-full flex items-center justify-center shadow-sm shadow-rose-600/20">
+                                    <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </label>
+                    @endforeach
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <button type="button" @click="confirmingDeletion = false"
+                        class="h-10 rounded-xl bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-bold text-[10px] uppercase tracking-wider border border-gray-200 dark:border-gray-700 hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="button" wire:click="deleteRecurring"
+                        class="h-10 rounded-xl bg-rose-600 text-white font-bold text-[10px] uppercase tracking-wider hover:bg-rose-700 shadow-md shadow-rose-600/20">
+                        Confirmar
+                    </button>
+                </div>
+            </div>
         </div>
     </form>
 </div>
