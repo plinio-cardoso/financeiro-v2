@@ -5,6 +5,7 @@
             editing: false,
             value: @js($transaction->title),
             original: @js($transaction->title),
+            saving: false,
             save() {
                 if (!this.value || this.value.trim() === '') {
                     this.value = this.original;
@@ -15,14 +16,17 @@
                     this.editing = false;
                     return;
                 }
+                this.saving = true;
                 $wire.updateField('title', this.value)
                     .then(() => {
                         this.original = this.value;
                         this.editing = false;
+                        this.saving = false;
                     })
                     .catch(() => {
                         this.value = this.original;
                         this.editing = false;
+                        this.saving = false;
                     });
             }
         }" class="min-w-[200px]">
@@ -47,6 +51,11 @@
                 @keydown.escape="editing = false; value = original"
                 x-effect="if(editing) { $nextTick(() => $refs.input.focus()); }" type="text"
                 class="w-full px-2 py-1 text-sm font-bold bg-white dark:bg-gray-700 border-b-2 border-[#4ECDC4] border-t-0 border-x-0 focus:ring-0 focus:border-[#4ECDC4] text-gray-900 dark:text-gray-100 p-0">
+
+            {{-- Saving Spinner --}}
+            <div x-show="saving" x-cloak class="absolute right-0 top-1/2 -translate-y-1/2">
+                <div class="w-3.5 h-3.5 border-2 border-[#4ECDC4] border-t-transparent rounded-full animate-spin"></div>
+            </div>
         </div>
 
 
@@ -68,19 +77,23 @@
                 });
             },
 
+            saving: false,
             save() {
                 if (this.value === this.original) {
                     this.editing = false;
                     return;
                 }
+                this.saving = true;
                 $wire.updateField('amount', this.value)
                     .then(() => {
                         this.original = this.value;
                         this.editing = false;
+                        this.saving = false;
                     })
                     .catch(() => {
                         this.value = this.original;
                         this.editing = false;
+                        this.saving = false;
                     });
             },
             formatDisplay() {
@@ -119,6 +132,12 @@
                     @keydown.enter="save()" @keydown.escape="editing = false; value = original"
                     x-effect="if(editing) { $nextTick(() => $refs.input.focus()); }" type="text"
                     class="w-32 px-1 py-0 text-sm font-bold bg-white dark:bg-gray-700 border-b border-[#4ECDC4] border-t-0 border-x-0 focus:ring-0 focus:border-[#4ECDC4] text-gray-900 dark:text-gray-100 p-0 text-left">
+
+                {{-- Saving Spinner --}}
+                <div x-show="saving" x-cloak class="ml-2">
+                    <div class="w-3.5 h-3.5 border-2 border-[#4ECDC4] border-t-transparent rounded-full animate-spin">
+                    </div>
+                </div>
             </div>
         </div>
     </td>
@@ -157,6 +176,7 @@
             editing: false,
             value: @js($transaction->due_date->format('Y-m-d')),
             original: @js($transaction->due_date->format('Y-m-d')),
+            saving: false,
             save() {
                 if (!this.value) {
                     this.value = this.original;
@@ -167,14 +187,17 @@
                     this.editing = false;
                     return;
                 }
+                this.saving = true;
                 $wire.updateField('due_date', this.value)
                     .then(() => {
                         this.original = this.value;
                         this.editing = false;
+                        this.saving = false;
                     })
                     .catch(() => {
                         this.value = this.original;
                         this.editing = false;
+                        this.saving = false;
                     });
             },
             formatDisplay() {
@@ -197,6 +220,11 @@
                 @keydown.enter="save()" @keydown.escape="editing = false; value = original"
                 x-effect="if(editing) { $nextTick(() => $refs.input.focus()); }" type="date"
                 class="px-2 py-0 text-sm bg-white dark:bg-gray-700 border-b border-[#4ECDC4] border-t-0 border-x-0 focus:ring-0 focus:border-[#4ECDC4] text-gray-900 dark:text-gray-100 p-0">
+
+            {{-- Saving Spinner --}}
+            <div x-show="saving" x-cloak class="absolute right-0 top-1/2 -translate-y-1/2">
+                <div class="w-3.5 h-3.5 border-2 border-[#4ECDC4] border-t-transparent rounded-full animate-spin"></div>
+            </div>
         </div>
     </td>
 

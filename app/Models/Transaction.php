@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
@@ -33,6 +34,7 @@ class Transaction extends Model
     use HasFactory;
     use TransactionAccessorTrait;
     use TransactionActionTrait;
+    use SoftDeletes;
 
     protected $fillable = [
         'user_id',

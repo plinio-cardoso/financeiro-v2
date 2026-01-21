@@ -123,6 +123,36 @@ class TransactionService
     }
 
     /**
+     * Delete a recurring transaction and its associated transactions based on option
+     */
+    public function deleteRecurringTransaction(int|\App\Models\RecurringTransaction $recurring, string $option = 'only_recurrence'): bool
+    {
+        if (is_int($recurring)) {
+            $recurring = \App\Models\RecurringTransaction::findOrFail($recurring);
+        }
+
+        switch ($option) {
+            case 'all':
+                // Delete all transactions linked to this recurrence
+                $recurring->transactions()->delete();
+                break;
+            case 'future':
+                // Delete only future pending transactions
+                $recurring->transactions()
+                    ->where('status', \App\Enums\TransactionStatusEnum::Pending)
+                    ->where('due_date', '>=', today())
+                    ->delete();
+                break;
+            case 'only_recurrence':
+            default:
+                // Just delete the recurring rule
+                break;
+        }
+
+        return $recurring->delete();
+    }
+
+    /**
      * Find a transaction by ID for a specific user
      */
     public function findTransactionById(int $transactionId, int $userId): ?Transaction

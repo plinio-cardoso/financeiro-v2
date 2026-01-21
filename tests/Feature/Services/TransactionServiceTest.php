@@ -147,7 +147,7 @@ class TransactionServiceTest extends TestCase
         $result = $this->transactionService->deleteTransaction($transaction);
 
         $this->assertTrue($result);
-        $this->assertDatabaseMissing('transactions', ['id' => $transaction->id]);
+        $this->assertSoftDeleted('transactions', ['id' => $transaction->id]);
     }
 
     public function test_delete_transaction_removes_tag_associations(): void
@@ -160,7 +160,8 @@ class TransactionServiceTest extends TestCase
 
         $this->transactionService->deleteTransaction($transaction);
 
-        $this->assertDatabaseCount('transaction_tag', 0);
+        // Tag associations should remain even after soft delete
+        $this->assertDatabaseCount('transaction_tag', 2);
     }
 
     public function test_delete_transaction_accepts_transaction_id(): void
@@ -170,7 +171,7 @@ class TransactionServiceTest extends TestCase
         $result = $this->transactionService->deleteTransaction($transaction->id);
 
         $this->assertTrue($result);
-        $this->assertDatabaseMissing('transactions', ['id' => $transaction->id]);
+        $this->assertSoftDeleted('transactions', ['id' => $transaction->id]);
     }
 
     // ==================== Mark as Paid/Pending ====================

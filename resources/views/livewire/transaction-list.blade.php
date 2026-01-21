@@ -34,7 +34,20 @@
         class="bg-white dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-gray-700/50 shadow-sm overflow-hidden">
         {{-- List Header with Actions --}}
         <div
-            class="px-6 py-3 border-b border-gray-50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/10 flex items-center justify-end">
+            class="px-6 py-3 border-b border-gray-50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/10 flex items-center justify-between">
+            {{-- Global Loading Indicator --}}
+            <div wire:loading.flex class="items-center gap-3">
+                <div class="w-4 h-4 border-2 border-[#4ECDC4] border-t-transparent rounded-full animate-spin"></div>
+                <span
+                    class="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                    Sincronizando...
+                </span>
+            </div>
+            <div wire:loading.remove>
+                {{-- Placeholder to maintain layout --}}
+                <div class="h-10"></div>
+            </div>
+
             <x-button @click="openCreate()"
                 class="!bg-[#4ECDC4] hover:!bg-[#3dbdb5] !text-gray-900 shadow-sm py-1.5 px-4 rounded-lg active:scale-95 transition-all text-[11px] font-bold uppercase tracking-wider">
                 Nova Transação
@@ -42,19 +55,20 @@
         </div>
 
         {{-- Totals Summary Bar --}}
-        <div class="flex items-center gap-6 px-6 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm relative">
-            {{-- Loading overlay for aggregates --}}
-            <div wire:loading class="absolute inset-0 bg-white/50 dark:bg-gray-800/50 flex items-center justify-center rounded-2xl">
-                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[#4ECDC4]"></div>
-            </div>
+        <div
+            class="flex items-center gap-6 px-6 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm relative overflow-hidden">
             <div class="flex items-center gap-2">
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
                     Total de Itens
                 </span>
-                <span
-                    class="inline-flex items-center text-sm font-black text-[#4ECDC4] bg-[#4ECDC420] px-2 py-1 rounded-lg">
-                    {{ $this->totalCount }}
-                </span>
+                <div class="relative">
+                    <span wire:loading.remove wire:target="applyFilters, sortBy, gotoPage"
+                        class="inline-flex items-center text-sm font-black text-[#4ECDC4] bg-[#4ECDC420] px-2 py-1 rounded-lg">
+                        {{ $this->totalCount }}
+                    </span>
+                    <div wire:loading wire:target="applyFilters, sortBy, gotoPage"
+                        class="h-7 w-8 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg"></div>
+                </div>
             </div>
 
             <div class="w-px self-stretch bg-gray-100 dark:bg-gray-700"></div>
@@ -63,22 +77,28 @@
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
                     Saldo Período
                 </span>
-                @if($this->totalAmount > 0)
-                    <span
-                        class="inline-flex items-center text-sm font-black px-2 py-1 rounded-lg !text-emerald-600 dark:!text-emerald-400 !bg-emerald-50 dark:!bg-emerald-500/10">
-                        R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
-                    </span>
-                @elseif($this->totalAmount < 0)
-                    <span
-                        class="inline-flex items-center text-sm font-black px-2 py-1 rounded-lg !text-rose-600 dark:!text-rose-400 !bg-rose-50 dark:!bg-rose-500/10">
-                        R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
-                    </span>
-                @else
-                    <span
-                        class="inline-flex items-center text-sm font-black px-2 py-1 rounded-lg !text-gray-600 dark:!text-gray-400 !bg-gray-50 dark:!bg-gray-700/50">
-                        R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
-                    </span>
-                @endif
+                <div class="relative">
+                    <div wire:loading.remove wire:target="applyFilters, sortBy, gotoPage">
+                        @if($this->totalAmount > 0)
+                            <span
+                                class="inline-flex items-center text-sm font-black px-2 py-1 rounded-lg !text-emerald-600 dark:!text-emerald-400 !bg-emerald-50 dark:!bg-emerald-500/10">
+                                R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
+                            </span>
+                        @elseif($this->totalAmount < 0)
+                            <span
+                                class="inline-flex items-center text-sm font-black px-2 py-1 rounded-lg !text-rose-600 dark:!text-rose-400 !bg-rose-50 dark:!bg-rose-500/10">
+                                R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
+                            </span>
+                        @else
+                            <span
+                                class="inline-flex items-center text-sm font-black px-2 py-1 rounded-lg !text-gray-600 dark:!text-gray-400 !bg-gray-50 dark:!bg-gray-700/50">
+                                R$ {{ number_format(abs($this->totalAmount), 2, ',', '.') }}
+                            </span>
+                        @endif
+                    </div>
+                    <div wire:loading wire:target="applyFilters, sortBy, gotoPage"
+                        class="h-7 w-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg"></div>
+                </div>
             </div>
         </div>
 
@@ -117,8 +137,20 @@
                             </div>
 
                             {{-- Content Area --}}
-                            <div class="flex-1 flex items-center justify-center relative overflow-hidden">
-                                {{-- Component Content - No loader needed as modal opens instantly --}}
+                            <div class="flex-1 relative overflow-hidden">
+                                {{-- Loading Overlay for Modal Content --}}
+                                <div wire:loading wire:target="editingTransactionId, editingRecurringId"
+                                    class="absolute inset-0 z-[60] bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm flex items-center justify-center">
+                                    <div class="flex flex-col items-center gap-4">
+                                        <div
+                                            class="w-10 h-10 border-4 border-[#4ECDC4] border-t-transparent rounded-full animate-spin">
+                                        </div>
+                                        <span
+                                            class="text-[10px] font-black uppercase tracking-widest text-[#4ECDC4]">Carregando...</span>
+                                    </div>
+                                </div>
+
+                                {{-- Component Content --}}
                                 <div class="w-full h-full px-6 py-8 overflow-y-auto custom-scrollbar">
                                     {{-- Transaction Form (now handles both transaction and recurrence) --}}
                                     <livewire:transaction-form :transaction-id="$editingTransactionId"
@@ -133,10 +165,6 @@
 
         {{-- Tabela de Transações --}}
         <div class="overflow-hidden bg-white shadow dark:bg-gray-800 rounded-none relative">
-            {{-- Loading overlay for table --}}
-            <div wire:loading class="absolute inset-0 bg-white/50 dark:bg-gray-800/50 flex items-center justify-center z-10">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4ECDC4]"></div>
-            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">

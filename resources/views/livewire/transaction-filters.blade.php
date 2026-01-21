@@ -22,30 +22,26 @@
             class="bg-transparent border-none focus:ring-0 text-xs font-bold text-gray-600 dark:text-gray-400 py-2 px-3">
     </div>
 
-    {{-- Status Filter --}}
     <div class="w-40">
         <x-custom-select wire:model.live="filterStatus" :options="[]" placeholder="Todos os Status"
             x-init="options = $store.options.statuses; $watch('$store.options.statuses', val => options = val)"
             class="!py-2 !text-xs !font-bold" />
     </div>
 
-    {{-- Type Filter --}}
     <div class="w-40">
         <x-custom-select wire:model.live="filterType" :options="[]" placeholder="Todos os Tipos"
             x-init="options = $store.options.types; $watch('$store.options.types', val => options = val)"
             class="!py-2 !text-xs !font-bold" />
     </div>
 
-    {{-- Recurrence Filter --}}
     <div class="w-44">
         <x-custom-select wire:model.live="filterRecurrence" :options="[
-    ['value' => '', 'label' => 'Recorrência (Todos)'],
-    ['value' => 'recurring', 'label' => 'Recorrentes'],
-    ['value' => 'not_recurring', 'label' => 'Não recorrentes']
-]" placeholder="Recorrência (Todos)" class="!py-2 !text-xs !font-bold" />
+        ['value' => '', 'label' => 'Recorrência (Todos)'],
+        ['value' => 'recurring', 'label' => 'Recorrentes'],
+        ['value' => 'not_recurring', 'label' => 'Não recorrentes']
+    ]" placeholder="Recorrência (Todos)" class="!py-2 !text-xs !font-bold" />
     </div>
 
-    {{-- Tags Filter --}}
     <div class="w-48">
         <x-multi-select wire:model.live="selectedTags" :options="[]" placeholder="Tags"
             x-init="options = $store.tags.list; $watch('$store.tags.list', val => options = val)"

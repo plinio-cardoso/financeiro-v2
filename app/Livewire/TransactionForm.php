@@ -55,6 +55,8 @@ class TransactionForm extends Component
     // State
     public bool $editing = false;
 
+    public bool $confirmingDeletion = false;
+
     public function mount(?int $transactionId = null): void
     {
         $this->dueDate = now()->format('Y-m-d');
@@ -89,7 +91,7 @@ class TransactionForm extends Component
     public function save(TransactionService $transactionService): void
     {
         // Remove everything except digits and comma, then convert to float
-        if (! empty($this->amount)) {
+        if (!empty($this->amount)) {
             $amount = preg_replace('/[^\d,.]/', '', $this->amount);
             // If it has a comma, it's Brazilian format, so we clean accordingly
             if (str_contains($amount, ',')) {
@@ -136,6 +138,19 @@ class TransactionForm extends Component
         }
     }
 
+    public function deleteTransaction(TransactionService $transactionService): void
+    {
+        if (!$this->editing || !$this->transaction) {
+            return;
+        }
+
+        $transactionService->deleteTransaction($this->transaction->id);
+
+        $this->dispatch('transaction-saved');
+        $this->dispatch('notify', message: 'Transação removida com sucesso!', type: 'success');
+        $this->confirmingDeletion = false;
+    }
+
     protected function rules(): array
     {
         $rules = [
@@ -148,7 +163,7 @@ class TransactionForm extends Component
             'selectedTags.*' => 'exists:tags,id',
         ];
 
-        if ($this->isRecurring && ! $this->editing) {
+        if ($this->isRecurring && !$this->editing) {
             $rules = array_merge($rules, [
                 'frequency' => 'required|in:weekly,monthly,custom',
                 'interval' => 'required|integer|min:1',

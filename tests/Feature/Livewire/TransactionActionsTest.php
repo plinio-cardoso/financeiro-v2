@@ -98,7 +98,7 @@ class TransactionActionsTest extends TestCase
             ->call('delete')
             ->assertDispatched('transaction-deleted');
 
-        $this->assertDatabaseMissing('transactions', [
+        $this->assertSoftDeleted('transactions', [
             'id' => $transaction->id,
         ]);
     }

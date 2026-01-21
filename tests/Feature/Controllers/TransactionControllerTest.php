@@ -263,7 +263,7 @@ class TransactionControllerTest extends TestCase
 
         $response->assertRedirect(route('transactions.index'));
 
-        $this->assertDatabaseMissing('transactions', [
+        $this->assertSoftDeleted('transactions', [
             'id' => $transaction->id,
         ]);
     }
