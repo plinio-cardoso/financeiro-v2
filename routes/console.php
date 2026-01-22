@@ -18,3 +18,9 @@ Schedule::command('notify:overdue')
     ->dailyAt('09:00')
     ->withoutOverlapping()
     ->onOneServer();
+
+// Automatically generate recurring transactions every 5 minutes
+Schedule::command('app:generate-transactions')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->onOneServer();

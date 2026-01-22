@@ -11,7 +11,8 @@ class DashboardService
 {
     public function __construct(
         private TransactionService $transactionService
-    ) {}
+    ) {
+    }
 
     /**
      * Get current month statistics
@@ -132,7 +133,7 @@ class DashboardService
         return Transaction::where('user_id', $userId)
             ->where('type', TransactionTypeEnum::Debit)
             ->where('due_date', '>=', now()->subMonths(6)->startOfMonth())
-            ->selectRaw('YEAR(due_date) as year, MONTH(due_date) as month, SUM(amount) as total')
+            ->selectRaw('YEAR(due_date) as year, MONTH(due_date) as month, SUM(amount) as total, COUNT(*) as count')
             ->groupBy('year', 'month')
             ->orderBy('year')
             ->orderBy('month')
@@ -149,7 +150,7 @@ class DashboardService
         $expenses = $this->getUpcomingExpenses($userId);
 
         return $expenses
-            ->groupBy(fn ($expense) => $expense->due_date->startOfDay()->timestamp)
+            ->groupBy(fn($expense) => $expense->due_date->startOfDay()->timestamp)
             ->all();
     }
 
@@ -158,6 +159,9 @@ class DashboardService
      */
     public function getCurrentMonthExpenseTotal(int $userId): float
     {
-        return $this->getExpensesByTag($userId)->sum('total');
+        $now = now();
+        $totals = $this->transactionService->calculateMonthlyTotals($userId, $now->year, $now->month);
+
+        return (float) $totals['total_due'];
     }
 }

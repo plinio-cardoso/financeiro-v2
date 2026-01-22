@@ -251,7 +251,8 @@
                     theme: { mode: chartTheme },
                     series: [{
                         name: 'Total Gasto',
-                        data: monthlyData.map(m => parseFloat(m.total))
+                        data: monthlyData.map(m => parseFloat(m.total)),
+                        counts: monthlyData.map(m => parseInt(m.count))
                     }],
                     xaxis: {
                         categories: monthlyData.map(m => {
@@ -288,10 +289,11 @@
                         custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                             const value = series[seriesIndex][dataPointIndex];
                             const category = w.globals.labels[dataPointIndex];
+                            const count = w.config.series[seriesIndex].counts[dataPointIndex];
 
                             return '<div style="padding: 10px; background: ' + (isDark ? '#1e293b' : '#ffffff') + '; border: 1px solid ' + (isDark ? '#334155' : '#e2e8f0') + '; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">' +
-                                '<div style="color: ' + (isDark ? '#94a3b8' : '#64748b') + '; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">' + category + '</div>' +
                                 '<div style="color: ' + (isDark ? '#f1f5f9' : '#0f172a') + '; font-size: 14px; font-weight: 700;">R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</div>' +
+                                '<div style="color: ' + (isDark ? '#4ECDC4' : '#0ea5e9') + '; font-size: 10px; font-weight: 600; margin-top: 4px;">' + count + ' Transações</div>' +
                                 '</div>';
                         }
                     }
