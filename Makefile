@@ -81,6 +81,7 @@ deploy:
 	@$(MAKE) deploy-install
 	@$(MAKE) deploy-build
 	@$(MAKE) deploy-migrate
+	@$(MAKE) deploy-clear
 	@$(MAKE) deploy-optimize
 	@$(MAKE) deploy-restart
 	@$(MAKE) deploy-health
@@ -105,6 +106,10 @@ deploy-migrate:
 	@echo "🗄️  Running migrations..."
 	docker compose -f docker-compose.staging.yml exec -T app php artisan migrate --force
 
+deploy-clear:
+	@echo "🧹 Clearing application cache..."
+	docker compose -f docker-compose.staging.yml exec -T app php artisan optimize:clear
+
 deploy-optimize:
 	@echo "⚡ Optimizing application..."
 	docker compose -f docker-compose.staging.yml exec -T app php artisan config:cache
@@ -125,6 +130,7 @@ deploy-rollback:
 	@echo "⏪ Rolling back to previous version..."
 	git reset --hard HEAD~1
 	@$(MAKE) deploy-install
+	@$(MAKE) deploy-clear
 	@$(MAKE) deploy-optimize
 	@$(MAKE) deploy-restart
 	@$(MAKE) deploy-health
