@@ -50,9 +50,15 @@ bash:
 db-bash:
 	docker exec -it mysql_financeiro bash
 
-refresh:
+fresh:
 	docker exec -it php_financeiro php artisan migrate:fresh
 	docker exec -it php_financeiro php artisan db:seed
+
+fresh-simple:
+	docker exec -it php_financeiro php artisan migrate:fresh
+	docker exec -it php_financeiro php artisan db:seed --class=NotificationSettingSeeder
+	docker exec -it php_financeiro php artisan db:seed --class=TagSeeder
+	docker exec -it php_financeiro php artisan db:seed --class=UserSeeder
 
 install:
 	docker exec -it php_financeiro composer install --ignore-platform-req=ext-http

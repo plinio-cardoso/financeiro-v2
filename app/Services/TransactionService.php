@@ -9,7 +9,6 @@ use App\Models\RecurringTransaction;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Artisan;
 
 class TransactionService
 {
@@ -37,17 +36,9 @@ class TransactionService
             $recurring->tags()->sync($data['tags']);
         }
 
-        // If start date is today or in the past, let the scheduled job pick it up
-        // OR we can generate the first one immediately.
-        // Let's generate immediately to give instant feedback to the user.
         // Generate transactions for the rest of this month + all of next month
         // This ensures the user has a correct forecast.
-        $targetDate = now()->addMonth()->endOfMonth();
-        $daysToGenerate = now()->diffInDays($targetDate);
-
-        Artisan::call('app:generate-transactions', [
-            '--days' => max(0, (int) $daysToGenerate),
-        ]);
+        $this->generateRecurringTransactions();
 
         // Reload to get updated next_due_date
         $recurring->refresh();
@@ -376,5 +367,124 @@ class TransactionService
             ->where('type', TransactionTypeEnum::Debit)
             ->whereBetween('due_date', [$startDate, $endDate])
             ->get();
+    }
+
+    /**
+     * Get the standard horizon for transaction generation (end of next month)
+     */
+    public function getGenerationEndDate(): Carbon
+    {
+        return now()->addMonth()->endOfMonth();
+    }
+
+    /**
+     * Generate transactions for all active recurring rules until a specific date
+     */
+    public function generateRecurringTransactions(?Carbon $endDate = null, bool $force = false): Collection
+    {
+        $endDate = $endDate ?? $this->getGenerationEndDate();
+
+        $recurringTransactions = RecurringTransaction::where('active', true)
+            ->where('next_due_date', '<=', $endDate)
+            ->get();
+
+        $generated = collect();
+
+        foreach ($recurringTransactions as $recurring) {
+            $generated = $generated->merge($this->generateTransactionsForRecurring($recurring, $endDate, $force));
+        }
+
+        return $generated;
+    }
+
+    /**
+     * Generate transactions for a specific recurring rule until a specific date
+     */
+    public function generateTransactionsForRecurring(
+        RecurringTransaction $recurring,
+        Carbon $endDate,
+        bool $force = false
+    ): Collection {
+        $generated = collect();
+        $currentDate = Carbon::parse($recurring->next_due_date)->copy();
+
+        while ($currentDate->lte($endDate)) {
+            // Check if we've reached the end
+            if ($this->hasReachedEnd($recurring, $currentDate)) {
+                $recurring->update(['active' => false]);
+                break;
+            }
+
+            // Check if transaction already exists (idempotency)
+            if (! $force && $this->transactionExists($recurring, $currentDate)) {
+                $currentDate = $this->calculateNextDate($currentDate, $recurring);
+
+                continue;
+            }
+
+            // Create the transaction
+            $transaction = Transaction::create([
+                'user_id' => $recurring->user_id,
+                'title' => $recurring->title,
+                'description' => $recurring->description,
+                'amount' => $recurring->amount,
+                'type' => $recurring->type,
+                'status' => TransactionStatusEnum::Pending,
+                'due_date' => $currentDate,
+                'recurring_transaction_id' => $recurring->id,
+                'sequence' => $recurring->generated_count + 1,
+            ]);
+
+            // Sync tags from recurring transaction
+            if ($recurring->tags->isNotEmpty()) {
+                $transaction->tags()->sync($recurring->tags->pluck('id'));
+            }
+
+            $generated->push($transaction);
+            $recurring->increment('generated_count');
+
+            // Move to next occurrence
+            $currentDate = $this->calculateNextDate($currentDate, $recurring);
+        }
+
+        // Update next_due_date
+        if ($recurring->active) {
+            $recurring->update(['next_due_date' => $currentDate]);
+        }
+
+        return $generated;
+    }
+
+    private function hasReachedEnd(RecurringTransaction $recurring, Carbon $currentDate): bool
+    {
+        // Check if end_date is set and we've passed it
+        if ($recurring->end_date && $currentDate->gt($recurring->end_date)) {
+            return true;
+        }
+
+        // Check if occurrences limit is set and we've reached it
+        if ($recurring->occurrences && $recurring->generated_count >= $recurring->occurrences) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function transactionExists(RecurringTransaction $recurring, Carbon $dueDate): bool
+    {
+        return Transaction::where('recurring_transaction_id', $recurring->id)
+            ->whereDate('due_date', $dueDate->toDateString())
+            ->exists();
+    }
+
+    private function calculateNextDate(Carbon $currentDate, RecurringTransaction $recurring): Carbon
+    {
+        $nextDate = $currentDate->copy();
+
+        return match ($recurring->frequency) {
+            RecurringFrequencyEnum::Weekly => $nextDate->addWeeks($recurring->interval),
+            RecurringFrequencyEnum::Monthly => $nextDate->addMonths($recurring->interval),
+            RecurringFrequencyEnum::Custom => $nextDate->addDays($recurring->interval),
+        };
     }
 }

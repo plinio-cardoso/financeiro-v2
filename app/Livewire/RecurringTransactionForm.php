@@ -6,7 +6,6 @@ use App\Models\RecurringTransaction;
 use App\Services\TagService;
 use App\Services\TransactionService;
 use DateTimeInterface;
-use Illuminate\Support\Facades\Artisan;
 use Laravel\Jetstream\InteractsWithBanner;
 use Livewire\Component;
 
@@ -143,12 +142,7 @@ class RecurringTransactionForm extends Component
             $this->dispatch('notify', message: 'Recorrência atualizada com sucesso!', type: 'success');
 
             // Trigger generation to ensure forecast is up to date
-            $targetDate = now()->addMonth()->endOfMonth();
-            $daysToGenerate = now()->diffInDays($targetDate);
-
-            Artisan::call('app:generate-transactions', [
-                '--days' => max(0, (int) $daysToGenerate),
-            ]);
+            $transactionService->generateRecurringTransactions();
         } else {
             // Create new recurring transaction
             $recurring = $transactionService->createRecurringTransaction($data);

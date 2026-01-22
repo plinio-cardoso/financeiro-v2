@@ -192,11 +192,11 @@ class DashboardServiceTest extends TestCase
         $user = User::factory()->create();
 
         $transaction1 = Transaction::factory()->for($user)->create([
-            'due_date' => now()->addDays(10),
+            'due_date' => now()->startOfMonth()->addDays(2),
         ]);
 
         $transaction2 = Transaction::factory()->for($user)->create([
-            'due_date' => now()->addDays(5),
+            'due_date' => now()->startOfMonth()->addDays(1),
         ]);
 
         $transactions = $this->dashboardService->getMonthlyTransactions($user->id);
