@@ -4,6 +4,11 @@
 
 <title>{{ config('app.name', 'Laravel') }}</title>
 <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+<link rel="manifest" href="{{ asset('manifest.json') }}">
+<meta name="theme-color" content="#4ECDC4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sistema Financeiro">
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.bunny.net">
