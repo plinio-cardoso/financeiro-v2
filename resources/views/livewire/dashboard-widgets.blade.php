@@ -178,24 +178,174 @@
 
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-        <script>         let tagChart = null;         let monthlyChart = null;
-             function getChartStyles() {             const isDark = document.documentElement.classList.contains('dark');             return {                 textColor: isDark ? '#94a3b8' : '#475569',                 chartTheme: isDark ? 'dark' : 'light',                 isDark: isDark             };         }
-             function initializeTagChart(tagData) {             const { textColor, chartTheme } = getChartStyles();
-                 // Destroy existing chart if it exists             if (tagChart) {                 tagChart.destroy();             }
-                 // Don't render if no data             if (!tagData || tagData.length === 0) {                 console.log('No tag data available');                 return;             }
-                 console.log('Rendering tag chart with data:', tagData);
-                 const tagOptions = {                 chart: {                     type: 'donut',                     height: 350,                     fontFamily: 'Inter, sans-serif',                     background: 'transparent'                 },                 theme: { mode: chartTheme },                 series: tagData.map(t => parseFloat(t.total)),                 labels: tagData.map(t => t.tag_name),                 colors: tagData.map(t => t.tag_color),                 stroke: { show: false },                 dataLabels: { enabled: false },                 legend: {                     position: 'bottom',                     labels: { colors: textColor, useSeriesColors: false },                     markers: { strokeWidth: 0, radius: 12, offsetX: -5 },                     itemMargin: { horizontal: 10, vertical: 8 }                 },                 tooltip: { theme: chartTheme },                 plotOptions: { pie: { donut: { size: '75%' } } }             };
-                 tagChart = new ApexCharts(document.querySelector("#chart-tags"), tagOptions);             tagChart.render();         }
-             function initializeMonthlyChart(monthlyData) {             const { textColor, chartTheme, isDark } = getChartStyles();
-                 // Destroy existing chart if it exists             if (monthlyChart) {                 monthlyChart.destroy();             }
-                 // Don't render if no data             if (!monthlyData || monthlyData.length === 0) {                 console.log('No monthly data available');                 return;             }
-                 console.log('Rendering monthly chart with data:', monthlyData);
-                 const monthlyOptions = {                 chart: {                     type: 'area',                     height: 350,                     fontFamily: 'Inter, sans-serif',                     toolbar: { show: false },                     background: 'transparent'                 },                 theme: { mode: chartTheme },                 series: [{                     name: 'Total Gasto',                     data: monthlyData.map(m => parseFloat(m.total)),                     counts: monthlyData.map(m => parseInt(m.count))                 }],                 xaxis: {                     categories: monthlyData.map(m => {                         const date = new Date(m.year, m.month - 1);                         return date.toLocaleString('pt-BR', { month: 'short' }).toUpperCase();                     }),                     labels: { style: { colors: textColor, fontWeight: 700, fontSize: '10px' } },                     axisBorder: { show: false },                     axisTicks: { show: false }                 },                 yaxis: { labels: { style: { colors: textColor, fontWeight: 600 } } },                 dataLabels: { enabled: false },                 colors: ['#4ECDC4'],                 fill: {                     type: 'gradient',                     gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] }                 },                 stroke: { curve: 'smooth', width: 4 },                 grid: { borderColor: isDark ? '#1e293b' : '#f1f5f9', strokeDashArray: 4 },                 tooltip: {                     theme: chartTheme,                     style: {                         fontSize: '12px',                         fontFamily: 'Inter, sans-serif'                     },                     x: {                         show: true                     },                     y: {                         formatter: function (value) {                             return 'R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });                         }                     },                     custom: function ({ series, seriesIndex, dataPointIndex, w }) {                         const value = series[seriesIndex][dataPointIndex];                         const category = w.globals.labels[dataPointIndex];                         const count = w.config.series[seriesIndex].counts[dataPointIndex];
-                             return '<div style="padding: 10px; background: ' + (isDark ? '#1e293b' : '#ffffff') + '; border: 1px solid ' + (isDark ? '#334155' : '#e2e8f0') + '; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">' +                             '<div style="color: ' + (isDark ? '#f1f5f9' : '#0f172a') + '; font-size: 14px; font-weight: 700;">R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</div>' +                             '<div style="color: ' + (isDark ? '#4ECDC4' : '#0ea5e9') + '; font-size: 10px; font-weight: 600; margin-top: 4px;">' + count + ' Transações</div>' +                             '</div>';                     }                 }             };
-                 monthlyChart = new ApexCharts(document.querySelector("#chart-monthly"), monthlyOptions);             monthlyChart.render();         }
-             // Listen for Livewire events when data is loaded         document.addEventListener('livewire:initialized', () => {             Livewire.on('expensesByTagLoaded', (event) => {                 console.log('expensesByTagLoaded event received:', event);                 // Small delay to ensure DOM is updated                 setTimeout(() => initializeTagChart(event.data), 100);             });
-                 Livewire.on('monthlyComparisonLoaded', (event) => {                 console.log('monthlyComparisonLoaded event received:', event);                 // Small delay to ensure DOM is updated                 setTimeout(() => initializeMonthlyChart(event.data), 100);             });         });
-             // Reinitialize charts when theme changes (only if data already loaded)         window.addEventListener('theme-changed', () => {             // Charts will be re-rendered on next data load             if (tagChart) tagChart.destroy();             if (monthlyChart) monthlyChart.destroy();         });
+        <script>
+            let tagChart = null;
+            let monthlyChart = null;
+            let currentTagData = null;
+            let currentMonthlyData = null;
+
+            function getChartStyles() {
+                const isDark = document.documentElement.classList.contains('dark');
+                return {
+                    textColor: isDark ? '#94a3b8' : '#475569',
+                    chartTheme: isDark ? 'dark' : 'light',
+                    isDark: isDark
+                };
+            }
+
+            function initializeTagChart(tagData) {
+                currentTagData = tagData; // Store for re-rendering
+                const { textColor, chartTheme } = getChartStyles();
+
+                // Destroy existing chart if it exists
+                if (tagChart) {
+                    tagChart.destroy();
+                }
+
+                // Don't render if no data
+                if (!tagData || tagData.length === 0) {
+                    return;
+                }
+
+                const tagOptions = {
+                    chart: {
+                        type: 'donut',
+                        height: 350,
+                        fontFamily: 'Inter, sans-serif',
+                        background: 'transparent',
+                        events: {
+                            mounted: (chart) => {
+                                chart.windowResizeHandler();
+                            }
+                        }
+                    },
+                    theme: { mode: chartTheme },
+                    series: tagData.map(t => parseFloat(t.total)),
+                    labels: tagData.map(t => t.tag_name),
+                    colors: tagData.map(t => t.tag_color),
+                    stroke: { show: false },
+                    dataLabels: { enabled: false },
+                    legend: {
+                        position: 'bottom',
+                        labels: { colors: textColor, useSeriesColors: false },
+                        markers: { strokeWidth: 0, radius: 12, offsetX: -5 },
+                        itemMargin: { horizontal: 10, vertical: 8 }
+                    },
+                    tooltip: { theme: chartTheme },
+                    plotOptions: { pie: { donut: { size: '75%' } } }
+                };
+
+                const chartEl = document.querySelector("#chart-tags");
+                if (chartEl) {
+                    tagChart = new ApexCharts(chartEl, tagOptions);
+                    tagChart.render();
+                }
+            }
+
+            function initializeMonthlyChart(monthlyData) {
+                currentMonthlyData = monthlyData; // Store for re-rendering
+                const { textColor, chartTheme, isDark } = getChartStyles();
+
+                // Destroy existing chart if it exists
+                if (monthlyChart) {
+                    monthlyChart.destroy();
+                }
+
+                // Don't render if no data
+                if (!monthlyData || monthlyData.length === 0) {
+                    return;
+                }
+
+                const monthlyOptions = {
+                    chart: {
+                        type: 'area',
+                        height: 350,
+                        fontFamily: 'Inter, sans-serif',
+                        toolbar: { show: false },
+                        background: 'transparent',
+                        events: {
+                            mounted: (chart) => {
+                                chart.windowResizeHandler();
+                            }
+                        }
+                    },
+                    theme: { mode: chartTheme },
+                    series: [{
+                        name: 'Total Gasto',
+                        data: monthlyData.map(m => parseFloat(m.total)),
+                        counts: monthlyData.map(m => parseInt(m.count))
+                    }],
+                    xaxis: {
+                        categories: monthlyData.map(m => {
+                            const date = new Date(m.year, m.month - 1);
+                            return date.toLocaleString('pt-BR', { month: 'short' }).toUpperCase();
+                        }),
+                        labels: { style: { colors: textColor, fontWeight: 700, fontSize: '10px' } },
+                        axisBorder: { show: false },
+                        axisTicks: { show: false }
+                    },
+                    yaxis: { labels: { style: { colors: textColor, fontWeight: 600 } } },
+                    dataLabels: { enabled: false },
+                    colors: ['#4ECDC4'],
+                    fill: {
+                        type: 'gradient',
+                        gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] }
+                    },
+                    stroke: { curve: 'smooth', width: 4 },
+                    grid: { borderColor: isDark ? '#1e293b' : '#f1f5f9', strokeDashArray: 4 },
+                    tooltip: {
+                        theme: chartTheme,
+                        style: {
+                            fontSize: '12px',
+                            fontFamily: 'Inter, sans-serif'
+                        },
+                        x: {
+                            show: true
+                        },
+                        y: {
+                            formatter: function (value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            }
+                        },
+                        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                            const value = series[seriesIndex][dataPointIndex];
+                            const count = w.config.series[seriesIndex].counts[dataPointIndex];
+
+                            return '<div style="padding: 10px; background: ' + (isDark ? '#1e293b' : '#ffffff') + '; border: 1px solid ' + (isDark ? '#334155' : '#e2e8f0') + '; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">' +
+                                '<div style="color: ' + (isDark ? '#f1f5f9' : '#0f172a') + '; font-size: 14px; font-weight: 700;">R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</div>' +
+                                '<div style="color: ' + (isDark ? '#4ECDC4' : '#0ea5e9') + '; font-size: 10px; font-weight: 600; margin-top: 4px;">' + count + ' Transações</div>' +
+                                '</div>';
+                        }
+                    }
+                };
+
+                const chartEl = document.querySelector("#chart-monthly");
+                if (chartEl) {
+                    monthlyChart = new ApexCharts(chartEl, monthlyOptions);
+                    monthlyChart.render();
+                }
+            }
+
+            // Listen for Livewire events when data is loaded
+            document.addEventListener('livewire:initialized', () => {
+                Livewire.on('expensesByTagLoaded', (event) => {
+                    // Ensure we get the data correctly regardless of event structure
+                    const data = event.data || (Array.isArray(event) && event[0] ? event[0].data : null) || event;
+                    setTimeout(() => initializeTagChart(data), 100);
+                });
+
+                Livewire.on('monthlyComparisonLoaded', (event) => {
+                    const data = event.data || (Array.isArray(event) && event[0] ? event[0].data : null) || event;
+                    setTimeout(() => initializeMonthlyChart(data), 100);
+                });
+            });
+
+            // Reinitialize charts when theme changes
+            window.addEventListener('theme-changed', (e) => {
+                // Re-render with stored data
+                if (currentTagData) initializeTagChart(currentTagData);
+                if (currentMonthlyData) initializeMonthlyChart(currentMonthlyData);
+            });
         </script>
     @endpush
 </div>
