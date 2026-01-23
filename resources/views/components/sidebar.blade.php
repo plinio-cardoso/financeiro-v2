@@ -1,23 +1,17 @@
-<aside x-data="{
-    open: false,
-    darkMode: localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
-    toggleTheme() {
-        this.darkMode = !this.darkMode;
-        localStorage.theme = this.darkMode ? 'dark' : 'light';
-        if (this.darkMode) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-        // Dispatch event to notify charts to update
-        window.dispatchEvent(new CustomEvent('theme-changed', { detail: { darkMode: this.darkMode } }));
-    }
-}"
-    class="flex flex-col w-64 h-screen px-4 py-8 overflow-y-auto bg-white border-r rtl:border-r-0 rtl:border-l dark:bg-gray-800 dark:border-gray-700/50">
+<!-- Overlay for Mobile -->
+<div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" @click="mobileMenuOpen = false"
+    class="fixed inset-0 z-20 bg-black/50 lg:hidden" x-cloak>
+</div>
+
+<aside
+    class="fixed inset-y-0 left-0 z-30 transition-transform duration-300 transform lg:static lg:translate-x-0 w-64 h-screen px-4 py-8 overflow-y-auto bg-white border-r rtl:border-r-0 rtl:border-l dark:bg-gray-800 dark:border-gray-700/50 -translate-x-full"
+    :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'">
     <div class="flex items-center px-2 mb-8">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
-            <x-application-mark class="w-7 h-7 text-gray-900 dark:text-white" />
-            <span class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Financeiro</span>
+            <x-application-mark class="w-7 h-7 text-[#4ECDC4]" />
+            <span class="text-xl font-bold tracking-tight text-gray-900 dark:text-white uppercase">Financeiro</span>
         </a>
     </div>
 
@@ -43,7 +37,8 @@
                 Transações
             </x-sidebar-link>
 
-            <x-sidebar-link href="{{ route('recurring-transactions.index') }}" :active="request()->routeIs('recurring-transactions.*')">
+            <x-sidebar-link href="{{ route('recurring-transactions.index') }}"
+                :active="request()->routeIs('recurring-transactions.*')">
                 <x-slot name="icon">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -101,7 +96,8 @@
                     <div class="flex-1 min-w-0">
                         <h1
                             class="text-sm font-bold text-gray-900 dark:text-white truncate group-hover/user:text-[#4ECDC4] transition-colors">
-                            {{ Auth::user()->name }}</h1>
+                            {{ Auth::user()->name }}
+                        </h1>
                         <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 truncate tracking-wide">
                             {{ Auth::user()->email }}
                         </p>

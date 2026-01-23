@@ -62,5 +62,13 @@
     "September": "Setembro",
     "October": "Outubro",
     "November": "Novembro",
-    "December": "Dezembro"
+    "December": "Dezembro",
+    "Password": "Senha",
+    "Remember me": "Lembrar-me",
+    "Forgot your password?": "Esqueceu sua senha?",
+    "Log in": "Entrar",
+    "Whoops! Something went wrong.": "Ops! Algo deu errado.",
+    "These credentials do not match our records.": "Essas credenciais não correspondem aos nossos registros.",
+    "Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.": "Esqueceu sua senha? Sem problemas. Basta nos informar seu endereço de e-mail e enviaremos um link de redefinição de senha por e-mail, que permitirá que você escolha uma nova.",
+    "Email Password Reset Link": "Enviar Link de Redefinição de Senha"
 }

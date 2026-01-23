@@ -54,6 +54,7 @@ class RecurringTransactionTest extends TestCase
 
     public function test_generates_weekly_transactions(): void
     {
+        \Carbon\Carbon::setTestNow('2025-01-20 12:00:00'); // A Monday
         $user = User::factory()->create();
 
         $recurring = RecurringTransaction::factory()

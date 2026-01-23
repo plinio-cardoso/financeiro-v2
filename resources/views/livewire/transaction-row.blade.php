@@ -1,9 +1,11 @@
 <tr class="hover:bg-gray-100 dark:hover:bg-gray-700/30 transition-colors">
     {{-- Title & Description (inline editable) --}}
-    <td class="px-6 py-4 whitespace-nowrap">
+    <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
         <div x-data="inlineEdit({{ $transaction->id }}, 'title', @js($transaction->title), { required: true })"
-            class="min-w-[200px] relative">
-            <div x-show="!editing" @click="editing = true" class="flex items-center gap-2 group cursor-pointer">
+            class="min-w-[120px] sm:min-w-[200px] relative">
+            {{-- Desktop: Inline Editable --}}
+            <div class="hidden sm:flex items-center gap-2 group cursor-pointer" x-show="!editing"
+                @click="editing = true">
                 @if($transaction->recurring_transaction_id)
                     <x-icon name="recurring" class="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0"
                         title="Transação recorrente" />
@@ -14,6 +16,29 @@
                 <x-icon name="pencil"
                     class="w-3 h-3 text-[#4ECDC4] opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
+
+            {{-- Mobile: Static with Date & Amount below --}}
+            <div class="sm:hidden flex flex-col gap-1"
+                @click="$dispatch('open-edit-modal', { transactionId: {{ $transaction->id }} })">
+                <div class="flex items-center gap-2">
+                    @if($transaction->recurring_transaction_id)
+                        <x-icon name="recurring" class="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
+                    @endif
+                    <span class="text-sm font-black text-gray-900 dark:text-gray-100 truncate">
+                        {{ $transaction->title }}
+                    </span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-black {{ $transaction->getAmountColorClass() }}">
+                        {{ $transaction->getFormattedAmount() }}
+                    </span>
+                    <span class="text-gray-300 dark:text-gray-700">|</span>
+                    <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        {{ $transaction->due_date->format('d/m/Y') }}
+                    </span>
+                </div>
+            </div>
+
             <input x-show="editing" x-cloak x-ref="input" x-model="value" @focusout="save()" @keydown.enter="save()"
                 @keydown.escape="editing = false; value = original"
                 x-effect="if(editing) { $nextTick(() => $refs.input.focus()); }" type="text"
@@ -27,16 +52,26 @@
     </td>
 
     {{-- Amount (inline editable) --}}
-    <td class="px-6 py-4 whitespace-nowrap">
+    <td class="hidden sm:table-cell px-2 sm:px-6 py-4 whitespace-nowrap">
         <div x-data="inlineEdit({{ $transaction->id }}, 'amount', @js(number_format($transaction->amount, 2, ',', '.')), { type: 'amount' })"
-            class="flex flex-col items-start relative">
-            <div x-show="!editing" @click="editing = true" class="flex items-center gap-2 group cursor-pointer">
+            class="flex flex-col items-end sm:items-start relative">
+            {{-- Desktop: Inline Editable --}}
+            <div class="hidden sm:flex items-center gap-2 group cursor-pointer" x-show="!editing"
+                @click="editing = true">
                 <span
                     class="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#4ECDC4] transition-colors"
                     x-text="formatDisplay()"></span>
                 <x-icon name="pencil"
                     class="w-3 h-3 text-[#4ECDC4] opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
+
+            {{-- Mobile: Static --}}
+            <div class="sm:hidden" @click="$dispatch('open-edit-modal', { transactionId: {{ $transaction->id }} })">
+                <span class="text-sm font-black text-gray-900 dark:text-gray-100">
+                    {{ $transaction->getFormattedAmount() }}
+                </span>
+            </div>
+
             <div x-show="editing" x-cloak class="flex items-center">
                 <span class="text-sm mr-1 font-bold text-gray-900 dark:text-gray-100">R$</span>
                 <input x-ref="input" x-model="value" @input="handleInput($event)" @focusout="save()"
@@ -54,7 +89,7 @@
     </td>
 
     {{-- Type (badge only - click opens modal) --}}
-    <td class="px-6 py-4 whitespace-nowrap text-center">
+    <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-center">
         <div @click="$dispatch('open-edit-modal', { transactionId: {{ $transaction->id }} })"
             class="cursor-pointer inline-block">
             <span @class([
@@ -68,7 +103,7 @@
     </td>
 
     {{-- Status (badge only - click opens modal) --}}
-    <td class="px-6 py-4 whitespace-nowrap text-center">
+    <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-center">
         <div @click="$dispatch('open-edit-modal', { transactionId: {{ $transaction->id }} })"
             class="cursor-pointer inline-block">
             <span @class([
@@ -82,12 +117,12 @@
     </td>
 
     {{-- Due Date (inline editable) --}}
-    <td class="px-6 py-4 whitespace-nowrap">
+    <td class="hidden sm:table-cell px-4 sm:px-6 py-4 whitespace-nowrap">
         <div x-data="inlineEdit({{ $transaction->id }}, 'due_date', @js($transaction->due_date->format('Y-m-d')), { type: 'date' })"
-            class="relative">
+            class="min-w-[100px] sm:min-w-[120px] relative">
             <div x-show="!editing" @click="editing = true" class="flex items-center gap-2 group cursor-pointer">
                 <span
-                    class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-[#4ECDC4] transition-colors"
+                    class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-[#4ECDC4] transition-colors"
                     x-text="formatDisplay()"></span>
                 <x-icon name="pencil"
                     class="w-3 h-3 text-[#4ECDC4] opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -105,7 +140,7 @@
     </td>
 
     {{-- Tags (badge list - click opens modal) --}}
-    <td class="px-6 py-4 whitespace-nowrap">
+    <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
         @if($transaction->tags->isNotEmpty())
             <div @click="$dispatch('open-edit-modal', { transactionId: {{ $transaction->id }} })"
                 class="flex flex-wrap gap-1 cursor-pointer p-1">
@@ -126,12 +161,12 @@
 
     {{-- Actions --}}
     <td class="px-2 py-4 text-sm font-medium text-right whitespace-nowrap">
-        <div class="flex justify-end gap-2 pr-8">
+        <div class="flex justify-end gap-2 sm:pr-8">
             {{-- Pay button (only for pending debits) --}}
             @if($transaction->status->value === 'pending' && $transaction->type->value === 'debit')
                 <button wire:click="markAsPaid" wire:loading.attr="disabled"
                     wire:loading.class="opacity-50 cursor-not-allowed" wire:target="markAsPaid"
-                    class="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all text-[10px] font-black uppercase tracking-widest group border border-emerald-500/10 dark:border-none shadow-sm"
+                    class="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all text-[10px] font-black uppercase tracking-widest group border border-emerald-500/10 dark:border-none shadow-sm"
                     title="Pagar">
                     <div wire:loading.remove wire:target="markAsPaid" class="flex items-center gap-1.5">
                         <x-icon name="check" class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />

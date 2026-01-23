@@ -1,4 +1,4 @@
-<div x-data="{
+<div class="px-4 sm:px-0" x-data="{
     // Modal state is now global
 }" @recurring-saved.window="$wire.refreshList()" @close-modal.window="">
 
@@ -29,7 +29,8 @@
         <div class="flex items-center gap-6 px-6 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm relative overflow-hidden">
             <div class="flex items-center gap-2">
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
-                    Total de Recorrências
+                    <span class="sm:hidden">ITENS</span>
+                    <span class="hidden sm:inline">Total de Recorrências</span>
                 </span>
                 <div class="relative">
                     <span wire:loading.remove wire:target="applyFilters, sortBy, gotoPage"
@@ -44,7 +45,8 @@
 
             <div class="flex items-center gap-2">
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
-                    Impacto Mensal Estimado
+                    <span class="sm:hidden">SALDO</span>
+                    <span class="hidden sm:inline">Impacto Mensal Estimado</span>
                 </span>
                 <div class="relative">
                     <div wire:loading.remove wire:target="applyFilters, sortBy, gotoPage">
@@ -77,7 +79,7 @@
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
                             <th scope="col" wire:click="sortBy('title')"
-                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                class="px-4 sm:px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center gap-1 whitespace-nowrap">
                                     Título
                                     @if ($sortField === 'title')
@@ -86,7 +88,7 @@
                                 </div>
                             </th>
                             <th scope="col" wire:click="sortBy('amount')"
-                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                class="px-4 sm:px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center gap-1 whitespace-nowrap">
                                     Valor
                                     @if ($sortField === 'amount')
@@ -95,7 +97,7 @@
                                 </div>
                             </th>
                             <th scope="col" wire:click="sortBy('type')"
-                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                class="hidden sm:table-cell px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center gap-1 whitespace-nowrap">
                                     Tipo
                                     @if ($sortField === 'type')
@@ -104,7 +106,7 @@
                                 </div>
                             </th>
                             <th scope="col" wire:click="sortBy('frequency')"
-                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                class="hidden sm:table-cell px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center gap-1 whitespace-nowrap">
                                     Frequência
                                     @if ($sortField === 'frequency')
@@ -113,8 +115,8 @@
                                 </div>
                             </th>
                             <th scope="col" wire:click="sortBy('next_due_date')"
-                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                <div class="flex items-center gap-1 whitespace-nowrap min-w-[120px]">
+                                class="hidden sm:table-cell px-4 sm:px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                <div class="flex items-center gap-1 whitespace-nowrap min-w-[100px] sm:min-w-[120px]">
                                     Próximo Vencimento
                                     @if ($sortField === 'next_due_date')
                                         <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
@@ -122,7 +124,7 @@
                                 </div>
                             </th>
                             <th scope="col"
-                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                                class="hidden sm:table-cell px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
                                 Status
                             </th>
                             <th scope="col" class="relative px-6 py-3">
@@ -134,13 +136,17 @@
                         @forelse ($this->recurringTransactions as $recurring)
                             <tr class="hover:bg-gray-100 dark:hover:bg-gray-700/30 transition-colors">
                                 {{-- Title & Description --}}
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
                                     <div class="min-w-0 flex-1">
                                         <span class="text-sm font-bold text-gray-900 dark:text-gray-100">
                                             {{ $recurring->title }}
                                         </span>
+                                        {{-- Mobile: Show Next Due Date below title --}}
+                                        <div class="sm:hidden text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 uppercase tracking-wide">
+                                            Vencimento: {{ $recurring->next_due_date ? $recurring->next_due_date->format('d/m/y') : '-' }}
+                                        </div>
                                         @if ($recurring->description)
-                                            <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                            <div class="hidden sm:block mt-1 text-sm text-gray-500 dark:text-gray-400">
                                                 {{ Str::limit($recurring->description, 50) }}
                                             </div>
                                         @endif
@@ -148,14 +154,14 @@
                                 </td>
 
                                 {{-- Amount --}}
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
                                     <span class="text-sm font-bold text-gray-900 dark:text-gray-100">
                                         R$ {{ number_format($recurring->amount, 2, ',', '.') }}
                                     </span>
                                 </td>
 
                                 {{-- Type --}}
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
                                     <span @class([
                                         'inline-flex px-2 text-xs font-semibold leading-5 rounded-full',
                                         'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' =>
@@ -168,7 +174,7 @@
                                 </td>
 
                                 {{-- Frequency --}}
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
                                     <span class="text-sm text-gray-900 dark:text-gray-100">
                                         @switch($recurring->frequency->value)
                                             @case('weekly')
@@ -187,14 +193,14 @@
                                 </td>
 
                                 {{-- Next Due Date --}}
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                        {{ $recurring->next_due_date ? $recurring->next_due_date->format('d/m/Y') : '-' }}
+                                <td class="hidden sm:table-cell px-4 sm:px-6 py-4 whitespace-nowrap">
+                                    <span class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {{ $recurring->next_due_date ? $recurring->next_due_date->format('d/m/y') : '-' }}
                                     </span>
                                 </td>
 
                                 {{-- Status --}}
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
                                     <span @class([
                                         'inline-flex px-2 text-xs font-semibold leading-5 rounded-full',
                                         'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' =>
@@ -208,7 +214,7 @@
 
                                 {{-- Actions --}}
                                 <td class="px-2 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                    <div class="flex justify-end gap-2 pr-8">
+                                    <div class="flex justify-end gap-2 sm:pr-8">
                                         <button @click="$dispatch('open-recurring-modal', { recurringId: {{ $recurring->id }} })"
                                             class="text-gray-400 hover:text-[#4ECDC4] dark:text-gray-500 dark:hover:text-[#4ECDC4] transition-colors p-1 rounded-full hover:bg-[#4ECDC410] dark:hover:bg-[#4ECDC420]"
                                             title="Editar recorrência">

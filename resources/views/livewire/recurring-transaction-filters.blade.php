@@ -1,4 +1,5 @@
-<div class="flex flex-wrap items-center gap-4 mb-8" @tags-loaded.window="$store.tags.setTags($event.detail.tags)">
+<div class="flex flex-wrap items-center gap-4 mb-8 px-4 sm:px-0"
+    @tags-loaded.window="$store.tags.setTags($event.detail.tags)">
     {{-- Search Input --}}
     <div class="relative w-64">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -13,28 +14,28 @@
     </div>
 
     {{-- Type Filter --}}
-    <div class="w-40">
+    <div class="hidden sm:block w-40">
         <x-custom-select wire:model.live="filterType" :options="[]" placeholder="Todos os Tipos"
             x-init="options = $store.options.types; $watch('$store.options.types', val => options = val)"
             class="!py-2 !text-xs !font-bold" />
     </div>
 
     {{-- Status Filter --}}
-    <div class="w-40">
+    <div class="hidden sm:block w-40">
         <x-custom-select wire:model.live="filterStatus" :options="[]" placeholder="Todos os Status"
             x-init="options = $store.options.recurringStatuses; $watch('$store.options.recurringStatuses', val => options = val)"
             class="!py-2 !text-xs !font-bold" />
     </div>
 
     {{-- Frequency Filter --}}
-    <div class="w-44">
+    <div class="hidden sm:block w-44">
         <x-custom-select wire:model.live="filterFrequency" :options="[]" placeholder="Todas Frequências"
             x-init="options = $store.options.frequencies; $watch('$store.options.frequencies', val => options = val)"
             class="!py-2 !text-xs !font-bold" />
     </div>
 
     {{-- Categorias Filter (NEW!) --}}
-    <div class="w-48">
+    <div class="hidden sm:block w-48">
         <x-multi-select wire:model.live="selectedTags" :options="[]" placeholder="Categorias"
             x-init="options = $store.tags.list; $watch('$store.tags.list', val => options = val)"
             class="!py-2 !text-xs !font-bold" />

@@ -18,7 +18,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <x-application-mark class="block h-6 w-auto" />
+                        <x-application-mark class="block h-6 w-auto text-[#4ECDC4]" />
                     </a>
                 </div>
 
@@ -32,7 +32,8 @@
                         {{ __('Transações') }}
                     </x-nav-link>
 
-                    <x-nav-link href="{{ route('recurring-transactions.index') }}" :active="request()->routeIs('recurring-transactions.*')">
+                    <x-nav-link href="{{ route('recurring-transactions.index') }}"
+                        :active="request()->routeIs('recurring-transactions.*')">
                         {{ __('Recorrentes') }}
                     </x-nav-link>
 

@@ -13,6 +13,9 @@ down:
 build:
 	docker compose up --build -d
 
+pint:
+	docker exec -it php_financeiro vendor/bin/pint
+
 test:
 	docker exec -it php_financeiro php artisan test --testsuite=Feature --stop-on-failure
 

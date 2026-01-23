@@ -105,7 +105,16 @@ class DashboardWidgets extends Component
                     'status' => 'paid',
                 ]);
 
-                $this->mount(app(DashboardService::class));
+                $this->loadedRecent = false;
+                $this->loadedUpcoming = false;
+                $this->loadedByTag = false;
+                $this->loadedComparison = false;
+
+                $this->loadUpcomingExpenses();
+                $this->loadRecentActivity();
+                $this->loadExpensesByTag();
+                $this->loadMonthlyComparison();
+
                 $this->dispatch('notify', message: 'Transação marcada como paga!', type: 'success');
                 $this->dispatch('transactionUpdated');
             }

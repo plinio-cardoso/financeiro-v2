@@ -4,7 +4,7 @@
             <x-authentication-card-logo />
         </x-slot>
 
-        <x-validation-errors class="mb-4" />
+
 
         @session('status')
             <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
@@ -12,19 +12,25 @@
             </div>
         @endsession
 
-        <form method="POST" action="{{ route('login') }}">
+        <form method="POST" action="{{ route('login') }}" novalidate>
             @csrf
 
             <div>
                 <x-label for="email" value="{{ __('Email') }}" />
                 <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required
                     autofocus autocomplete="username" @keydown.enter="$el.closest('form').submit()" />
+                @error('email')
+                    <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="mt-4">
                 <x-label for="password" value="{{ __('Password') }}" />
                 <x-input id="password" class="block mt-1 w-full" type="password" name="password" required
                     autocomplete="current-password" @keydown.enter="$el.closest('form').submit()" />
+                @error('password')
+                    <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="block mt-4">

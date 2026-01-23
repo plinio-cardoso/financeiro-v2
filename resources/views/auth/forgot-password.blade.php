@@ -14,14 +14,18 @@
             </div>
         @endsession
 
-        <x-validation-errors class="mb-4" />
 
-        <form method="POST" action="{{ route('password.email') }}">
+
+        <form method="POST" action="{{ route('password.email') }}" novalidate>
             @csrf
 
             <div class="block">
                 <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required
+                    autofocus autocomplete="username" />
+                @error('email')
+                    <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="flex items-center justify-end mt-4">

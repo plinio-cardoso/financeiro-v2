@@ -32,7 +32,8 @@
             this.add('{{ session('flash.banner') }}', '{{ session('flash.bannerStyle') == 'danger' ? 'error' : 'success' }}');
         @endif
     }
-}" class="fixed top-4 right-4 z-50 space-y-4 w-full max-w-xs pointer-events-none">
+}"
+    class="fixed bottom-4 left-1/2 -translate-x-1/2 sm:top-8 sm:right-8 sm:bottom-auto sm:left-auto sm:translate-x-0 z-50 space-y-4 w-full max-w-xs pointer-events-none px-4 sm:px-0">
 
     <template x-for="notification in notifications" :key="notification.id">
         <div x-show="true" x-transition:enter="transform ease-out duration-300 transition"
@@ -40,9 +41,9 @@
             x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0"
             x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5"
+            class="pointer-events-auto w-full max-w-sm overflow-hidden rounded-2xl shadow-2xl border border-gray-100 dark:border-white/10 backdrop-blur-md"
             :class="{
-                'bg-white dark:bg-gray-800': true
+                'bg-white/95 dark:bg-gray-800/95': true
              }">
             <div class="p-4">
                 <div class="flex items-start">

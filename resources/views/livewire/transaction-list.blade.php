@@ -1,4 +1,4 @@
-<div x-data="{
+<div class="px-4 sm:px-0" x-data="{
     // No longer needs to manage modal state
 }" @transaction-saved.window="$wire.refreshAggregates()" @recurring-saved.window="$wire.refreshAggregates()">
 
@@ -30,7 +30,8 @@
             class="flex items-center gap-6 px-6 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm relative overflow-hidden">
             <div class="flex items-center gap-2">
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
-                    Total de Itens
+                    <span class="sm:hidden">ITENS</span>
+                    <span class="hidden sm:inline">Total de Itens</span>
                 </span>
                 <div class="relative">
                     <span wire:loading.remove wire:target="applyFilters, sortBy, gotoPage"
@@ -46,7 +47,8 @@
 
             <div class="flex items-center gap-2">
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
-                    Saldo Período
+                    <span class="sm:hidden">SALDO</span>
+                    <span class="hidden sm:inline">Saldo Período</span>
                 </span>
                 <div class="relative">
                     <div wire:loading.remove wire:target="applyFilters, sortBy, gotoPage">
@@ -80,7 +82,7 @@
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
                             <th scope="col" wire:click="sortBy('title')"
-                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                class="px-4 sm:px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center gap-1 whitespace-nowrap">
                                     Título
                                     @if ($sortField === 'title')
@@ -89,7 +91,7 @@
                                 </div>
                             </th>
                             <th scope="col" wire:click="sortBy('amount')"
-                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                class="hidden sm:table-cell px-4 sm:px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center gap-1 whitespace-nowrap">
                                     Valor
                                     @if ($sortField === 'amount')
@@ -98,7 +100,7 @@
                                 </div>
                             </th>
                             <th scope="col" wire:click="sortBy('type')"
-                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                class="hidden sm:table-cell px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center gap-1 whitespace-nowrap">
                                     Tipo
                                     @if ($sortField === 'type')
@@ -107,7 +109,7 @@
                                 </div>
                             </th>
                             <th scope="col" wire:click="sortBy('status')"
-                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                class="hidden sm:table-cell px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <div class="flex items-center gap-1 whitespace-nowrap">
                                     Status
                                     @if ($sortField === 'status')
@@ -116,20 +118,20 @@
                                 </div>
                             </th>
                             <th scope="col" wire:click="sortBy('due_date')"
-                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                <div class="flex items-center gap-1 whitespace-nowrap min-w-[120px]">
-                                    Vencimento
+                                class="hidden sm:table-cell px-4 sm:px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                <div class="flex items-center gap-1 whitespace-nowrap min-w-[100px] sm:min-w-[120px]">
+                                    VENCIMENTO
                                     @if ($sortField === 'due_date')
                                         <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                                     @endif
                                 </div>
                             </th>
                             <th scope="col"
-                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                                class="hidden sm:table-cell px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
                                 Categorias
                             </th>
                             <th scope="col" class="relative px-6 py-3">
-                                <span class="sr-only">Ações</span>
+                                <span class="hidden sm:inline sr-only">Ações</span>
                             </th>
                         </tr>
                     </thead>

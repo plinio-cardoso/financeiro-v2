@@ -13,13 +13,13 @@
             <div x-data="{photoName: null, photoPreview: null}" class="col-span-6 sm:col-span-4">
                 <!-- Profile Photo File Input -->
                 <input type="file" id="photo" class="hidden" wire:model.live="photo" x-ref="photo" x-on:change="
-                                        photoName = $refs.photo.files[0].name;
-                                        const reader = new FileReader();
-                                        reader.onload = (e) => {
-                                            photoPreview = e.target.result;
-                                        };
-                                        reader.readAsDataURL($refs.photo.files[0]);
-                                " />
+                                            photoName = $refs.photo.files[0].name;
+                                            const reader = new FileReader();
+                                            reader.onload = (e) => {
+                                                photoPreview = e.target.result;
+                                            };
+                                            reader.readAsDataURL($refs.photo.files[0]);
+                                    " />
 
                 <x-label for="photo" value="{{ __('Photo') }}" />
 
@@ -86,11 +86,7 @@
     </x-slot>
 
     <x-slot name="actions">
-        <x-action-message class="me-3" on="saved">
-            {{ __('Saved.') }}
-        </x-action-message>
-
-        <x-button wire:loading.attr="disabled" wire:target="photo">
+        <x-button wire:loading.attr="disabled" wire:target="updateProfileInformation,photo">
             {{ __('Save') }}
         </x-button>
     </x-slot>
